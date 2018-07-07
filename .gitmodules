@@ -1,0 +1,6 @@
+[submodule "ranger"]
+	path = ranger
+	url = https://github.com/imbs-hl/ranger.git
+[submodule "HighFive"]
+	path = HighFive
+	url = ./HighFive

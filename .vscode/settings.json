@@ -1,0 +1,5 @@
+{
+    "cmake.configureSettings": {
+        "HDF5_ROOT": "C:\\Program Files\\HDF_Group\\HDF5\\1.10.2"
+    }
+}

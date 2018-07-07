@@ -1,6 +1,111 @@
 #define BOOST_TEST_MODULE ReadReftable
 #include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_CASE( la ) {
-    BOOST_CHECK_EQUAL(1, 1);
+#include "readreftable.hpp"
+#include "statobsTest.hpp"
+#include "readstatobs.hpp"
+
+#include <highfive/H5DataSet.hpp>
+#include <highfive/H5DataSpace.hpp>
+#include <highfive/H5File.hpp>
+
+#include "H5Cpp.h"    
+#include <iostream>
+#include <string>
+#include <vector>
+#include <random>
+#include <algorithm>
+
+std::vector<std::string> readcolnames(H5::DataSet& dataset, const std::string& attr_name) {
+    H5::Attribute attr(dataset.openAttribute(attr_name.c_str()));
+    hsize_t dim = 0;
+    attr.getSpace().getSimpleExtentDims(&dim);
+    vector<string> res(dim);
+    char **rdata = new char*[dim];
+    H5::StrType str_type(H5::PredType::C_S1, H5T_VARIABLE);
+    attr.read(str_type,(void*)rdata);
+    for (int iStr = 0; iStr < dim; iStr++) {
+        res[iStr] = rdata[iStr];
+        // delete[] rdata[iStr];
+    }
+    delete[] rdata;
+    return res;
+}
+
+BOOST_AUTO_TEST_CASE(ReadColNames) {
+    auto myread = readreftable("headerRF.txt","reftableRF.bin");
+    auto file = H5::H5File("reftable.h5", H5F_ACC_RDONLY);
+    auto dataset_stats = file.openDataSet("/stats");
+    BOOST_TEST(myread.stats_names == readcolnames(dataset_stats,"stats_names"));
+    auto dataset_params = file.openDataSet("/params");
+    BOOST_TEST(myread.params_names == readcolnames(dataset_params,"params_names"));
+}
+
+
+template<typename T>
+void test_against_field(HighFive::File& file, std::string field, T& p)
+{
+    T op;
+    HighFive::DataSet dataset = file.getDataSet(field);
+    dataset.read(op);
+    BOOST_TEST(op == p);
+}
+
+bool equalifnan(double const& t1, double const& t2) {
+    return ((std::isnan(t1) && std::isnan(t2)) || t1 == t2);
+}
+
+template<class T, class U>
+boost::test_tools::predicate_result
+compare_lists( T l1b, T l1e, U l2b, U l2e )
+{
+    
+    if( std::distance(l1b,l1e) != std::distance(l2b,l2e) ) {
+        boost::test_tools::predicate_result res( false );
+
+        res.message() << "Different sizes [" << std::distance(l1b,l1e)  << "!=" << std::distance(l2b,l2e) << "]";
+
+        return res;
+    } else {
+        bool res = true;
+        while(res && l1b != l1e) {
+            res = res && equalifnan(*(l1b++),*(l2b++));
+         }
+        return res;
+    }
+}
+
+using namespace HighFive;
+
+void test_random_lines(HighFive::File& file, const string& dataname, std::vector<double>& p){
+    DataSet dataset =
+        file.getDataSet(dataname);
+    std::vector<std::vector<double>> data;
+    dataset.read(data);
+    auto nrow = data.size();
+    auto ncol = data[0].size();
+    BOOST_TEST(p.size() == ncol*nrow);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<size_t> dis(0,nrow-1);
+    for(auto j = 0; j < 10; j++) {
+        auto i = dis(gen);
+        BOOST_TEST( compare_lists(&p[i*ncol],&p[(i+1)*ncol],data[i].begin(),data[i].end() ));
+    }
+ 
+}
+
+BOOST_AUTO_TEST_CASE(ReadRefTableData) {
+    auto myread = readreftable("headerRF.txt","reftableRF.bin");
+    File file("reftable.h5", File::ReadOnly);
+    test_against_field(file,"nrec",myread.nrec);
+    test_against_field(file,"nrecscen",myread.nrecscen);
+    test_against_field(file,"nparam",myread.nparam);
+    test_against_field(file,"scenarios",myread.scenarios);
+    test_random_lines(file,"stats",myread.stats);
+    test_random_lines(file,"params",myread.params);
+}
+
+BOOST_AUTO_TEST_CASE(ReadStatobs, * boost::unit_test::tolerance(0.001)) {
+    BOOST_TEST( statobs == readStatObs("statobsRF.txt"), boost::test_tools::per_element());
 }

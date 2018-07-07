@@ -403,3 +403,9 @@ doc/api/
 *.js.deps
 *.js.map
 
+
+.fake
+obj
+
+packages/
+paket-files/

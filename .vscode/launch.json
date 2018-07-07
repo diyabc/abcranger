@@ -1,0 +1,24 @@
+{
+    // Utilisez IntelliSense pour en savoir plus sur les attributs possibles.
+    // Pointez pour afficher la description des attributs existants.
+    // Pour plus d'informations, visitez : https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD",
+            "environment": [
+                {
+                    "name": "PATH",
+                    "value": "C:/tools/boost_1_67_0/lib64-msvc-14.1;C:/Program Files/HDF_Group/HDF5/1.10.2/bin;${env:PATH}"
+                }
+            ],
+            "externalConsole": false
+        }
+    ]
+}

@@ -4,6 +4,7 @@
 #include "readreftable.hpp"
 #include "statobsTest.hpp"
 #include "readstatobs.hpp"
+#include "threadpool.hpp"
 
 #include <highfive/H5DataSet.hpp>
 #include <highfive/H5DataSpace.hpp>
@@ -13,8 +14,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <random>
 #include <algorithm>
+#include <numeric>
 
 std::vector<std::string> readcolnames(H5::DataSet& dataset, const std::string& attr_name) {
     H5::Attribute attr(dataset.openAttribute(attr_name.c_str()));
@@ -24,7 +25,7 @@ std::vector<std::string> readcolnames(H5::DataSet& dataset, const std::string& a
     char **rdata = new char*[dim];
     H5::StrType str_type(H5::PredType::C_S1, H5T_VARIABLE);
     attr.read(str_type,(void*)rdata);
-    for (int iStr = 0; iStr < dim; iStr++) {
+    for (auto iStr = 0; iStr < dim; iStr++) {
         res[iStr] = rdata[iStr];
         // delete[] rdata[iStr];
     }
@@ -85,14 +86,19 @@ void test_random_lines(HighFive::File& file, const string& dataname, std::vector
     auto nrow = data.size();
     auto ncol = data[0].size();
     BOOST_TEST(p.size() == ncol*nrow);
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<size_t> dis(0,nrow-1);
-    for(auto j = 0; j < 10; j++) {
-        auto i = dis(gen);
-        BOOST_TEST( compare_lists(&p[i*ncol],&p[(i+1)*ncol],data[i].begin(),data[i].end() ));
-    }
- 
+    size_t nloop = std::min((size_t) 200u,ncol);
+    std::vector<size_t> indices(ncol);
+    std::iota(std::begin(indices),std::end(indices),0);
+    std::random_shuffle(std::begin(indices),std::end(indices));
+    
+    ThreadPool::ParallelFor((size_t) 0u, nloop, [&] (size_t j){
+        auto i = indices[j];
+        // BOOST_TEST( compare_lists(&p[i*ncol],&p[(i+1)*ncol],data[i].begin(),data[i].end() ));
+        BOOST_TEST( compare_lists(std::next(std::begin(p),i*ncol),
+                                  std::next(std::begin(p),(i+1)*ncol),
+                                  data[i].begin(),
+                                  data[i].end() ));
+    }); 
 }
 
 BOOST_AUTO_TEST_CASE(ReadRefTableData) {

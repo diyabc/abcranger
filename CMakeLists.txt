@@ -7,9 +7,14 @@ enable_testing()
 set(RANGER_SOURCE_DIR ${CMAKE_SOURCE_DIR}/ranger/src)
 include_directories("${RANGER_SOURCE_DIR}")
 set(PROJECT_abcranger_SRCS
-  ${RANGER_SOURCE_DIR}/Data.cpp
-  ${RANGER_SOURCE_DIR}/utility.cpp
-  a.cpp
+${RANGER_SOURCE_DIR}/Data.cpp
+${RANGER_SOURCE_DIR}/DataDouble.cpp
+${RANGER_SOURCE_DIR}/DataFloat.cpp
+${RANGER_SOURCE_DIR}/Forest.cpp
+${RANGER_SOURCE_DIR}/Tree.cpp
+${RANGER_SOURCE_DIR}/TreeClassification.cpp
+${RANGER_SOURCE_DIR}/utility.cpp
+a.cpp
   )
 
 find_package (Threads REQUIRED)
@@ -51,3 +56,8 @@ target_link_libraries(matutils Boost::unit_test_framework Boost::regex Boost::dy
 add_test(NAME MatutilsTest COMMAND matutils WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
 set_tests_properties(MatutilsTest PROPERTIES ENVIRONMENT "${TestENV}")
 
+add_executable(ForestClass forestclass-test.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
+target_link_libraries(ForestClass Threads::Threads Boost::unit_test_framework Boost::regex Boost::dynamic_linking Boost::diagnostic_definitions)
+# target_link_libraries(arraytest Boost::unit_test_framework)
+add_test(NAME MatutilsTest COMMAND matutils WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
+set_tests_properties(MatutilsTest PROPERTIES ENVIRONMENT "${TestENV}")

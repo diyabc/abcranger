@@ -1,5 +1,8 @@
 {
     "cmake.configureSettings": {
-        "HDF5_ROOT": "C:\\Program Files\\HDF_Group\\HDF5\\1.10.2"
-    }
+        // "HDF5_ROOT": "C:/Program Files/HDF_Group/HDF5/1.10.2"
+        "LAPACK_BIN" : "c:/Program Files (x86)/IntelSWTools/compilers_and_libraries_2018.3.210/windows/redist/intel64_win/mkl",
+        "LAPACK_ROOT" : "C:/Program Files (x86)/IntelSWTools/compilers_and_libraries_2018/windows/mkl/lib/intel64_win"
+    },
+    "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools"
 }

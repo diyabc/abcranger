@@ -4,3 +4,6 @@
 [submodule "HighFive"]
 	path = HighFive
 	url = ./HighFive
+[submodule "boost-numeric-bindings"]
+	path = boost-numeric-bindings
+	url = ./boost-numeric-bindings

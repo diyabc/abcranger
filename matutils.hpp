@@ -29,7 +29,8 @@ std::vector<double> getNoise(size_t n) {
 
 void addNoiseCols(Reftable& rf, size_t ncols) {
     for(auto i = 0; i < ncols; i++) {
-        addCol(rf.stats,getNoise(rf.nrec));
+        auto noise = getNoise(rf.nrec);
+        addCol(rf.stats,noise);
         rf.stats_names.push_back("NOISE" + std::to_string(i));
     }
 }

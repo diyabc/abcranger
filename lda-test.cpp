@@ -1,11 +1,11 @@
 #define BOOST_TEST_MODULE LdaTest
 #include <boost/test/unit_test.hpp>
 
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/assignment.hpp>
+
 #include <vector>
 #include "lda.hpp"
-#include <algorithm>
-#include <numeric>
-#include <execution>
 
 std::vector<double> S{
     5.1, 3.5, 1.4, 0.2,
@@ -163,48 +163,48 @@ std::vector<double> V{
     6.2, 3.4, 5.4, 2.3,
     5.9, 3.0, 5.1, 1.8};
 
-BOOST_AUTO_TEST_CASE(LDAtest)
+BOOST_AUTO_TEST_CASE(LDAtest, * boost::unit_test::tolerance(1e-6))
 {
     const size_t K = 3;
     const size_t p = 4;
     const size_t n = (S.size() + C.size() + V.size()) / p;
-    boost::numeric::ublas::vector<double> y(n);
-    boost::numeric::ublas::matrix<double> x(n, p);
-    std::vector<set<size_t>> m;
-    set<size_t> l;
+    vector<size_t> y(n);
+    matrix<double> x(n, p);
     // S
-    l = set<size_t>();
     for (auto i = 0; i < (S.size()) / p; i++)
     {
         y[i] = 0;
-        l.insert(i);
         for (auto j = 0; j < p; j++)
             x(i, j) = S[i * p + j];
     }
-    m.push_back(l);
-    l = set<size_t>();
     for (auto i = 0; i < (C.size()) / p; i++)
     {
         auto ii = (S.size() / p) + i;
-        y[ii] = 0;
-        l.insert(ii);
+        y[ii] = 1;
         for (auto j = 0; j < p; j++)
             x(ii, j) = C[i * p + j];
     }
-    m.push_back(l);
-    l = set<size_t>();
     for (auto i = 0; i < (V.size()) / p; i++)
     {
         auto ii = (S.size() + C.size()) / p + i;
-        y[ii] = 0;
-        l.insert(ii);
+        y[ii] = 2;
         for (auto j = 0; j < p; j++)
             x(ii, j) = V[i * p + j];
     }
-    m.push_back(l);
-    matrix<double> W;
-    lda::compute_centroids(x, m, W);
-    cout << W << endl;
+    matrix<double> Ld;
+    lda(x,y, Ld);
+    std::cout << Ld << std::endl;
     
-    BOOST_TEST(1 == 1);
+    matrix<double> LdMass(p,K-1);
+    LdMass <<= 
+         0.8293776,  0.02410215,
+         1.5344731,  2.16452123,
+        -2.2012117, -0.93192121,
+        -2.8104603,  2.83918785; 
+    std::cout << LdMass << std::endl;
+    matrix<double> LdPlus = Ld + LdMass;
+    matrix<double> LdMinus = Ld - LdMass;
+    for(auto c = 0; c < K - 1; c++) {
+        BOOST_TEST(std::min(norm_inf(column(LdPlus,c)),norm_inf(column(LdMinus,c))) == 0.0);
+    }
 }

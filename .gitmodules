@@ -3,7 +3,7 @@
 	url = https://github.com/imbs-hl/ranger.git
 [submodule "HighFive"]
 	path = HighFive
-	url = ./HighFive
+	url = https://github.com/BlueBrain/HighFive.git
 [submodule "boost-numeric-bindings"]
 	path = boost-numeric-bindings
-	url = ./boost-numeric-bindings
+	url = https://git.tiker.net/trees/boost-numeric-bindings.git

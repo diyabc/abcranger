@@ -19,6 +19,7 @@ ${RANGER_SOURCE_DIR}/utility.cpp
 a.cpp
   )
 
+add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING -D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
 find_package(Threads REQUIRED)
 # set(LAPACK_ROOT "C:/tools/miniconda3/pkgs/mkl-2018.0.3-1/Library/lib")
 find_package(LAPACK)
@@ -36,9 +37,9 @@ endif()
 
 
 include_directories(Boost::boost)
+include_directories(AFTER ${CMAKE_SOURCE_DIR}/boost-numeric-bindings)
 include_directories(${HDF5_INCLUDE_DIRS})
 include_directories(${CMAKE_SOURCE_DIR}/HighFive/include)
-include_directories(${CMAKE_SOURCE_DIR}/boost-numeric-bindings)
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_executable(abcranger main.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
@@ -80,6 +81,5 @@ target_compile_features(LDA PRIVATE cxx_std_17)
 
 add_executable(Lapack lapack-test.cpp)
 target_link_libraries(Lapack ${LAPACK_LIBRARIES} Boost::unit_test_framework Boost::dynamic_linking Boost::diagnostic_definitions)
-message("${TestENV}")
 add_test(NAME Lapacktest COMMAND Lapack WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
 set_tests_properties(Lapacktest PROPERTIES ENVIRONMENT "${TestENV}")

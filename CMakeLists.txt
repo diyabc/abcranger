@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0)
 cmake_policy(SET CMP0074 NEW)
 
+
 project(abcranger VERSION 0.1.0 LANGUAGES CXX)
 
 include(CTest)
@@ -29,6 +30,7 @@ find_package(Boost REQUIRED COMPONENTS unit_test_framework filesystem regex)
 
 find_package(HDF5 REQUIRED COMPONENTS CXX)
 
+
 if (WIN32)
     set(HDF5_ROOT "C:/Program Files/HDF_Group/HDF5/1.10.2")
     set(TestENV "PATH=${Boost_LIBRARY_DIRS}\\;${HDF5_ROOT}/bin\\;${LAPACK_BIN};$ENV{PATH}")
@@ -41,6 +43,8 @@ include_directories(AFTER ${CMAKE_SOURCE_DIR}/boost-numeric-bindings)
 include_directories(${HDF5_INCLUDE_DIRS})
 include_directories(${CMAKE_SOURCE_DIR}/HighFive/include)
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
+include_directories(${CMAKE_SOURCE_DIR}/eigen)
+include_directories(${LAPACK_ROOT}/../../include)
 
 add_executable(abcranger main.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
 target_link_libraries(abcranger Boost::regex Boost::dynamic_linking Boost::diagnostic_definitions)
@@ -83,3 +87,10 @@ add_executable(Lapack lapack-test.cpp)
 target_link_libraries(Lapack ${LAPACK_LIBRARIES} Boost::unit_test_framework Boost::dynamic_linking Boost::diagnostic_definitions)
 add_test(NAME Lapacktest COMMAND Lapack WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
 set_tests_properties(Lapacktest PROPERTIES ENVIRONMENT "${TestENV}")
+
+add_executable(Eigen eigen-test.cpp)
+
+target_compile_definitions(Eigen PRIVATE EIGEN_USE_MKL_ALL)
+target_link_libraries(Eigen ${LAPACK_LIBRARIES} Boost::unit_test_framework Boost::dynamic_linking Boost::diagnostic_definitions)
+add_test(NAME EigenTest COMMAND Eigen WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
+set_tests_properties(EigenTest PROPERTIES ENVIRONMENT "${TestENV}")

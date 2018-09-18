@@ -7,3 +7,6 @@
 [submodule "boost-numeric-bindings"]
 	path = boost-numeric-bindings
 	url = https://git.tiker.net/trees/boost-numeric-bindings.git
+[submodule "eigen"]
+	path = eigen
+	url = https://github.com/eigenteam/eigen-git-mirror.git

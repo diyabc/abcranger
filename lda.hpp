@@ -61,23 +61,19 @@ void lda(const matrix<double> &x,
     // D is x centered data and sorted by classes
     matrix<double> D(n,p);
     vector<size_t> countrows = scalar_vector<size_t>(K,0);
-    vector<size_t> slicepos(K+1);
-    slicepos[0] = 0;
-    for(auto c = 0; c < K; c++) {
-        slicepos[c+1] = slicepos[c] + d[c];
-    }
 
     // W = Within-class covariance matrix
+    size_t slicepos = 0;
     matrix<double> W = zero_matrix(p,p);
     for(auto c = 0; c < K; c++) {
         // Dc is a single class subrange of x
-        matrix<double> Dc = project(x,range(slicepos[c],slicepos[c+1]),range(0,p));
+        matrix<double> Dc = project(x,range(slicepos,slicepos+d[c]),range(0,p));
         // Centering
         noalias(Dc) -= outer_prod(scalar_vector(d[c],1.0),row(M,c));
         W += prod(trans(Dc),Dc);
+        slicepos += d[c];
     }
     W /= (n - K);
-
     // Eigen decomposition of W, Wv vectors, Wb values
     matrix<double, column_major> Wv(p,p);
     Wv = W;

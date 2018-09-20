@@ -89,8 +89,13 @@ add_test(NAME Lapacktest COMMAND Lapack WORKING_DIRECTORY "../../../R/dossier_te
 set_tests_properties(Lapacktest PROPERTIES ENVIRONMENT "${TestENV}")
 
 add_executable(Eigen eigen-test.cpp)
-
 target_compile_definitions(Eigen PRIVATE EIGEN_USE_MKL_ALL)
 target_link_libraries(Eigen ${LAPACK_LIBRARIES} Boost::unit_test_framework Boost::dynamic_linking Boost::diagnostic_definitions)
 add_test(NAME EigenTest COMMAND Eigen WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
 set_tests_properties(EigenTest PROPERTIES ENVIRONMENT "${TestENV}")
+
+add_executable(LDAEigen lda-eigen-test.cpp)
+target_compile_definitions(LDAEigen PRIVATE EIGEN_USE_MKL_ALL)
+target_link_libraries(LDAEigen ${LAPACK_LIBRARIES} Boost::unit_test_framework Boost::dynamic_linking Boost::diagnostic_definitions)
+add_test(NAME LDAEigenTest COMMAND LDAEigen WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
+set_tests_properties(LDAEigenTest PROPERTIES ENVIRONMENT "${TestENV}")

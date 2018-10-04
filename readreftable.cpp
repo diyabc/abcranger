@@ -1,5 +1,5 @@
-// #include <regex>
-#include <boost/regex.hpp>
+#include <regex>
+// #include <boost/regex.hpp>
 #include <string>
 #include <map>
 #include <algorithm>
@@ -7,7 +7,7 @@
 #include <fstream>
 #include "readreftable.hpp"
 
-using namespace boost;
+// using namespace boost;
 
 template<class A, class B> 
 B readAndCast(ifstream& f) {

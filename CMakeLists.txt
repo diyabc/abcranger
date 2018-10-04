@@ -67,7 +67,8 @@ target_link_libraries(matutils Boost::unit_test_framework Boost::regex Boost::dy
 add_test(NAME MatutilsTest COMMAND matutils WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
 set_tests_properties(MatutilsTest PROPERTIES ENVIRONMENT "${TestENV}")
 
-add_executable(ForestClass forestclass-test.cpp ForestOnlineClassification.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
+# add_executable(ForestClass forestclass-test.cpp ForestOnlineClassification.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
+add_executable(ForestClass forestclass-test.cpp ${RANGER_SOURCE_DIR}/ForestClassification.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
 target_link_libraries(ForestClass Threads::Threads Boost::unit_test_framework Boost::regex Boost::dynamic_linking Boost::diagnostic_definitions)
 add_test(NAME ForestClassTest COMMAND ForestClass WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
 set_tests_properties(ForestClassTest PROPERTIES ENVIRONMENT "${TestENV}")

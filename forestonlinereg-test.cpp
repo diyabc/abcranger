@@ -1,14 +1,14 @@
-#define BOOST_TEST_MODULE ForestRegCpp
+#define BOOST_TEST_MODULE ForestClassCpp
 #include <boost/test/unit_test.hpp>
 
-#include "ForestRegression.h"
+#include "ForestOnlineRegression.hpp"
 #include "readstatobs.hpp"
 #include "readreftable.hpp"
 #include "matutils.hpp"
 #include "DataDense.h"
 #include "test-error.hpp"
-
 using namespace ranger;
+using namespace Eigen;
 
 std::vector<double> DEFAULT_SAMPLE_FRACTION = std::vector<double>({1});
 
@@ -26,21 +26,25 @@ std::unique_ptr<T_DEST> unique_cast(std::unique_ptr<T_SRC> &&src)
     return ret;
 }
 
-BOOST_AUTO_TEST_CASE(InitForestReg, *boost::unit_test::tolerance(1e-4))
+BOOST_AUTO_TEST_CASE(InitForestOnlineReg, *boost::unit_test::tolerance(1e-2))
 {
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", 0);
     auto nstat = myread.stats_names.size();
+    MatrixXd statobs(1,nstat);
+    statobs = Map<MatrixXd>(readStatObs("statobsRF.txt").data(),1,nstat);
     addCol(myread.stats, error);
     auto colnames = myread.stats_names;
     colnames.push_back("Y");
-    auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, myread.nrec, nstat + 1));
-    ForestRegression forestreg;
+    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, myread.nrec, nstat + 1));
+    auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(statobs, colnames, myread.nrec, nstat + 1));
+    ForestOnlineRegression forestreg;
     auto ntree = 500;
     auto nthreads = 8;
 
     forestreg.init("Y",                       // dependant variable
                      MemoryMode::MEM_DOUBLE,    // memory mode double or float
-                     std::move(datastatobs),    // data
+                     std::move(datastats),    // data
+                     std::move(datastatobs),  // predict
                      0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
                      "originalranger_out",              // output file name prefix
                      ntree,                     // number of trees

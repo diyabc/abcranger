@@ -80,6 +80,14 @@ void ForestOnlineClassification::growInternal()
     trees.push_back(
         std::make_unique<TreeClassification>(&class_values, &response_classIDs, &sampleIDs_per_class, &class_weights));
   }
+
+    // Class counts for samples
+  class_counts.reserve(num_samples);
+  for (size_t i = 0; i < num_samples; ++i)
+  {
+    class_counts.push_back(std::unordered_map<double, size_t>());
+  }
+
 }
 
 void ForestOnlineClassification::allocatePredictMemory()
@@ -126,26 +134,24 @@ void ForestOnlineClassification::predictInternal(size_t sample_idx)
   }
 }
 
-void ForestOnlineClassification::computePredictionErrorInternal()
-{
-
-  // Class counts for samples
-  std::vector<std::unordered_map<double, size_t>> class_counts;
-  class_counts.reserve(num_samples);
-  for (size_t i = 0; i < num_samples; ++i)
-  {
-    class_counts.push_back(std::unordered_map<double, size_t>());
-  }
-
+void ForestOnlineClassification::calculateAfterGrow(size_t tree_idx) {
   // For each tree loop over OOB samples and count classes
-  for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx)
-  {
     for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx)
     {
       size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
       ++class_counts[sampleID][getTreePrediction(tree_idx, sample_idx)];
     }
-  }
+}
+
+void ForestOnlineClassification::computePredictionErrorInternal()
+{
+  // For each tree loop over OOB samples and count classes
+  // for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
+  //   for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx) {
+  //     size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
+  //     ++class_counts[sampleID][getTreePrediction(tree_idx, sample_idx)];
+  //   }
+  // }
 
   // Compute majority vote for each sample
   predictions = std::vector<std::vector<std::vector<double>>>(1,

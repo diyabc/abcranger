@@ -1,13 +1,13 @@
 #define BOOST_TEST_MODULE ForestOnlineClassCpp
 #include <boost/test/unit_test.hpp>
 
-#include "ForestClassification.h"
+#include "ForestOnlineClassification.hpp"
 #include "readstatobs.hpp"
 #include "readreftable.hpp"
 #include "matutils.hpp"
 #include "DataDense.h"
-
 using namespace ranger;
+using namespace Eigen;
 
 std::vector<double> DEFAULT_SAMPLE_FRACTION = std::vector<double>({1});
 
@@ -25,17 +25,19 @@ std::unique_ptr<T_DEST> unique_cast(std::unique_ptr<T_SRC> &&src)
     return ret;
 }
 
-BOOST_AUTO_TEST_CASE(InitForestClass, *boost::unit_test::tolerance(1e-5))
+BOOST_AUTO_TEST_CASE(InitForestOnlineClass, *boost::unit_test::tolerance(1e-2))
 {
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", 0);
-    auto statobs = readStatObs("statobsRF.txt");
     auto nstat = myread.stats_names.size();
+    MatrixXd statobs(1,nstat);
+    statobs = Map<MatrixXd>(readStatObs("statobsRF.txt").data(),1,nstat);
     addCol(myread.stats, myread.scenarios);
     auto colnames = myread.stats_names;
     colnames.push_back("Y");
-    auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, myread.nrec, nstat + 1));
+    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, myread.nrec, nstat + 1));
+    auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(statobs, colnames, myread.nrec, nstat + 1));
     // ForestOnlineClassification forestclass;
-    ForestClassification forestclass;
+    ForestOnlineClassification forestclass;
     auto ntree = 200;
     auto nthreads = 8;
 
@@ -66,13 +68,14 @@ BOOST_AUTO_TEST_CASE(InitForestClass, *boost::unit_test::tolerance(1e-5))
     //                           ranger::uint max_depth)
     forestclass.init("Y",                       // dependant variable
                      MemoryMode::MEM_DOUBLE,    // memory mode double or float
-                     std::move(datastatobs),    // data
+                     std::move(datastats),    // data
+                     std::move(datastatobs),  // predict
                      0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
-                     "originalranger_out",              // output file name prefix
+                     "onlineranger_out",              // output file name prefix
                      ntree,                     // number of trees
                      123456,                    // seed rd()
                      nthreads,                  // number of threads
-                     DEFAULT_IMPORTANCE_MODE,  // Default IMP_NONE
+                     ranger::IMP_GINI,  // Default IMP_NONE
                      0,                         // default min node size (classif = 1, regression 5)
                      "",                        // status variable name, only for survival
                      false,                     // prediction mode (true = predict)
@@ -93,6 +96,8 @@ BOOST_AUTO_TEST_CASE(InitForestClass, *boost::unit_test::tolerance(1e-5))
     forestclass.run(true, true);
     auto preds = forestclass.getPredictions();
     auto oob_prior_error = forestclass.getOverallPredictionError();
+    forestclass.writeConfusionFile();
+    forestclass.writeImportanceFile();
 
     BOOST_TEST(oob_prior_error == 0.232417);
 }

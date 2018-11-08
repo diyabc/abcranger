@@ -1,6 +1,6 @@
 [submodule "ranger"]
 	path = ranger
-	url = https://github.com/imbs-hl/ranger.git
+	url = git@github.com:fradav/ranger.git
 [submodule "HighFive"]
 	path = HighFive
 	url = https://github.com/BlueBrain/HighFive.git
@@ -10,3 +10,6 @@
 [submodule "eigen"]
 	path = eigen
 	url = https://github.com/eigenteam/eigen-git-mirror.git
+[submodule "wingetopt"]
+	path = wingetopt
+	url = https://github.com/alex85k/wingetopt.git

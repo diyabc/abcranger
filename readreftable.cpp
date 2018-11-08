@@ -113,9 +113,9 @@ Reftable readreftable(string headerpath, string reftablepath, size_t N) {
     vector<string> stats_names  { allcolspre.begin()+ (allcolspre.size() - nstat),  allcolspre.end() };
     vector<double> scenarios(nrec);
     size_t nmutparams = params_names.size() - realparamtot;
-    vector<double> params(nrec * params_names.size(),NAN);
+    MatrixXd params = MatrixXd::Constant(nrec,params_names.size(),NAN);
     // for(auto r : statsname) cout << r << endl;
-    vector<double> stats(nrec * nstat,NAN);
+    MatrixXd stats = MatrixXd::Constant(nrec,nstat,NAN);
     // DataDouble data(stats,statsname,nrec,nstat + 1);
     // bool hasError;
     for(auto i = 0; i < nrec; i++) {
@@ -129,14 +129,14 @@ Reftable readreftable(string headerpath, string reftablepath, size_t N) {
             reftableStream.read(reinterpret_cast<char *>(&r),sizeof(r));
         }
         for(auto j = 0; j < parambyscenh[scen].size(); j++)
-            params[i * params_names.size() + parambyscenh[scen][j] - 1] = lparam[j];
+            params(i,parambyscenh[scen][j] - 1) = lparam[j];
         for(auto j = 0; j < nmutparams; j++)
-            params[i * params_names.size() + realparamtot + j - 1] = lparam[nparam[scen] - nmutparams + j - 1];
+            params(i,j) = lparam[nparam[scen] - nmutparams + j - 1];
         for(auto j = 0; j < nstat; j++) {
             float r;
             reftableStream.read(reinterpret_cast<char *>(&r),4);
             // col * num_rows + row
-            stats[i * nstat + j] = r;
+            stats(i,j) = r;
             // data.set(j,i,r,hasError);
         }
     }

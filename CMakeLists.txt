@@ -8,7 +8,7 @@ include(CTest)
 enable_testing()
 
 set(RANGER_SOURCE_DIR ${CMAKE_SOURCE_DIR}/ranger/src)
-include_directories("${RANGER_SOURCE_DIR}")
+set(CPPRANGER_SOURCE_DIR ${CMAKE_SOURCE_DIR}/ranger/cpp_version/src)
 set(PROJECT_abcranger_SRCS
 ${RANGER_SOURCE_DIR}/Data.cpp
 ${RANGER_SOURCE_DIR}/DataFloat.cpp
@@ -22,6 +22,44 @@ a.cpp
 
 add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING -D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
 find_package(Threads REQUIRED)
+
+set(PROJECT_cppranger_SRCS
+${CPPRANGER_SOURCE_DIR}/main.cpp
+${CPPRANGER_SOURCE_DIR}/utility/ArgumentHandler.cpp
+${RANGER_SOURCE_DIR}/Forest.cpp
+${RANGER_SOURCE_DIR}/ForestClassification.cpp
+${RANGER_SOURCE_DIR}/ForestProbability.cpp
+${RANGER_SOURCE_DIR}/ForestRegression.cpp
+${RANGER_SOURCE_DIR}/ForestSurvival.cpp
+${RANGER_SOURCE_DIR}/Tree.cpp
+${RANGER_SOURCE_DIR}/TreeClassification.cpp
+${RANGER_SOURCE_DIR}/TreeProbability.cpp
+${RANGER_SOURCE_DIR}/TreeRegression.cpp
+${RANGER_SOURCE_DIR}/TreeSurvival.cpp
+${RANGER_SOURCE_DIR}/Data.cpp
+${RANGER_SOURCE_DIR}/DataChar.cpp
+${RANGER_SOURCE_DIR}/DataFloat.cpp
+${RANGER_SOURCE_DIR}/utility.cpp
+)
+
+include_directories("${CPPRANGER_SOURCE_DIR}"
+                    "${CPPRANGER_SOURCE_DIR}/utility"
+                    "${RANGER_SOURCE_DIR}")
+
+IF(MSVC)
+  add_subdirectory (wingetopt)
+  link_directories (${wingetopt_BINARY_DIR})
+  # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Za")
+ENDIF()
+                  
+add_executable(ranger ${PROJECT_cppranger_SRCS})
+if (MSVC)
+  target_link_libraries(ranger Threads::Threads wingetopt)
+  include_directories(${CMAKE_SOURCE_DIR}/wingetopt/src)
+else()
+  target_link_libraries(ranger Threads::Threads)
+endif()
+
 # set(LAPACK_ROOT "C:/tools/miniconda3/pkgs/mkl-2018.0.3-1/Library/lib")
 find_package(LAPACK)
 
@@ -68,15 +106,26 @@ add_test(NAME MatutilsTest COMMAND matutils WORKING_DIRECTORY "../../../R/dossie
 set_tests_properties(MatutilsTest PROPERTIES ENVIRONMENT "${TestENV}")
 
 # add_executable(ForestClass forestclass-test.cpp ForestOnlineClassification.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
-add_executable(ForestClass forestclass-test.cpp ${RANGER_SOURCE_DIR}/ForestClassification.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
+add_executable(ForestClass forestclass-test.cpp DataDense.cpp ${RANGER_SOURCE_DIR}/ForestClassification.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
 target_link_libraries(ForestClass Threads::Threads Boost::unit_test_framework Boost::regex Boost::dynamic_linking Boost::diagnostic_definitions)
 add_test(NAME ForestClassTest COMMAND ForestClass WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
 set_tests_properties(ForestClassTest PROPERTIES ENVIRONMENT "${TestENV}")
 
-add_executable(ForestReg forestreg-test.cpp ForestOnlineRegression.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
+add_executable(ForestOnlineClass forestonlineclass-test.cpp DataDense.cpp ForestOnlineClassification.cpp ForestOnline.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
+target_link_libraries(ForestOnlineClass Threads::Threads Boost::unit_test_framework Boost::regex Boost::dynamic_linking Boost::diagnostic_definitions)
+add_test(NAME ForestOnlineClassTest COMMAND ForestOnlineClass WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
+set_tests_properties(ForestOnlineClassTest PROPERTIES ENVIRONMENT "${TestENV}")
+
+
+add_executable(ForestReg forestreg-test.cpp DataDense.cpp ${RANGER_SOURCE_DIR}/ForestRegression.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
 target_link_libraries(ForestReg Threads::Threads Boost::unit_test_framework Boost::regex Boost::dynamic_linking Boost::diagnostic_definitions)
 add_test(NAME ForestRegTest COMMAND ForestReg WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
 set_tests_properties(ForestRegTest PROPERTIES ENVIRONMENT "${TestENV}")
+
+add_executable(ForestOnlineReg forestonlinereg-test.cpp DataDense.cpp ForestOnlineRegression.cpp ForestOnline.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
+target_link_libraries(ForestOnlineReg Threads::Threads Boost::unit_test_framework Boost::regex Boost::dynamic_linking Boost::diagnostic_definitions)
+add_test(NAME ForestOnlineRegTest COMMAND ForestOnlineReg WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
+set_tests_properties(ForestOnlineRegTest PROPERTIES ENVIRONMENT "${TestENV}")
 
 add_executable(LDA lda-test.cpp)
 target_link_libraries(LDA ${LAPACK_LIBRARIES} Boost::unit_test_framework Boost::dynamic_linking Boost::diagnostic_definitions)
@@ -100,3 +149,9 @@ target_compile_definitions(LDAEigen PRIVATE EIGEN_USE_MKL_ALL)
 target_link_libraries(LDAEigen ${LAPACK_LIBRARIES} Boost::unit_test_framework Boost::dynamic_linking Boost::diagnostic_definitions)
 add_test(NAME LDAEigenTest COMMAND LDAEigen WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
 set_tests_properties(LDAEigenTest PROPERTIES ENVIRONMENT "${TestENV}")
+
+add_executable(PLSEigen pls-eigen-test.cpp)
+target_compile_definitions(PLSEigen PRIVATE EIGEN_USE_MKL_ALL)
+target_link_libraries(PLSEigen ${LAPACK_LIBRARIES} Boost::unit_test_framework Boost::dynamic_linking Boost::diagnostic_definitions)
+add_test(NAME PLSEigenTest COMMAND PLSEigen WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
+set_tests_properties(PLSEigenTest PROPERTIES ENVIRONMENT "${TestENV}")

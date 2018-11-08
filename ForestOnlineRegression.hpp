@@ -4,11 +4,11 @@
 #include <vector>
 
 #include "globals.h"
-#include "Forest.h"
+#include "ForestOnline.hpp"
 
 namespace ranger {
 
-class ForestOnlineRegression: public Forest {
+class ForestOnlineRegression: public ForestOnline {
 public:
   ForestOnlineRegression() = default;
 
@@ -17,14 +17,10 @@ public:
 
   virtual ~ForestOnlineRegression() override = default;
 
-  void loadForest(size_t dependent_varID, size_t num_trees,
-      std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
-      std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
-      std::vector<bool>& is_ordered_variable);
-
 private:
   void initInternal(std::string status_variable_name) override;
   void growInternal() override;
+  void calculateAfterGrow(size_t tree_idx) override;
   void allocatePredictMemory() override;
   void predictInternal(size_t sample_idx) override;
   void computePredictionErrorInternal() override;
@@ -33,6 +29,9 @@ private:
   void writePredictionFile() override;
   void saveToFileInternal(std::ofstream& outfile) override;
   void loadFromFileInternal(std::ifstream& infile) override;
+
+  // OOb counts for regression
+  std::vector<size_t> samples_oob_count;
 
 private:
   double getTreePrediction(size_t tree_idx, size_t sample_idx) const;

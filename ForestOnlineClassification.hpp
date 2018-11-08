@@ -1,11 +1,12 @@
 #pragma once
 
 #include <map>
-#include "Forest.h"
+#include <unordered_map>
+#include "ForestOnline.hpp"
 
 namespace ranger
 {
-class ForestOnlineClassification : public Forest
+class ForestOnlineClassification : public ForestOnline
 {
 public:
   ForestOnlineClassification() = default;
@@ -27,15 +28,16 @@ public:
 
   // Manually set the outputstream for verbose out
   void setverboseOutput(std::ostream* verbose_output);
+  void writeConfusionFile() override;
 
 protected:
   void initInternal(std::string status_variable_name) override;
   void growInternal() override;
+  void calculateAfterGrow(size_t tree_idx) override;
   void allocatePredictMemory() override;
   void predictInternal(size_t sample_idx) override;
   void computePredictionErrorInternal() override;
   void writeOutputInternal() override;
-  void writeConfusionFile() override;
   void writePredictionFile() override;
   void saveToFileInternal(std::ofstream &outfile) override;
   void loadFromFileInternal(std::ifstream &infile) override;
@@ -47,6 +49,9 @@ protected:
 
   // Splitting weights
   std::vector<double> class_weights;
+
+  // Class counts
+  std::vector<std::unordered_map<double, size_t>> class_counts;
 
   // Table with classifications and true classes
   std::map<std::pair<double, double>, size_t> classification_table;

@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
+#include <Eigen/Dense>
 
+using namespace Eigen;
 using namespace std;
 
 struct Reftable {
@@ -9,8 +11,8 @@ struct Reftable {
     std::vector<size_t> nparam;
     std::vector<string> params_names;
     std::vector<string> stats_names;
-    std::vector<double> stats;
-    std::vector<double> params;
+    MatrixXd stats;
+    MatrixXd params;    
     std::vector<double> scenarios;
 };
 

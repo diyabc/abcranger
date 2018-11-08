@@ -78,14 +78,14 @@ compare_lists( T l1b, T l1e, U l2b, U l2e )
 
 using namespace HighFive;
 
-void test_random_lines(HighFive::File& file, const string& dataname, std::vector<double>& p){
+void test_random_lines(HighFive::File& file, const string& dataname, MatrixXd p){
     DataSet dataset =
         file.getDataSet(dataname);
     std::vector<std::vector<double>> data;
     dataset.read(data);
     auto nrow = data.size();
     auto ncol = data[0].size();
-    BOOST_TEST(p.size() == ncol*nrow);
+    // BOOST_TEST(p.size() == ncol*nrow);
     size_t nloop = std::min((size_t) 200u,ncol);
     std::vector<size_t> indices(ncol);
     std::iota(std::begin(indices),std::end(indices),0);
@@ -94,8 +94,12 @@ void test_random_lines(HighFive::File& file, const string& dataname, std::vector
     ThreadPool::ParallelFor((size_t) 0u, nloop, [&] (size_t j){
         auto i = indices[j];
         // BOOST_TEST( compare_lists(&p[i*ncol],&p[(i+1)*ncol],data[i].begin(),data[i].end() ));
-        BOOST_TEST( compare_lists(std::next(std::begin(p),i*ncol),
-                                  std::next(std::begin(p),(i+1)*ncol),
+        // BOOST_TEST( compare_lists(std::next(std::begin(p),i*ncol),
+        //                           std::next(std::begin(p),(i+1)*ncol),
+        //                           data[i].begin(),
+        //                           data[i].end() ));
+        BOOST_TEST( compare_lists(std::begin(p.row(i)),
+                                  std::end(p.row(i)),
                                   data[i].begin(),
                                   data[i].end() ));
     }); 

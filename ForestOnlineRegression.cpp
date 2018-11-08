@@ -9,26 +9,6 @@
 
 namespace ranger {
 
-void ForestOnlineRegression::loadForest(size_t dependent_varID, size_t num_trees,
-    std::vector<std::vector<std::vector<size_t>> >& forest_child_nodeIDs,
-    std::vector<std::vector<size_t>>& forest_split_varIDs, std::vector<std::vector<double>>& forest_split_values,
-    std::vector<bool>& is_ordered_variable) {
-
-  this->dependent_varID = dependent_varID;
-  this->num_trees = num_trees;
-  data->setIsOrderedVariable(is_ordered_variable);
-
-  // Create trees
-  trees.reserve(num_trees);
-  for (size_t i = 0; i < num_trees; ++i) {
-    trees.push_back(
-        std::make_unique<TreeRegression>(forest_child_nodeIDs[i], forest_split_varIDs[i], forest_split_values[i]));
-  }
-
-  // Create thread ranges
-  equalSplit(thread_ranges, 0, num_trees - 1, num_threads);
-}
-
 void ForestOnlineRegression::initInternal(std::string status_variable_name) {
 
   // If mtry not set, use floored square root of number of independent variables
@@ -53,6 +33,11 @@ void ForestOnlineRegression::growInternal() {
   for (size_t i = 0; i < num_trees; ++i) {
     trees.push_back(make_unique<TreeRegression>());
   }
+
+  predictions = std::vector<std::vector<std::vector<double>>>(1,
+      std::vector<std::vector<double>>(1, std::vector<double>(num_samples, 0)));
+  samples_oob_count.resize(num_samples, 0);
+
 }
 
 void ForestOnlineRegression::allocatePredictMemory() {
@@ -86,25 +71,34 @@ void ForestOnlineRegression::predictInternal(size_t sample_idx) {
   }
 }
 
-void ForestOnlineRegression::computePredictionErrorInternal() {
-
-// For each sample sum over trees where sample is OOB
-  std::vector<size_t> samples_oob_count;
-  predictions = std::vector<std::vector<std::vector<double>>>(1,
-      std::vector<std::vector<double>>(1, std::vector<double>(num_samples, 0)));
-  samples_oob_count.resize(num_samples, 0);
-  for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
-    for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx) {
+void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx) {
+  // For each tree loop over OOB samples and count classes
+    for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx)
+    {
       size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
       double value = getTreePrediction(tree_idx, sample_idx);
 
       predictions[0][0][sampleID] += value;
       ++samples_oob_count[sampleID];
     }
-  }
+}
+
+void ForestOnlineRegression::computePredictionErrorInternal() {
+
+// For each sample sum over trees where sample is OOB
+  // for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
+  //   for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx) {
+  //     size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
+  //     double value = getTreePrediction(tree_idx, sample_idx);
+
+  //     predictions[0][0][sampleID] += value;
+  //     ++samples_oob_count[sampleID];
+  //   }
+  // }
 
 // MSE with predictions and true data
   size_t num_predictions = 0;
+  overall_prediction_error = 0;
   for (size_t i = 0; i < predictions[0][0].size(); ++i) {
     if (samples_oob_count[i] > 0) {
       ++num_predictions;

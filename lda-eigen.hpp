@@ -23,9 +23,10 @@ using namespace std;
  * @param y labels from 0 to K 
  * @param Ld computes matrix whoses columns are Ld vectors
  */
-void lda(const MatrixXd &x,
+template<class Derived>
+void lda(const MatrixBase<Derived> &x,
          const Matrix<size_t, -1, 1> &y,
-         MatrixXd &Ld)
+         MatrixXd& Ld)
 {
     auto n = x.rows();
     auto p = x.cols();

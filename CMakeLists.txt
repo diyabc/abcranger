@@ -155,3 +155,6 @@ target_compile_definitions(PLSEigen PRIVATE EIGEN_USE_MKL_ALL)
 target_link_libraries(PLSEigen ${LAPACK_LIBRARIES} Boost::unit_test_framework Boost::dynamic_linking Boost::diagnostic_definitions)
 add_test(NAME PLSEigenTest COMMAND PLSEigen WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
 set_tests_properties(PLSEigenTest PROPERTIES ENVIRONMENT "${TestENV}")
+
+add_executable(ModelChoice model_choice.cpp DataDense.cpp ForestOnlineClassification.cpp ForestOnline.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
+target_link_libraries(ModelChoice Threads::Threads  Boost::regex Boost::dynamic_linking Boost::diagnostic_definitions)

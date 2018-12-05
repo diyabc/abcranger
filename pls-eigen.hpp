@@ -19,9 +19,9 @@
 using namespace Eigen;
 using namespace std;
 
-template<class Derived>
-VectorXd pls(const MatrixXd &x,
-         const VectorXd &y,
+template<class Derived, class OtherDerived>
+VectorXd pls(const MatrixBase<Derived>& x,
+         const MatrixBase<OtherDerived>& y,
          size_t ncomp,
          double threshold,
          MatrixXd& Pls)
@@ -51,8 +51,7 @@ VectorXd pls(const MatrixXd &x,
         }
         X -= Zm.rowwise().replicate(p) * ((Zm/Znorm).transpose() * X).asDiagonal();
     }
-
-    Pls.block(0,orig_ncols,n,orig_ncols + r + 1) = Z.block(0,0,n,r + 1);
+    Pls = Z.block(0,0,n,r + 1);
     VectorXd res = (Y.block(0,1,n,r + 1).array() - ymean).array().square().colwise().sum() / SSTO;
     return res;
 }

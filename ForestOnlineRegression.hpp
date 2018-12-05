@@ -22,7 +22,7 @@ private:
   void growInternal() override;
   void calculateAfterGrow(size_t tree_idx) override;
   void allocatePredictMemory() override;
-  void predictInternal(size_t sample_idx) override;
+  void predictInternal(size_t tree_idx) override;
   void computePredictionErrorInternal() override;
   void writeOutputInternal() override;
   void writeConfusionFile() override;
@@ -32,6 +32,8 @@ private:
 
   // OOb counts for regression
   std::vector<size_t> samples_oob_count;
+  // Storing prediction sum by tree
+  std::vector<double> prediction_sum;
 
 private:
   double getTreePrediction(size_t tree_idx, size_t sample_idx) const;

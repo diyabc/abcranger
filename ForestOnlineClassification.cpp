@@ -92,46 +92,62 @@ void ForestOnlineClassification::growInternal()
 
 void ForestOnlineClassification::allocatePredictMemory()
 {
-  size_t num_prediction_samples = data->getNumRows();
+  size_t num_prediction_samples = predict_data->getNumRows();
+  predictions = std::vector<std::vector<std::vector<double>>>(2);
+  predictions[0] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
   if (predict_all || prediction_type == TERMINALNODES)
   {
-    predictions = std::vector<std::vector<std::vector<double>>>(1,
-                                                                std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees)));
+    predictions[1] = std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees));
   }
   else
   {
-    predictions = std::vector<std::vector<std::vector<double>>>(1,
-                                                                std::vector<std::vector<double>>(1, std::vector<double>(num_prediction_samples)));
+    predictions[1] = std::vector<std::vector<double>>(1, std::vector<double>(num_prediction_samples));
   }
 }
 
-void ForestOnlineClassification::predictInternal(size_t sample_idx)
+void ForestOnlineClassification::predictInternal(size_t tree_idx)
 {
-  if (predict_all || prediction_type == TERMINALNODES)
+  // if (predict_all || prediction_type == TERMINALNODES)
+  // {
+  //   // Get all tree predictions
+  //   for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx)
+  //   {
+  //     if (prediction_type == TERMINALNODES)
+  //     {
+  //       predictions[0][sample_idx][tree_idx] = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
+  //     }
+  //     else
+  //     {
+  //       predictions[0][sample_idx][tree_idx] = getTreePrediction(tree_idx, sample_idx);
+  //     }
+  //   }
+  // }
+  // else
+  // {
+  //   // Count classes over trees and save class with maximum count
+  //   std::unordered_map<double, size_t> class_count;
+  //   for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx)
+  //   {
+  //     ++class_count[getTreePrediction(tree_idx, sample_idx)];
+  //   }
+  //   predictions[0][0][sample_idx] = mostFrequentValue(class_count, random_number_generator);
+  // }
+    for (size_t sample_idx = 0; sample_idx < predict_data->getNumRows(); ++sample_idx)
   {
-    // Get all tree predictions
-    for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx)
-    {
+    if (predict_all || prediction_type == TERMINALNODES) {
       if (prediction_type == TERMINALNODES)
       {
-        predictions[0][sample_idx][tree_idx] = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
+        predictions[1][sample_idx][tree_idx] = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
       }
       else
       {
-        predictions[0][sample_idx][tree_idx] = getTreePrediction(tree_idx, sample_idx);
+        predictions[1][sample_idx][tree_idx] = getTreePrediction(tree_idx, sample_idx);
       }
-    }
-  }
-  else
-  {
-    // Count classes over trees and save class with maximum count
-    std::unordered_map<double, size_t> class_count;
-    for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx)
-    {
+    } else {
       ++class_count[getTreePrediction(tree_idx, sample_idx)];
     }
-    predictions[0][0][sample_idx] = mostFrequentValue(class_count, random_number_generator);
   }
+
 }
 
 void ForestOnlineClassification::calculateAfterGrow(size_t tree_idx) {
@@ -154,8 +170,8 @@ void ForestOnlineClassification::computePredictionErrorInternal()
   // }
 
   // Compute majority vote for each sample
-  predictions = std::vector<std::vector<std::vector<double>>>(1,
-                                                              std::vector<std::vector<double>>(1, std::vector<double>(num_samples)));
+  // predictions = std::vector<std::vector<std::vector<double>>>(1,
+  //                                                             std::vector<std::vector<double>>(1, std::vector<double>(num_samples)));
   for (size_t i = 0; i < num_samples; ++i)
   {
     if (!class_counts[i].empty())
@@ -186,6 +202,12 @@ void ForestOnlineClassification::computePredictionErrorInternal()
     }
   }
   overall_prediction_error = (double)num_missclassifications / (double)num_predictions;
+
+  if (!(predict_all || prediction_type == TERMINALNODES))
+  for(auto sample_idx = 0; sample_idx < predict_data->getNumRows(); sample_idx++) {
+    predictions[1][0][sample_idx] = mostFrequentValue(class_count, random_number_generator);
+  }
+
 }
 
 // #nocov start
@@ -215,17 +237,24 @@ void ForestOnlineClassification::writeConfusionFile()
   outfile << std::endl;
   outfile << "Class specific prediction errors:" << std::endl;
   outfile << "           ";
+
+  std::sort(class_values.begin(),class_values.end());
   for (auto &class_value : class_values)
   {
     outfile << "     " << class_value;
   }
-  outfile << std::endl;
+  outfile << " class.error" << std::endl;
+  double classtot;
+  double classok;
   for (auto &predicted_value : class_values)
   {
     outfile << "predicted " << predicted_value << "     ";
+    classtot = 0.0;
     for (auto &real_value : class_values)
     {
       size_t value = classification_table[std::make_pair(real_value, predicted_value)];
+      if (real_value == predicted_value) classok = value;
+      classtot += value;
       outfile << value;
       if (value < 10)
       {
@@ -248,7 +277,7 @@ void ForestOnlineClassification::writeConfusionFile()
         outfile << " ";
       }
     }
-    outfile << std::endl;
+    outfile << " " << (classtot - classok) / classtot << std::endl;
   }
 
   outfile.close();
@@ -275,11 +304,11 @@ void ForestOnlineClassification::writePredictionFile()
     for (size_t k = 0; k < num_trees; ++k)
     {
       outfile << "Tree " << k << ":" << std::endl;
-      for (size_t i = 0; i < predictions.size(); ++i)
+      for (size_t i = 1; i < predictions.size(); ++i)
       {
         for (size_t j = 0; j < predictions[i].size(); ++j)
         {
-          outfile << predictions[i][j][k] << std::endl;
+          outfile << predictions[1][j][k] << std::endl;
         }
       }
       outfile << std::endl;
@@ -287,7 +316,7 @@ void ForestOnlineClassification::writePredictionFile()
   }
   else
   {
-    for (size_t i = 0; i < predictions.size(); ++i)
+    for (size_t i = 1; i < predictions.size(); ++i)
     {
       for (size_t j = 0; j < predictions[i].size(); ++j)
       {

@@ -34,41 +34,64 @@ void ForestOnlineRegression::growInternal() {
     trees.push_back(make_unique<TreeRegression>());
   }
 
-  predictions = std::vector<std::vector<std::vector<double>>>(1,
-      std::vector<std::vector<double>>(1, std::vector<double>(num_samples, 0)));
+  // predictions = std::vector<std::vector<std::vector<double>>>(1,
+  //     std::vector<std::vector<double>>(1, std::vector<double>(num_samples, 0)));
   samples_oob_count.resize(num_samples, 0);
 
 }
 
-void ForestOnlineRegression::allocatePredictMemory() {
-  size_t num_prediction_samples = data->getNumRows();
-  if (predict_all || prediction_type == TERMINALNODES) {
-    predictions = std::vector<std::vector<std::vector<double>>>(1,
-        std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees)));
-  } else {
-    predictions = std::vector<std::vector<std::vector<double>>>(1,
-        std::vector<std::vector<double>>(1, std::vector<double>(num_prediction_samples)));
+void ForestOnlineRegression::allocatePredictMemory()
+{
+  size_t num_prediction_samples = predict_data->getNumRows();
+  predictions = std::vector<std::vector<std::vector<double>>>(2);
+  predictions[0] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
+  prediction_sum = std::vector<double>(predict_data->getNumRows());
+
+  if (predict_all || prediction_type == TERMINALNODES)
+  {
+    predictions[1] = std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees));
+  }
+  else
+  {
+    predictions[1] = std::vector<std::vector<double>>(1, std::vector<double>(num_prediction_samples));
   }
 }
 
-void ForestOnlineRegression::predictInternal(size_t sample_idx) {
-  if (predict_all || prediction_type == TERMINALNODES) {
-    // Get all tree predictions
-    for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
-      if (prediction_type == TERMINALNODES) {
-        predictions[0][sample_idx][tree_idx] = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
-      } else {
-        predictions[0][sample_idx][tree_idx] = getTreePrediction(tree_idx, sample_idx);
+void ForestOnlineRegression::predictInternal(size_t tree_idx) {
+  // if (predict_all || prediction_type == TERMINALNODES) {
+  //   // Get all tree predictions
+  //   for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
+  //     if (prediction_type == TERMINALNODES) {
+  //       predictions[0][sample_idx][tree_idx] = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
+  //     } else {
+  //       predictions[0][sample_idx][tree_idx] = getTreePrediction(tree_idx, sample_idx);
+  //     }
+  //   }
+  // } else {
+  //   // Mean over trees
+  //   double prediction_sum = 0;
+  //   for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
+  //     prediction_sum += getTreePrediction(tree_idx, sample_idx);
+  //   }
+  //   predictions[0][0][sample_idx] = prediction_sum / num_trees;
+  // }
+      for (size_t sample_idx = 0; sample_idx < predict_data->getNumRows(); ++sample_idx)
+  {
+        if (predict_all || prediction_type == TERMINALNODES) {
+      if (prediction_type == TERMINALNODES)
+      {
+        predictions[1][sample_idx][tree_idx] = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
       }
+      else
+      {
+        predictions[1][sample_idx][tree_idx] = getTreePrediction(tree_idx, sample_idx);
+      }
+    } else {
+      prediction_sum[sample_idx] += getTreePrediction(tree_idx, sample_idx);
     }
-  } else {
-    // Mean over trees
-    double prediction_sum = 0;
-    for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
-      prediction_sum += getTreePrediction(tree_idx, sample_idx);
-    }
-    predictions[0][0][sample_idx] = prediction_sum / num_trees;
+
   }
+
 }
 
 void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx) {
@@ -112,6 +135,11 @@ void ForestOnlineRegression::computePredictionErrorInternal() {
   }
 
   overall_prediction_error /= (double) num_predictions;
+
+  if (!(predict_all || prediction_type == TERMINALNODES))
+  for(auto sample_idx = 0; sample_idx < predict_data->getNumRows(); ++sample_idx) {
+    predictions[1][0][sample_idx] = prediction_sum[sample_idx]/num_trees;
+  }
 }
 
 // #nocov start

@@ -30,17 +30,17 @@ BOOST_AUTO_TEST_CASE(InitForestReg, *boost::unit_test::tolerance(1e-4))
 {
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", 0);
     auto nstat = myread.stats_names.size();
-    addCol(myread.stats, error);
     auto colnames = myread.stats_names;
+    addCols(myread.stats, Map<VectorXd>(error.data(),error.size()));
     colnames.push_back("Y");
-    auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, myread.nrec, nstat + 1));
+    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, myread.nrec, nstat + 1));
     ForestRegression forestreg;
     auto ntree = 500;
     auto nthreads = 8;
 
     forestreg.init("Y",                       // dependant variable
                      MemoryMode::MEM_DOUBLE,    // memory mode double or float
-                     std::move(datastatobs),    // data
+                     std::move(datastats),    // data
                      0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
                      "originalranger_out",              // output file name prefix
                      ntree,                     // number of trees

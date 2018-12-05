@@ -31,11 +31,9 @@ BOOST_AUTO_TEST_CASE(InitForestOnlineClass, *boost::unit_test::tolerance(1e-2))
     auto nstat = myread.stats_names.size();
     MatrixXd statobs(1,nstat);
     statobs = Map<MatrixXd>(readStatObs("statobsRF.txt").data(),1,nstat);
-    addCol(myread.stats, myread.scenarios);
-    auto colnames = myread.stats_names;
-    colnames.push_back("Y");
-    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, myread.nrec, nstat + 1));
-    auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(statobs, colnames, myread.nrec, nstat + 1));
+    auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(statobs, myread.stats_names, 1, myread.stats_names.size()));
+    addScen(myread);
+    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, myread.stats_names, myread.nrec, myread.stats_names.size()));
     // ForestOnlineClassification forestclass;
     ForestOnlineClassification forestclass;
     auto ntree = 200;
@@ -98,6 +96,7 @@ BOOST_AUTO_TEST_CASE(InitForestOnlineClass, *boost::unit_test::tolerance(1e-2))
     auto oob_prior_error = forestclass.getOverallPredictionError();
     forestclass.writeConfusionFile();
     forestclass.writeImportanceFile();
-
+    std::cout << "predicted model : " << preds[1][0][0];
     BOOST_TEST(oob_prior_error == 0.232417);
+    BOOST_TEST(preds[1][0][0] == 3.0);
 }

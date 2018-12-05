@@ -23,12 +23,13 @@ void addCols(MatrixBase<Derived> const &X_, const MatrixBase<OtherDerived>& M) {
     X.block(0,ncols,X.rows(),M.cols()) = M;
 }
 
+
 template<class Derived>
 void addNoiseCols(MatrixBase<Derived> const &X_, size_t n)
 {
     auto ncols = X_.cols();
     auto& X = constCastAddColsMatrix(X_,n);
-    X.block(0,ncols,X.rows(),n).unaryExpr([](double x){ return dis(rng);} );
+    X.block(0,ncols,X_.rows(),n) = X.block(0,ncols,X_.rows(),n).unaryExpr([](double x){ return dis(rng);});
 }
 
 template<class Derived>
@@ -48,7 +49,7 @@ void addLinearComb(MatrixBase<Derived> const & X_, const MatrixBase<OtherDerived
 template<class Derived>
 void addLda(Reftable& rf, MatrixBase<Derived> const &statobs) {
     Matrix<size_t,-1,1> scen(rf.nrec);
-    for(auto i = 0; i < rf.nrec; i++) scen(i) = static_cast<size_t>(rf.scenarios[i]);
+    for(auto i = 0; i < rf.nrec; i++) scen(i) = static_cast<size_t>(rf.scenarios[i]) - 1;
     MatrixXd Ld;
     lda(rf.stats, scen, Ld);
     addLinearComb(rf.stats,Ld);

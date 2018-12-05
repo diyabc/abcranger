@@ -28,12 +28,9 @@ std::unique_ptr<T_DEST> unique_cast(std::unique_ptr<T_SRC> &&src)
 BOOST_AUTO_TEST_CASE(InitForestClass, *boost::unit_test::tolerance(1e-5))
 {
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", 0);
-    auto statobs = readStatObs("statobsRF.txt");
     auto nstat = myread.stats_names.size();
-    addCol(myread.stats, myread.scenarios);
-    auto colnames = myread.stats_names;
-    colnames.push_back("Y");
-    auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, myread.nrec, nstat + 1));
+    addScen(myread);
+    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, myread.stats_names, myread.nrec, myread.stats_names.size()));
     // ForestOnlineClassification forestclass;
     ForestClassification forestclass;
     auto ntree = 200;
@@ -66,7 +63,7 @@ BOOST_AUTO_TEST_CASE(InitForestClass, *boost::unit_test::tolerance(1e-5))
     //                           ranger::uint max_depth)
     forestclass.init("Y",                       // dependant variable
                      MemoryMode::MEM_DOUBLE,    // memory mode double or float
-                     std::move(datastatobs),    // data
+                     std::move(datastats),    // data
                      0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
                      "originalranger_out",              // output file name prefix
                      ntree,                     // number of trees

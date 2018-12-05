@@ -60,6 +60,8 @@ else()
   target_link_libraries(ranger Threads::Threads)
 endif()
 
+link_directories(${LAPACK_ROOT})
+
 # set(LAPACK_ROOT "C:/tools/miniconda3/pkgs/mkl-2018.0.3-1/Library/lib")
 find_package(LAPACK)
 
@@ -71,7 +73,7 @@ find_package(HDF5 REQUIRED COMPONENTS CXX)
 
 if (WIN32)
     set(HDF5_ROOT "C:/Program Files/HDF_Group/HDF5/1.10.2")
-    set(TestENV "PATH=${Boost_LIBRARY_DIRS}\\;${HDF5_ROOT}/bin\\;${LAPACK_BIN};$ENV{PATH}")
+    set(TestENV "PATH=${Boost_LIBRARY_DIRS}\\;${HDF5_ROOT}/bin\\;${LAPACK_BIN}\\;$ENV{PATH}")
     # set(TestENV "PATH=${BOOST_TEST_BIN};${HDF5_BIN};${LAPACK_BIN};$ENV{PATH}")
 endif()
 
@@ -156,5 +158,5 @@ target_link_libraries(PLSEigen ${LAPACK_LIBRARIES} Boost::unit_test_framework Bo
 add_test(NAME PLSEigenTest COMMAND PLSEigen WORKING_DIRECTORY "../../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD")
 set_tests_properties(PLSEigenTest PROPERTIES ENVIRONMENT "${TestENV}")
 
-add_executable(ModelChoice model_choice.cpp DataDense.cpp ForestOnlineClassification.cpp ForestOnline.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
+add_executable(ModelChoice model_choice.cpp DataDense.cpp ForestOnlineClassification.cpp ForestOnlineRegression.cpp ForestOnline.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
 target_link_libraries(ModelChoice Threads::Threads  Boost::regex Boost::dynamic_linking Boost::diagnostic_definitions)

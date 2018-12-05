@@ -50,6 +50,12 @@ public:
   void saveToFile();
   virtual void saveToFileInternal(std::ofstream& outfile) = 0;
 
+  std::unique_ptr<Data> releaseData() {
+    return std::move(data);
+  }
+  std::unique_ptr<Data> releasePred() {
+    return std::move(predict_data);
+  }
   std::vector<std::vector<std::vector<size_t>>> getChildNodeIDs() {
     std::vector<std::vector<std::vector<size_t>>> result;
     for (auto& tree : trees) {
@@ -120,7 +126,7 @@ protected:
   // Predict using existing tree from file and data as prediction data
   void predict();
   virtual void allocatePredictMemory() = 0;
-  virtual void predictInternal(size_t sample_idx) = 0;
+  virtual void predictInternal(size_t tree_idx) = 0;
 
   void computePredictionError();
   virtual void computePredictionErrorInternal() = 0;
@@ -128,7 +134,7 @@ protected:
   void computePermutationImportance();
 
   // Multithreading methods for growing/prediction/importance, called by each thread
-  void growTreesInThread(uint thread_idx, std::vector<double>* variable_importance, const Data* prediction_data);
+  void growTreesInThread(uint thread_idx, std::vector<double>* variable_importance, const Data* input_data, const Data* predict_data);
   void predictTreesInThread(uint thread_idx, const Data* prediction_data, bool oob_prediction);
   void predictInternalInThread(uint thread_idx);
   void computeTreePermutationImportanceInThread(uint thread_idx, std::vector<double>& importance,

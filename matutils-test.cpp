@@ -12,11 +12,28 @@ using namespace boost::accumulators;
 #include "readreftable.hpp"
 
 BOOST_AUTO_TEST_CASE(UnifDistrib, * boost::unit_test::tolerance(0.01)) {
-    auto noisevec = getNoise(100000);
     accumulator_set<double,stats<tag::mean, tag::variance>> acc;
-    for(auto& r: noisevec) acc(r);
+    for(auto i = 0; i < 10000; i++) acc(dis(rng));
     BOOST_TEST( mean(acc) == 0.5);
     BOOST_TEST( variance(acc) == 1.0/12.0);
+}
+
+BOOST_AUTO_TEST_CASE(AddLinearComb) {
+    MatrixXi m1(2,3);
+    MatrixXi m2(3,2);
+    MatrixXi m3(2,5);
+
+    m1 << 1, 2, 3,
+          4, 5, 6;
+
+    m2 << 1, 2,
+          3, 4, 
+          5, 6; 
+
+    m3 << 1, 2, 3, 22, 28, 
+          4, 5, 6, 49, 64;
+    addLinearComb(m1,m2);
+    BOOST_TEST( (m3 - m1).lpNorm<Infinity>() == 0 );
 }
 
 BOOST_AUTO_TEST_CASE(NoiseNames) {

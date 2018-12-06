@@ -33,7 +33,7 @@ public:
 protected:
   void initInternal(std::string status_variable_name) override;
   void growInternal() override;
-  void calculateAfterGrow(size_t tree_idx) override;
+  void calculateAfterGrow(size_t tree_idx, bool oob) override;
   void allocatePredictMemory() override;
   void predictInternal(size_t tree_idx) override;
   void computePredictionErrorInternal() override;
@@ -52,6 +52,7 @@ protected:
 
   // Class counts
   std::vector<std::unordered_map<double, size_t>> class_counts;
+  // std::vector<std::unordered_map<double, size_t>> class_counts_internal;
   std::unordered_map<double, size_t> class_count;
 
   // Table with classifications and true classes

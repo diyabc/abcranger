@@ -121,7 +121,7 @@ public:
 protected:
   void grow();
   virtual void growInternal() = 0;
-  virtual void calculateAfterGrow(size_t tree_idx) = 0;
+  virtual void calculateAfterGrow(size_t tree_idx, bool oob) = 0;
 
   // Predict using existing tree from file and data as prediction data
   void predict();

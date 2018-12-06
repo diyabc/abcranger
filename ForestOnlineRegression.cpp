@@ -94,7 +94,7 @@ void ForestOnlineRegression::predictInternal(size_t tree_idx) {
 
 }
 
-void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx) {
+void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx, bool oob) {
   // For each tree loop over OOB samples and count classes
     for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx)
     {

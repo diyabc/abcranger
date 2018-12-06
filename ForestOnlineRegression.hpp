@@ -20,7 +20,7 @@ public:
 private:
   void initInternal(std::string status_variable_name) override;
   void growInternal() override;
-  void calculateAfterGrow(size_t tree_idx) override;
+  void calculateAfterGrow(size_t tree_idx, bool oob) override;
   void allocatePredictMemory() override;
   void predictInternal(size_t tree_idx) override;
   void computePredictionErrorInternal() override;

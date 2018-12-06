@@ -51,7 +51,7 @@ int main()
                      0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
                      "onlineranger_out",        // output file name prefix
                      ntree,                     // number of trees
-                     123456,                    // seed rd()
+                     123457,                    // seed rd()
                      nthreads,                  // number of threads
                      ranger::IMP_GINI,          // Default IMP_NONE
                      0,                         // default min node size (classif = 1, regression 5)
@@ -102,7 +102,7 @@ int main()
                      0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
                      "originalranger_out",              // output file name prefix
                      ntree,                     // number of trees
-                     123456,                    // seed rd()
+                     123457,                    // seed rd()
                      nthreads,                  // number of threads
                      DEFAULT_IMPORTANCE_MODE,  // Default IMP_NONE
                      0,                         // default min node size (classif = 1, regression 5)
@@ -125,5 +125,7 @@ int main()
     forestreg.run(true,true);
     auto predserr = forestreg.getPredictions();
     std::cout << "Post proba : " << predserr[1][0][0] << std::endl;
+    for(auto i = 0; i < ntree; i++) 
+        std::cout << i << " -> " << preds[2][0][i]/nref << std::endl;
     std::cout << "OK !" << std::endl;
 }

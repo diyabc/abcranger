@@ -580,7 +580,9 @@ void ForestOnline::growTreesInThread(uint thread_idx, std::vector<double>* varia
 
       // Increase progress by 1 tree
       std::unique_lock<std::mutex> lock(mutex);
-      calculateAfterGrow(i);
+      calculateAfterGrow(i,true);
+      // trees[i]->predict(input_data,false);
+      // calculateAfterGrow(i,false);
       trees[i]->predict(predict_data,false);
       ++progress;
       predictInternal(i);

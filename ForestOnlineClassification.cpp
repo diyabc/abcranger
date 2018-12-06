@@ -83,9 +83,11 @@ void ForestOnlineClassification::growInternal()
 
     // Class counts for samples
   class_counts.reserve(num_samples);
+  // class_counts_internal.reserve(num_samples);
   for (size_t i = 0; i < num_samples; ++i)
   {
     class_counts.push_back(std::unordered_map<double, size_t>());
+    // class_counts_internal.push_back(std::unordered_map<double, size_t>());
   }
 
 }
@@ -93,8 +95,10 @@ void ForestOnlineClassification::growInternal()
 void ForestOnlineClassification::allocatePredictMemory()
 {
   size_t num_prediction_samples = predict_data->getNumRows();
-  predictions = std::vector<std::vector<std::vector<double>>>(2);
-  predictions[0] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
+  predictions = std::vector<std::vector<std::vector<double>>>(3);
+  predictions[0] = std::vector<std::vector<double>>(1,std::vector<double>(num_samples));
+  predictions[2] = std::vector<std::vector<double>>(1,std::vector<double>(num_trees,0.0));
+  // predictions[2] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
   if (predict_all || prediction_type == TERMINALNODES)
   {
     predictions[1] = std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees));
@@ -150,13 +154,24 @@ void ForestOnlineClassification::predictInternal(size_t tree_idx)
 
 }
 
-void ForestOnlineClassification::calculateAfterGrow(size_t tree_idx) {
+void ForestOnlineClassification::calculateAfterGrow(size_t tree_idx, bool oob) {
   // For each tree loop over OOB samples and count classes
-    for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx)
-    {
-      size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
-      ++class_counts[sampleID][getTreePrediction(tree_idx, sample_idx)];
+      for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx)
+      {
+        size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
+        auto res = getTreePrediction(tree_idx, sample_idx);
+        ++class_counts[sampleID][res];
+      }
+    for (size_t sample_idx = 0; sample_idx < num_samples; sample_idx++) {
+      if (!class_counts[sample_idx].empty())
+        predictions[2][0][tree_idx] += (mostFrequentValue(class_counts[sample_idx], random_number_generator) == data->get(sample_idx,dependent_varID)) ? 0.0 : 1.0;
     }
+
+    // else 
+    //   for (size_t sample_idx = 0; sample_idx < num_samples; ++sample_idx)
+    //   {
+    //     ++class_counts_internal[sample_idx][getTreePrediction(tree_idx,sample_idx)];
+    //   };
 }
 
 void ForestOnlineClassification::computePredictionErrorInternal()
@@ -182,6 +197,7 @@ void ForestOnlineClassification::computePredictionErrorInternal()
     {
       predictions[0][0][i] = NAN;
     }
+      // predictions[2][0][i] = mostFrequentValue(class_counts_internal[i], random_number_generator)
   }
 
   // Compare predictions with true data
@@ -203,10 +219,10 @@ void ForestOnlineClassification::computePredictionErrorInternal()
   }
   overall_prediction_error = (double)num_missclassifications / (double)num_predictions;
 
-  if (!(predict_all || prediction_type == TERMINALNODES))
-  for(auto sample_idx = 0; sample_idx < predict_data->getNumRows(); sample_idx++) {
-    predictions[1][0][sample_idx] = mostFrequentValue(class_count, random_number_generator);
-  }
+  // if (!(predict_all || prediction_type == TERMINALNODES))
+  // for(auto sample_idx = 0; sample_idx < predict_data->getNumRows(); sample_idx++) {
+  //   predictions[1][0][sample_idx] = mostFrequentValue(class_count, random_number_generator);
+  // }
 
 }
 

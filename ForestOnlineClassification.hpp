@@ -53,7 +53,7 @@ protected:
   // Class counts
   std::vector<std::unordered_map<double, size_t>> class_counts;
   // std::vector<std::unordered_map<double, size_t>> class_counts_internal;
-  std::unordered_map<double, size_t> class_count;
+  std::vector<std::unordered_map<double, size_t>> class_count;
 
   // Table with classifications and true classes
   std::map<std::pair<double, double>, size_t> classification_table;

@@ -160,3 +160,6 @@ set_tests_properties(PLSEigenTest PROPERTIES ENVIRONMENT "${TestENV}")
 
 add_executable(ModelChoice model_choice.cpp DataDense.cpp ForestOnlineClassification.cpp ForestOnlineRegression.cpp ForestOnline.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
 target_link_libraries(ModelChoice Threads::Threads  Boost::regex Boost::dynamic_linking Boost::diagnostic_definitions)
+
+add_executable(EstimParam estim_param.cpp DataDense.cpp ForestOnlineRegression.cpp ForestOnline.cpp readreftable.cpp ${PROJECT_abcranger_SRCS})
+target_link_libraries(ModelChoice Threads::Threads  Boost::regex Boost::dynamic_linking Boost::diagnostic_definitions)

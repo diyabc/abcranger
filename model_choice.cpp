@@ -125,7 +125,7 @@ int main()
     forestreg.run(true,true);
     auto predserr = forestreg.getPredictions();
     std::cout << "Post proba : " << predserr[1][0][0] << std::endl;
-    for(auto i = 0; i < ntree; i++) 
-        std::cout << i << " -> " << preds[2][0][i]/nref << std::endl;
+    // for(auto i = 0; i < ntree; i++) 
+    //     std::cout << i << " -> " << preds[2][0][i]/nref << std::endl;
     std::cout << "OK !" << std::endl;
 }

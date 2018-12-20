@@ -4,7 +4,7 @@
         // "Boost_DEBUG": "ON",
         "BOOST_LIBRARYDIR": "C:/tools/boost_1_69_0/lib64-msvc-14.1",
         "_boost_COMPILER": "-vc141",
-        // "HDF5_ROOT": "C:/Program Files/HDF_Group/HDF5/1.10.2",
+        "HDF5_ROOT": "C:/Program Files/HDF_Group/HDF5/1.10.2",
         "LAPACK_LIBRARIES" : "mkl_intel_lp64_dll.lib;mkl_intel_thread_dll.lib;mkl_core_dll.lib",
         "LAPACK_BIN"  : "c:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/redist/intel64_win/mkl;c:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/redist/intel64_win/compiler",
         "LAPACK_ROOT" : "C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/mkl/lib/intel64_win"

@@ -60,7 +60,7 @@ find_package(Threads REQUIRED)
 ### LAPACK
 link_directories(${LAPACK_ROOT})
 find_package(LAPACK)
-include_directories(${LAPACK_ROOT}/../../include)
+include_directories(${LAPACK_ROOT}/include)
 
 ### Boost
 find_package(Boost REQUIRED COMPONENTS filesystem regex)

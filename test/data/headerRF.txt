@@ -1,0 +1,113 @@
+poolseq_sim_dataset_4POP_001.pool
+13 parameters and 130 summary statistics
+
+6 scenarios: 8 8 8 8 8 8 
+scenario 1 [0.16667] (8)
+N1 N2 N3 N4
+0 sample 1
+0 sample 2
+0 sample 3
+0 sample 4
+t423 split 4 2 3 ra
+t32 merge 2 3
+t21 merge 1 2
+scenario 2 [0.16667] (8)
+N1 N2 N3 N4
+0 sample 1
+0 sample 2
+0 sample 3
+0 sample 4
+t421 split 4 2 1 ra
+t32 merge 2 3
+t21 merge 1 2
+scenario 3 [0.16667] (8)
+N1 N2 N3 N4
+0 sample 1
+0 sample 2
+0 sample 3
+0 sample 4
+t431 split 4 1 3 ra
+t32 merge 2 3
+t21 merge 1 2
+scenario 4 [0.16667] (7)
+N1 N2 N3 N4
+0 sample 1
+0 sample 2
+0 sample 3
+0 sample 4
+t41 merge 1 4
+t32 merge 2 3
+t21 merge 1 2
+scenario 5 [0.16667] (7)
+N1 N2 N3 N4
+0 sample 1
+0 sample 2
+0 sample 3
+0 sample 4
+t42 merge 2 4
+t32 merge 2 3
+t21 merge 1 2
+scenario 6 [0.16667] (7)
+N1 N2 N3 N4
+0 sample 1
+0 sample 2
+0 sample 3
+0 sample 4
+t43 merge 3 4
+t32 merge 2 3
+t21 merge 1 2
+
+historical parameters priors (13,6)
+N1 N UN[100,10000,0.0,0.0]
+N2 N UN[100,10000,0.0,0.0]
+N3 N UN[100,10000,0.0,0.0]
+N4 N UN[100,10000,0.0,0.0]
+t423 T UN[10,1000,0.0,0.0]
+ra A UN[0.05,0.95,0.0,0.0]
+t32 T UN[10,1000,0.0,0.0]
+t21 T UN[10,1000,0.0,0.0]
+t421 T UN[10,1000,0.0,0.0]
+t431 T UN[10,1000,0.0,0.0]
+t41 T UN[10,1000,0.0,0.0]
+t42 T UN[10,1000,0.0,0.0]
+t43 T UN[10,1000,0.0,0.0]
+t21>t32
+t42<t21
+t43<t32
+t32>t423
+t431<t32
+t421<t21
+DRAW UNTIL
+
+loci description (1)
+5000 <A> G1 from 1
+
+group summary statistics (130)
+group G1 (130)
+ML1p 1 2 3 4
+ML2p 1.2 1.3 1.4 2.3 2.4 3.4
+ML3p 1.2.3 1.2.4 1.3.4 2.3.4
+HWm 1 2 3 4
+HWv 1 2 3 4
+HBm 1.2 1.3 1.4 2.3 2.4 3.4
+HBv 1.2 1.3 1.4 2.3 2.4 3.4
+FST1m 1 2 3 4
+FST1v 1 2 3 4
+FST2m 1.2 1.3 1.4 2.3 2.4 3.4
+FST2v 1.2 1.3 1.4 2.3 2.4 3.4
+NEIm 1.2 1.3 1.4 2.3 2.4 3.4
+NEIv 1.2 1.3 1.4 2.3 2.4 3.4
+AMLm 1.2.3 2.1.3 3.1.2 1.2.4 2.1.4 4.1.2 1.3.4 3.1.4 4.1.3 2.3.4 3.2.4 4.2.3
+AMLv 1.2.3 2.1.3 3.1.2 1.2.4 2.1.4 4.1.2 1.3.4 3.1.4 4.1.3 2.3.4 3.2.4 4.2.3
+FST3m 1.2.3 1.2.4 1.3.4 2.3.4
+FST3v 1.2.3 1.2.4 1.3.4 2.3.4
+FST4m 1.2.3.4
+FST4v 1.2.3.4
+F3m 1.2.3 2.1.3 3.1.2 1.2.4 2.1.4 4.1.2 1.3.4 3.1.4 4.1.3 2.3.4 3.2.4 4.2.3
+F3v 1.2.3 2.1.3 3.1.2 1.2.4 2.1.4 4.1.2 1.3.4 3.1.4 4.1.3 2.3.4 3.2.4 4.2.3
+F4m 1.2.3.4 1.3.2.4 1.4.2.3
+F4v 1.2.3.4 1.3.2.4 1.4.2.3
+
+
+
+scenario      N1            N2            N3            N4           t423           ra           t32           t21           t421          t431          t41           t42           t43          ML1p_1        ML1p_2        ML1p_3        ML1p_4       ML2p_1.2      ML2p_1.3      ML2p_1.4      ML2p_2.3      ML2p_2.4      ML2p_3.4     ML3p_1.2.3    ML3p_1.2.4    ML3p_1.3.4    ML3p_2.3.4      HWm_1         HWm_2         HWm_3         HWm_4         HWv_1         HWv_2         HWv_3         HWv_4        HBm_1.2       HBm_1.3       HBm_1.4       HBm_2.3       HBm_2.4       HBm_3.4       HBv_1.2       HBv_1.3       HBv_1.4       HBv_2.3       HBv_2.4       HBv_3.4       FST1m_1       FST1m_2       FST1m_3       FST1m_4       FST1v_1       FST1v_2       FST1v_3       FST1v_4      FST2m_1.2     FST2m_1.3     FST2m_1.4     FST2m_2.3     FST2m_2.4     FST2m_3.4     FST2v_1.2     FST2v_1.3     FST2v_1.4     FST2v_2.3     FST2v_2.4     FST2v_3.4      NEIm_1.2      NEIm_1.3      NEIm_1.4      NEIm_2.3      NEIm_2.4      NEIm_3.4      NEIv_1.2      NEIv_1.3      NEIv_1.4      NEIv_2.3      NEIv_2.4      NEIv_3.4     AMLm_1.2.3    AMLm_2.1.3    AMLm_3.1.2    AMLm_1.2.4    AMLm_2.1.4    AMLm_4.1.2    AMLm_1.3.4    AMLm_3.1.4    AMLm_4.1.3    AMLm_2.3.4    AMLm_3.2.4    AMLm_4.2.3    AMLv_1.2.3    AMLv_2.1.3    AMLv_3.1.2    AMLv_1.2.4    AMLv_2.1.4    AMLv_4.1.2    AMLv_1.3.4    AMLv_3.1.4    AMLv_4.1.3    AMLv_2.3.4    AMLv_3.2.4    AMLv_4.2.3   FST3m_1.2.3   FST3m_1.2.4   FST3m_1.3.4   FST3m_2.3.4   FST3v_1.2.3   FST3v_1.2.4   FST3v_1.3.4   FST3v_2.3.4   FST4m_1.2.3.4  FST4v_1.2.3.4   F3m_1.2.3     F3m_2.1.3     F3m_3.1.2     F3m_1.2.4     F3m_2.1.4     F3m_4.1.2     F3m_1.3.4     F3m_3.1.4     F3m_4.1.3     F3m_2.3.4     F3m_3.2.4     F3m_4.2.3     F3v_1.2.3     F3v_2.1.3     F3v_3.1.2     F3v_1.2.4     F3v_2.1.4     F3v_4.1.2     F3v_1.3.4     F3v_3.1.4     F3v_4.1.3     F3v_2.3.4     F3v_3.2.4     F3v_4.2.3    F4m_1.2.3.4   F4m_1.3.2.4   F4m_1.4.2.3   F4v_1.2.3.4   F4v_1.3.2.4   F4v_1.4.2.3  

@@ -6,6 +6,7 @@ set(RANGER_SOURCE_DIR ${CMAKE_SOURCE_DIR}/ranger/src)
 set(CPPRANGER_SOURCE_DIR ${CMAKE_SOURCE_DIR}/ranger/cpp_version/src)
 set(ABCRANGER_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 
+
 project(ranger-standalone VERSION 0.1.0 LANGUAGES CXX)
 
 set(PROJECT_cppranger_SRCS
@@ -46,6 +47,9 @@ endif()
 
 
 project(abcranger VERSION 0.2.0 LANGUAGES CXX)
+
+include(CTest)
+enable_testing()
 
 add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING -D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")

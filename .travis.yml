@@ -1,7 +1,5 @@
-language: cpp
-compiler: gcc
-
-env: CMAKE_CMD_OPTION="-DENABLE_TESTING=1 "
+env: 
+  - CMAKE_CMD_OPTION="-DENABLE_TESTING=1 -DLAPACK_ROOT=/opt/intel/compilers_and_libraries_2019.1.144/linux/mkl -DLAPACK_LIBRARIES=libmkl_intel_ilp64.a;libmkl_intel_thread.a;libmkl_core.a"
 
 matrix:
   include:
@@ -12,16 +10,17 @@ matrix:
       addons:
         apt:
           sources: 
+            - sourceline: 'ppa:mhier/libboost-latest'
             - ubuntu-toolchain-r-test
           packages:
             - g++-8
       env:
         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
 
-    - os: osx
-      osx_image: xcode8
-      env:
-        - MATRIX_EVAL="brew install clang && CC=clang && CXX=clang++"
+    # - os: osx
+    #   osx_image: xcode8
+    #   env:
+    #     - MATRIX_EVAL="brew install clang && CC=clang && CXX=clang++"
 
 addons:
   apt:

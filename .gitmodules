@@ -1,6 +1,6 @@
 [submodule "ranger"]
 	path = ranger
-	url = git@github.com:fradav/ranger.git
+	url = https://github.com/fradav/ranger.git
 [submodule "HighFive"]
 	path = HighFive
 	url = https://github.com/BlueBrain/HighFive.git

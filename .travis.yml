@@ -1,5 +1,5 @@
-env: 
-  - CMAKE_CMD_OPTION="-DENABLE_TESTING=1 -DLAPACK_ROOT=/opt/intel/compilers_and_libraries_2019.1.144/linux/mkl -DLAPACK_LIBRARIES=libmkl_intel_ilp64.a;libmkl_intel_thread.a;libmkl_core.a"
+language: cpp
+compiler: gcc
 
 matrix:
   include:
@@ -11,9 +11,14 @@ matrix:
         apt:
           sources: 
             - sourceline: 'ppa:mhier/libboost-latest'
+            - sourceline: 'deb https://apt.repos.intel.com/mkl all main'
             - ubuntu-toolchain-r-test
           packages:
             - g++-8
+            - cmake
+            - libboost1.68-dev
+            - libhdf5-dev
+            - intel-mkl-64bit-2019.1-053
       env:
         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
 
@@ -22,39 +27,19 @@ matrix:
     #   env:
     #     - MATRIX_EVAL="brew install clang && CC=clang && CXX=clang++"
 
-addons:
-  apt:
-    packages:
-      - cmake
-      - libboost-dev
-      - libboost-test-dev
-      - libboost-regex
-
-
 script:
   - mkdir build
   - cd build
-  - cmake .. $CMAKE_CMD_OPTION
+  - eval "${MATRIX_EVAL}"
+  - cmake -DENABLE_TESTING=1
+          -DLAPACK_ROOT=/opt/intel/compilers_and_libraries_2019.1.144/linux/mkl
+          -DLAPACK_LIBRARIES="libmkl_intel_ilp64.a libmkl_intel_thread.a libmkl_core.a"
   - make -j 2
   - make test
 
 before_install:
   - wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
   - sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
-  - sudo sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list'
-  - sudo apt update
-  - sudo apt install intel-mkl-64bit-2019.1-053
-  - eval "${MATRIX_EVAL}"
-
-# Hook code coverage report with codecov.io
-# after_success:
-    # Creating report
-  # - cd ${TRAVIS_BUILD_DIR}
-  # - lcov --directory . --capture --output-file coverage.info # capture coverage info
-  # - lcov --remove coverage.info '/usr/*' --output-file coverage.info # filter out system
-  # - lcov --list coverage.info #debug info
-  # # Uploading report to CodeCov
-  # - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
 
 # Disable notifications
 notifications:

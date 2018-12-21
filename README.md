@@ -1,11 +1,9 @@
-# Fake bootstrapping example
+# ABC random forests for model choice and parameters estimation
 
-This repository shows how to bootstrap FAKE via paket clitool.
-You get a running fake via:
+Methodologies based on :
+- [@pudlo2015reliable]
+- [@raynal2016abc]
 
-- `dotnet build` (which will run `.paket/paket.exe restore`)
-- Or alternatively `dotnet restore` followed by `dotnet fake build`
-
-The version of dotnet-fake is managed via `paket.dependencies` and `paket.lock`.
-
-To upgrade to latest packages, just use `.paket/paket.exe update` and run fake again.
+Libraries we use :
+- [Ranger : A Fast Implementation of Random Forests](https://github.com/imbs-hl/ranger) [@wright2015ranger], there tuned to make "online" calculations (not storing the whole forests in memory)
+- [Eigen : C++ template library for linear algebra: matrices, vectors, numerical solvers, and related algorithms.](http://eigen.tuxfamily.org)

@@ -35,7 +35,7 @@ script:
   - cmake -DLAPACK_ROOT=/opt/intel/compilers_and_libraries_2019.1.144/linux/mkl/lib/intel64
           -DCMAKE_BUILD_TYPE=Release
           ..
-  - make -j 2
+  - make -j 2 VERBOSE=1
   - make test
 
 # Disable notifications

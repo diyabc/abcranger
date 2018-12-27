@@ -32,9 +32,8 @@ script:
   - mkdir build
   - cd build
   - eval "${MATRIX_EVAL}"
-  - cmake -DENABLE_TESTING=1
-          -DLAPACK_ROOT=/opt/intel/compilers_and_libraries_2019.1.144/linux/mkl
-          -DLAPACK_LIBRARIES="libmkl_intel_ilp64.a libmkl_intel_thread.a libmkl_core.a"
+  - cmake -DLAPACK_ROOT=/opt/intel/compilers_and_libraries_2019.1.144/linux/mkl/lib/intel64
+          -DCMAKE_BUILD_TYPE=Release
           ..
   - make -j 2
   - make test

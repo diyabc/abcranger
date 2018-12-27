@@ -21,7 +21,7 @@ matrix:
             - libhdf5-dev
             - intel-mkl-64bit-2019.1-053
       env:
-        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8 CXXFLAGS=-DBOOST_TEST_DYN_LINK"
 
     # - os: osx
     #   osx_image: xcode8

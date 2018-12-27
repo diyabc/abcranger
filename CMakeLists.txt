@@ -77,7 +77,7 @@ include_directories(${CMAKE_SOURCE_DIR}/eigen)
 add_subdirectory(src)
 include_directories(src)
 
-link_libraries(abcrangerlib ${LAPACK_LIBRARIES} Threads::Threads  Boost::regex Boost::dynamic_linking Boost::diagnostic_definitions)
+link_libraries(abcrangerlib ${LAPACK_LIBRARIES} Threads::Threads  Boost::regex)
 
 add_compile_definitions(PRIVATE EIGEN_USE_MKL_ALL)
 

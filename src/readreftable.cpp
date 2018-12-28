@@ -1,5 +1,9 @@
+#if defined(_MSC_VER)
+#include <boost/regex.hpp>
+using namespace boost;
+#else
 #include <regex>
-// #include <boost/regex.hpp>
+#endif
 #include <string>
 #include <map>
 #include <algorithm>

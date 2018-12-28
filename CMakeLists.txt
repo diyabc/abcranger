@@ -62,8 +62,6 @@ link_directories(${LAPACK_ROOT})
 find_package(LAPACK)
 include_directories(${LAPACK_ROOT}/../../include)
 
-### Boost
-find_package(Boost REQUIRED COMPONENTS filesystem regex)
 
 ### Eigen
 include_directories(${CMAKE_SOURCE_DIR}/eigen)
@@ -73,15 +71,19 @@ include_directories(${CMAKE_SOURCE_DIR}/eigen)
 #     set(WINDOWS_EXPORT_ALL_SYMBOLS True)
 # endif()
 
+if (MSVC)
+  ### Boost::regex for msvc, bug in msvc's std::regex...
+  find_package(Boost REQUIRED COMPONENTS regex)
+  include_directories(Boost::boost)
+  link_libraries(Boost::regex Boost::dynamic_linking)
+endif()
 
 add_subdirectory(src)
 include_directories(src)
 
-if (MSVC)
-  link_libraries(Boost::dynamic_linking)
-endif()
+link_libraries(abcrangerlib ${LAPACK_LIBRARIES} Threads::Threads)
 
-link_libraries(abcrangerlib ${LAPACK_LIBRARIES} Threads::Threads  Boost::regex)
+
 
 add_compile_definitions(PRIVATE EIGEN_USE_MKL_ALL)
 

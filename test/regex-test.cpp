@@ -1,12 +1,15 @@
-// #include <regex>
+#if defined(_MSC_VER)
 #include <boost/regex.hpp>
+using namespace boost;
+#else
+#include <regex>
+#endif
 #include <string>
 
 #define BOOST_TEST_MODULE RegexTest
 #include <boost/test/unit_test.hpp>
 
 using namespace std;
-using namespace boost;
 
 string filestr = R"#(
 foo

@@ -25,7 +25,7 @@ std::unique_ptr<T_DEST> unique_cast(std::unique_ptr<T_SRC> &&src)
     return ret;
 }
 
-BOOST_AUTO_TEST_CASE(InitForestClass, *boost::unit_test::tolerance(1e-5))
+BOOST_AUTO_TEST_CASE(InitForestClass, *boost::unit_test::tolerance(1e-4))
 {
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", 0);
     auto nstat = myread.stats_names.size();
@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(InitForestClass, *boost::unit_test::tolerance(1e-5))
     auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, myread.stats_names, myread.nrec, myread.stats_names.size()));
     // ForestOnlineClassification forestclass;
     ForestClassification forestclass;
-    auto ntree = 200;
+    auto ntree = 500;
     auto nthreads = 8;
 
     // void ranger::Forest::init(std::string dependent_variable_name,

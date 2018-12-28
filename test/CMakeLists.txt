@@ -16,6 +16,8 @@ if (WIN32)
     set(TestENV "PATH=${Boost_LIBRARY_DIRS}\\;${HDF5_ROOT}/bin\\;${LAPACK_BIN}\\;$ENV{PATH}")
 endif()
 
+add_definitions(-DBOOST_TEST_DYN_LINK)
+
 set(DATADIR ${CMAKE_SOURCE_DIR}/test/data)
 
 file(GLOB cxx_files *.cpp)

@@ -4,12 +4,13 @@
 #include "readreftable.hpp"
 #include "statobsTest.hpp"
 #include "readstatobs.hpp"
+#include "threadpool.hpp"
+
 #include <highfive/H5DataSet.hpp>
 #include <highfive/H5DataSpace.hpp>
 #include <highfive/H5File.hpp>
 
 #include "H5Cpp.h"    
-#include <execution>
 #include <random>
 #include <iostream>
 #include <string>
@@ -93,7 +94,8 @@ void test_random_lines(HighFive::File& file, const string& dataname, MatrixXd p)
     std::mt19937 g(rd());
     std::shuffle(std::begin(indices),std::end(indices),g);
     
-    std::for_each_n(std::execution::par, indices.begin(), nloop, [&] (size_t i){
+    ThreadPool::ParallelFor((size_t) 0u, nloop, [&] (size_t j){
+        auto i = indices[j];
         // BOOST_TEST( compare_lists(&p[i*ncol],&p[(i+1)*ncol],data[i].begin(),data[i].end() ));
         // BOOST_TEST( compare_lists(std::next(std::begin(p),i*ncol),
         //                           std::next(std::begin(p),(i+1)*ncol),

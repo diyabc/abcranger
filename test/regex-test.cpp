@@ -40,7 +40,7 @@ ra4 A UN[0.1,0.9,0.0,0.0]
 )#";
 
 BOOST_AUTO_TEST_CASE( SimpleRegex ) {
-    string reparamlistrestr = R"#(^foo\n((?:\w+\W[^\n]*\n)*\n\n))#";
+    string reparamlistrestr = R"#(\nfoo\n((?:\w+\W[^\n]*\n)*\n\n))#";
     const regex reparamlist(reparamlistrestr);
     sregex_token_iterator endregexp;
 

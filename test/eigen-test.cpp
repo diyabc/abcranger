@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(EigenSimple, *boost::unit_test::tolerance(1e-10))
     cout << "Here is the matrix m:" << endl
          << m << endl;
 
-    JacobiSVD<MatrixXd> svd(m, ComputeThinU);
+    JacobiSVD<MatrixXd> svd(m, ComputeFullU);
     auto D = svd.singularValues().array().sqrt().matrix().asDiagonal();
     auto U = svd.matrixU();
     // SelfAdjointEigenSolver<MatrixXd> svd(m);

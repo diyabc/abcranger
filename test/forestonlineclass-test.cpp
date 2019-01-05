@@ -94,9 +94,6 @@ BOOST_AUTO_TEST_CASE(InitForestOnlineClass, *boost::unit_test::tolerance(2e-2))
     forestclass.run(true, true);
     auto preds = forestclass.getPredictions();
     auto oob_prior_error = forestclass.getOverallPredictionError();
-    forestclass.writeConfusionFile();
-    forestclass.writeImportanceFile();
-    std::cout << "predicted model : " << preds[1][0][0];
     BOOST_TEST(oob_prior_error == 0.232417);
     BOOST_TEST(preds[1][0][0] == 3.0);
 }

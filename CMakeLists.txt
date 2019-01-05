@@ -59,33 +59,34 @@ find_package(Threads REQUIRED)
 
 ### LAPACK
 link_directories(${LAPACK_ROOT})
+set(BLA_STATIC TRUE)
 find_package(LAPACK)
+include_directories(${LAPACK_ROOT}/../include)
 include_directories(${LAPACK_ROOT}/../../include)
 
 
 ### Eigen
 include_directories(${CMAKE_SOURCE_DIR}/eigen)
+add_compile_definitions(PRIVATE EIGEN_USE_MKL_ALL)
 
 
 # if (WIN32)
 #     set(WINDOWS_EXPORT_ALL_SYMBOLS True)
 # endif()
 
+### Boost
+set(Boost_USE_STATIC_LIBS TRUE)
 if (MSVC)
   ### Boost::regex for msvc, bug in msvc's std::regex...
   find_package(Boost REQUIRED COMPONENTS regex)
   include_directories(Boost::boost)
-  link_libraries(Boost::regex Boost::dynamic_linking)
+  link_libraries(Boost::regex)
 endif()
 
 add_subdirectory(src)
 include_directories(src)
 
 link_libraries(abcrangerlib ${LAPACK_LIBRARIES} Threads::Threads)
-
-
-
-add_compile_definitions(PRIVATE EIGEN_USE_MKL_ALL)
 
 add_executable(ModelChoice model_choice.cpp)
 add_executable(EstimParam estim_param.cpp)

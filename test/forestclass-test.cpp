@@ -69,14 +69,14 @@ BOOST_AUTO_TEST_CASE(InitForestClass, *boost::unit_test::tolerance(2e-2))
                      ntree,                     // number of trees
                      123456,                    // seed rd()
                      nthreads,                  // number of threads
-                     DEFAULT_IMPORTANCE_MODE,  // Default IMP_NONE
+                     ImportanceMode::IMP_GINI,  // Default IMP_NONE
                      0,                         // default min node size (classif = 1, regression 5)
                      "",                        // status variable name, only for survival
                      false,                     // prediction mode (true = predict)
                      true,                      // replace
                      std::vector<string>(0),        // unordered variables names
                      false,                     // memory_saving_splitting
-                     DEFAULT_SPLITRULE,         // gini for classif variance for  regression
+                     SplitRule::LOGRANK,         // gini for classif variance for  regression
                      false,                     // predict_all
                      DEFAULT_SAMPLE_FRACTION,   // sample_fraction 1 if replace else 0.632
                      DEFAULT_ALPHA,             // alpha
@@ -88,8 +88,8 @@ BOOST_AUTO_TEST_CASE(InitForestClass, *boost::unit_test::tolerance(2e-2))
                      DEFAULT_MAXDEPTH);         // max_depth
     // forestclass.setverboseOutput(&cout);
     forestclass.run(true, true);
-    auto preds = forestclass.getPredictions();
+//    auto preds = forestclass.getPredictions();
     auto oob_prior_error = forestclass.getOverallPredictionError();
-
+    std::cout << "OOB error : " << oob_prior_error << endl;
     BOOST_TEST(oob_prior_error == 0.232417);
 }

@@ -5,18 +5,54 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "(gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/test/data",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "(Windows) debug",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD",
+            "cwd": "${workspaceFolder}/test/data",
             "environment": [
                 {
                     "name": "PATH",
                     "value": "C:/tools/boost_1_69_0/lib64-msvc-14.1;C:/Program Files/HDF_Group/HDF5/1.10.2/bin;c:/Program Files (x86)/IntelSWTools/compilers_and_libraries_2018.3.210/windows/redist/intel64_win/tbb/vc_mt;c:/Program Files (x86)/IntelSWTools/compilers_and_libraries_2018.3.210/windows/redist/intel64_win/mkl;c:/Program Files (x86)/IntelSWTools/compilers_and_libraries_2018.3.210/windows/redist/intel64_win/compiler;${env:PATH}"
                 },
+                {
+                    "name": "MKL_VERBOSE",
+                    "value" : "1"
+                }
+            ],
+            "externalConsole": false
+        },
+        {
+            "name": "(Windows) debug static",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/test/data",
+            "environment": [
                 {
                     "name": "MKL_VERBOSE",
                     "value" : "1"
@@ -39,7 +75,7 @@
              "--impmeasure","1",
              "--seed","123456"],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/../../R/dossier_test1_poolseq_TRIS_model_choice_estim_param_pour_FD",
+            "cwd": "${workspaceFolder}/test/data",
             
             // "cwd": "${workspaceFolder}/../../C++/diyabc/ranger-testbed",
             "environment": [

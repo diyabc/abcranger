@@ -20,6 +20,7 @@ matrix:
             - libboost1.68-dev
             - libhdf5-dev
             - intel-mkl-64bit-2019.1-053
+            - libgomp1
       env:
         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
 
@@ -33,7 +34,7 @@ script:
   - cd build
   - eval "${MATRIX_EVAL}"
   - cmake -DLAPACK_ROOT=/opt/intel/compilers_and_libraries_2019.1.144/linux/mkl/lib/intel64
-          -DLAPACK_LIBRARIES="mkl_intel_lp64;mkl_intel_thread;mkl_core;iomp5"
+          -DLAPACK_LIBRARIES="mkl_intel_lp64;mkl_intel_thread;mkl_core;gomp"
           -DCMAKE_BUILD_TYPE=Release
           ..
   - make -j 2 VERBOSE=1

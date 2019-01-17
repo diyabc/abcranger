@@ -34,7 +34,7 @@ script:
   - cd build
   - eval "${MATRIX_EVAL}"
   - cmake -DLAPACK_ROOT=/opt/intel/compilers_and_libraries_2019.1.144/linux/mkl/lib/intel64
-          -DLAPACK_LIBRARIES="mkl_intel_lp64;mkl_intel_thread;mkl_core;gomp"
+          -DLAPACK_LIBRARIES="mkl_intel_lp64;mkl_gnu_thread;mkl_core;gomp"
           -DCMAKE_BUILD_TYPE=Release
           ..
   - make -j 2 VERBOSE=1

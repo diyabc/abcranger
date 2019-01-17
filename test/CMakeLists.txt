@@ -8,6 +8,7 @@ include_directories(../src)
 
 if(!Boost_USE_STATIC_LIBS)
     add_definitions(-DBOOST_TEST_DYN_LINK)
+endif()
 
 ### HDF5
 set(HDF5_USE_STATIC_LIBRARIES 1)

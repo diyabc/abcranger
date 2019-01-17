@@ -28,7 +28,8 @@ foreach(filename ${cxx_files})
     add_test(NAME ${target} COMMAND ${target} WORKING_DIRECTORY ${DATADIR})
 endforeach(filename)
 
-target_link_libraries(readreftable-test hdf5::hdf5_cpp-static)
+target_link_libraries(readreftable-test ${HDF5_CXX_LIBRARIES})
+# target_link_libraries(readreftable-test hdf5::hdf5_cpp-static)
 target_compile_definitions(readreftable-test PRIVATE ${HDF5_DEFINITIONS})
 
 target_sources(forestclass-test PUBLIC ${RANGER_SOURCE_DIR}/ForestClassification.cpp)

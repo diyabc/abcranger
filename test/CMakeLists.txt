@@ -6,6 +6,9 @@ project(abcrangertest VERSION 0.2.0 LANGUAGES CXX)
 find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 include_directories(../src)
 
+if(!Boost_USE_STATIC_LIBS)
+    add_definitions(-DBOOST_TEST_DYN_LINK)
+
 ### HDF5
 set(HDF5_USE_STATIC_LIBRARIES 1)
 if(HDF5_DIR_ROOT)

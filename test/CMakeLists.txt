@@ -6,7 +6,7 @@ project(abcrangertest VERSION 0.2.0 LANGUAGES CXX)
 find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 include_directories(../src)
 
-if(!Boost_USE_STATIC_LIBS)
+if(UNIX)
     add_definitions(-DBOOST_TEST_DYN_LINK)
 endif()
 

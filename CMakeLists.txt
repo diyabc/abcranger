@@ -75,9 +75,9 @@ add_compile_definitions(PRIVATE EIGEN_USE_MKL_ALL)
 # endif()
 
 ### Boost
-set(Boost_USE_STATIC_LIBS TRUE)
 if (MSVC)
   ### Boost::regex for msvc, bug in msvc's std::regex...
+  set(Boost_USE_STATIC_LIBS TRUE)
   find_package(Boost REQUIRED COMPONENTS regex)
   include_directories(Boost::boost)
   link_libraries(Boost::regex)

@@ -26,7 +26,7 @@ std::unique_ptr<T_DEST> unique_cast(std::unique_ptr<T_SRC> &&src)
     return ret;
 }
 
-BOOST_AUTO_TEST_CASE(InitForestReg, *boost::unit_test::tolerance(2e-2))
+BOOST_AUTO_TEST_CASE(InitForestReg, *boost::unit_test::tolerance(1e-3))
 {
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", 0);
     auto nstat = myread.stats_names.size();
@@ -65,6 +65,6 @@ BOOST_AUTO_TEST_CASE(InitForestReg, *boost::unit_test::tolerance(2e-2))
                      DEFAULT_MAXDEPTH);         // max_depth
     forestreg.run(true,true);
     auto oob_prior_error = forestreg.getOverallPredictionError();
+    BOOST_TEST(oob_prior_error == 0.148368);
 
-    BOOST_TEST(oob_prior_error == 0.143003);
 }

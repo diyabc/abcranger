@@ -7,57 +7,66 @@
 #include "TreeRegression.h"
 #include "Data.h"
 
-namespace ranger {
+namespace ranger
+{
 
-void ForestOnlineRegression::initInternal(std::string status_variable_name) {
+void ForestOnlineRegression::initInternal(std::string status_variable_name)
+{
 
   // If mtry not set, use floored square root of number of independent variables
-  if (mtry == 0) {
-    unsigned long temp = sqrt((double) (num_variables - 1));
-    mtry = std::max((unsigned long) 1, temp);
+  if (mtry == 0)
+  {
+    unsigned long temp = sqrt((double)(num_variables - 1));
+    mtry = std::max((unsigned long)1, temp);
   }
 
   // Set minimal node size
-  if (min_node_size == 0) {
+  if (min_node_size == 0)
+  {
     min_node_size = DEFAULT_MIN_NODE_SIZE_REGRESSION;
   }
 
   // Sort data if memory saving mode
-  if (!memory_saving_splitting) {
+  if (!memory_saving_splitting)
+  {
     data->sort();
   }
 }
 
-void ForestOnlineRegression::growInternal() {
+void ForestOnlineRegression::growInternal()
+{
   trees.reserve(num_trees);
-  for (size_t i = 0; i < num_trees; ++i) {
+  for (size_t i = 0; i < num_trees; ++i)
+  {
     trees.push_back(make_unique<TreeRegression>());
   }
 
   // predictions = std::vector<std::vector<std::vector<double>>>(1,
   //     std::vector<std::vector<double>>(1, std::vector<double>(num_samples, 0)));
   samples_oob_count.resize(num_samples, 0);
-
 }
 
 void ForestOnlineRegression::allocatePredictMemory()
 {
   size_t num_prediction_samples = predict_data->getNumRows();
   predictions = std::vector<std::vector<std::vector<double>>>(2);
+  /// predictions oob
   predictions[0] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
-  prediction_sum = std::vector<double>(predict_data->getNumRows());
 
   if (predict_all || prediction_type == TERMINALNODES)
   {
+    /// predictions on data
     predictions[1] = std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees));
   }
   else
   {
+    /// predictions on data
     predictions[1] = std::vector<std::vector<double>>(1, std::vector<double>(num_prediction_samples));
   }
 }
 
-void ForestOnlineRegression::predictInternal(size_t tree_idx) {
+void ForestOnlineRegression::predictInternal(size_t tree_idx)
+{
   // if (predict_all || prediction_type == TERMINALNODES) {
   //   // Get all tree predictions
   //   for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
@@ -75,40 +84,43 @@ void ForestOnlineRegression::predictInternal(size_t tree_idx) {
   //   }
   //   predictions[0][0][sample_idx] = prediction_sum / num_trees;
   // }
-      for (size_t sample_idx = 0; sample_idx < predict_data->getNumRows(); ++sample_idx)
+  for (size_t sample_idx = 0; sample_idx < predict_data->getNumRows(); ++sample_idx)
   {
-        if (predict_all || prediction_type == TERMINALNODES) {
+    if (predict_all || prediction_type == TERMINALNODES)
+    {
       if (prediction_type == TERMINALNODES)
       {
-        predictions[1][sample_idx][tree_idx] = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
+        predictions[1][sample_idx][tree_idx] = static_cast<double>(getTreePredictionTerminalNodeID(tree_idx, sample_idx));
       }
       else
       {
         predictions[1][sample_idx][tree_idx] = getTreePrediction(tree_idx, sample_idx);
       }
-    } else {
-      prediction_sum[sample_idx] += getTreePrediction(tree_idx, sample_idx);
     }
-
-  }
-
-}
-
-void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx, bool oob) {
-  // For each tree loop over OOB samples and count classes
-    for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx)
+    else
     {
-      size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
-      double value = getTreePrediction(tree_idx, sample_idx);
-
-      predictions[0][0][sampleID] += value;
-      ++samples_oob_count[sampleID];
+      predictions[1][0][sample_idx] += getTreePrediction(tree_idx, sample_idx);
     }
+  }
 }
 
-void ForestOnlineRegression::computePredictionErrorInternal() {
+void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx, bool oob)
+{
+  // For each tree loop over OOB samples and count classes
+  for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx)
+  {
+    size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
+    double value = getTreePrediction(tree_idx, sample_idx);
 
-// For each sample sum over trees where sample is OOB
+    predictions[0][0][sampleID] += value;
+    ++samples_oob_count[sampleID];
+  }
+}
+
+void ForestOnlineRegression::computePredictionErrorInternal()
+{
+
+  // For each sample sum over trees where sample is OOB
   // for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx) {
   //   for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx) {
   //     size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
@@ -119,47 +131,57 @@ void ForestOnlineRegression::computePredictionErrorInternal() {
   //   }
   // }
 
-// MSE with predictions and true data
+  // MSE with predictions and true data
   size_t num_predictions = 0;
   overall_prediction_error = 0;
-  for (size_t i = 0; i < predictions[0][0].size(); ++i) {
-    if (samples_oob_count[i] > 0) {
+  for (size_t i = 0; i < predictions[0][0].size(); ++i)
+  {
+    if (samples_oob_count[i] > 0)
+    {
       ++num_predictions;
-      predictions[0][0][i] /= (double) samples_oob_count[i];
+      predictions[0][0][i] /= (double)samples_oob_count[i];
       double predicted_value = predictions[0][0][i];
       double real_value = data->get(i, dependent_varID);
       overall_prediction_error += (predicted_value - real_value) * (predicted_value - real_value);
-    } else {
+    }
+    else
+    {
       predictions[0][0][i] = NAN;
     }
   }
 
-  overall_prediction_error /= (double) num_predictions;
+  overall_prediction_error /= (double)num_predictions;
 
   if (!(predict_all || prediction_type == TERMINALNODES))
-  for(auto sample_idx = 0; sample_idx < predict_data->getNumRows(); ++sample_idx) {
-    predictions[1][0][sample_idx] = prediction_sum[sample_idx]/num_trees;
-  }
+    for (auto sample_idx = 0; sample_idx < predict_data->getNumRows(); ++sample_idx)
+    {
+      predictions[1][0][sample_idx] /= static_cast<double>(num_trees);
+    }
 }
 
 // #nocov start
-void ForestOnlineRegression::writeOutputInternal() {
-  if (verbose_out) {
-    *verbose_out << "Tree type:                         " << "Regression" << std::endl;
+void ForestOnlineRegression::writeOutputInternal()
+{
+  if (verbose_out)
+  {
+    *verbose_out << "Tree type:                         "
+                 << "Regression" << std::endl;
   }
 }
 
-void ForestOnlineRegression::writeConfusionFile() {
+void ForestOnlineRegression::writeConfusionFile()
+{
 
-// Open confusion file for writing
+  // Open confusion file for writing
   std::string filename = output_prefix + ".confusion";
   std::ofstream outfile;
   outfile.open(filename, std::ios::out);
-  if (!outfile.good()) {
+  if (!outfile.good())
+  {
     throw std::runtime_error("Could not write to confusion file: " + filename + ".");
   }
 
-// Write confusion to file
+  // Write confusion to file
   outfile << "Overall OOB prediction error (MSE): " << overall_prediction_error << std::endl;
 
   outfile.close();
@@ -167,32 +189,43 @@ void ForestOnlineRegression::writeConfusionFile() {
     *verbose_out << "Saved prediction error to file " << filename << "." << std::endl;
 }
 
-void ForestOnlineRegression::writePredictionFile() {
+void ForestOnlineRegression::writePredictionFile()
+{
 
-// Open prediction file for writing
+  // Open prediction file for writing
   std::string filename = output_prefix + ".prediction";
   std::ofstream outfile;
   outfile.open(filename, std::ios::out);
-  if (!outfile.good()) {
+  if (!outfile.good())
+  {
     throw std::runtime_error("Could not write to prediction file: " + filename + ".");
   }
 
   // Write
   outfile << "Predictions: " << std::endl;
-  if (predict_all) {
-    for (size_t k = 0; k < num_trees; ++k) {
+  if (predict_all)
+  {
+    for (size_t k = 0; k < num_trees; ++k)
+    {
       outfile << "Tree " << k << ":" << std::endl;
-      for (size_t i = 0; i < predictions.size(); ++i) {
-        for (size_t j = 0; j < predictions[i].size(); ++j) {
+      for (size_t i = 0; i < predictions.size(); ++i)
+      {
+        for (size_t j = 0; j < predictions[i].size(); ++j)
+        {
           outfile << predictions[i][j][k] << std::endl;
         }
       }
       outfile << std::endl;
     }
-  } else {
-    for (size_t i = 0; i < predictions.size(); ++i) {
-      for (size_t j = 0; j < predictions[i].size(); ++j) {
-        for (size_t k = 0; k < predictions[i][j].size(); ++k) {
+  }
+  else
+  {
+    for (size_t i = 0; i < predictions.size(); ++i)
+    {
+      for (size_t j = 0; j < predictions[i].size(); ++j)
+      {
+        for (size_t k = 0; k < predictions[i][j].size(); ++k)
+        {
           outfile << predictions[i][j][k] << std::endl;
         }
       }
@@ -203,30 +236,34 @@ void ForestOnlineRegression::writePredictionFile() {
     *verbose_out << "Saved predictions to file " << filename << "." << std::endl;
 }
 
-void ForestOnlineRegression::saveToFileInternal(std::ofstream& outfile) {
+void ForestOnlineRegression::saveToFileInternal(std::ofstream &outfile)
+{
 
-// Write num_variables
-  outfile.write((char*) &num_variables, sizeof(num_variables));
+  // Write num_variables
+  outfile.write((char *)&num_variables, sizeof(num_variables));
 
-// Write treetype
+  // Write treetype
   TreeType treetype = TREE_REGRESSION;
-  outfile.write((char*) &treetype, sizeof(treetype));
+  outfile.write((char *)&treetype, sizeof(treetype));
 }
 
-void ForestOnlineRegression::loadFromFileInternal(std::ifstream& infile) {
+void ForestOnlineRegression::loadFromFileInternal(std::ifstream &infile)
+{
 
-// Read number of variables
+  // Read number of variables
   size_t num_variables_saved;
-  infile.read((char*) &num_variables_saved, sizeof(num_variables_saved));
+  infile.read((char *)&num_variables_saved, sizeof(num_variables_saved));
 
-// Read treetype
+  // Read treetype
   TreeType treetype;
-  infile.read((char*) &treetype, sizeof(treetype));
-  if (treetype != TREE_REGRESSION) {
+  infile.read((char *)&treetype, sizeof(treetype));
+  if (treetype != TREE_REGRESSION)
+  {
     throw std::runtime_error("Wrong treetype. Loaded file is not a regression forest.");
   }
 
-  for (size_t i = 0; i < num_trees; ++i) {
+  for (size_t i = 0; i < num_trees; ++i)
+  {
 
     // Read data
     std::vector<std::vector<size_t>> child_nodeIDs;
@@ -237,9 +274,12 @@ void ForestOnlineRegression::loadFromFileInternal(std::ifstream& infile) {
     readVector1D(split_values, infile);
 
     // If dependent variable not in test data, change variable IDs accordingly
-    if (num_variables_saved > num_variables) {
-      for (auto& varID : split_varIDs) {
-        if (varID >= dependent_varID) {
+    if (num_variables_saved > num_variables)
+    {
+      for (auto &varID : split_varIDs)
+      {
+        if (varID >= dependent_varID)
+        {
           --varID;
         }
       }
@@ -250,16 +290,18 @@ void ForestOnlineRegression::loadFromFileInternal(std::ifstream& infile) {
   }
 }
 
-double ForestOnlineRegression::getTreePrediction(size_t tree_idx, size_t sample_idx) const {
-  const auto& tree = dynamic_cast<const TreeRegression&>(*trees[tree_idx]);
+double ForestOnlineRegression::getTreePrediction(size_t tree_idx, size_t sample_idx) const
+{
+  const auto &tree = dynamic_cast<const TreeRegression &>(*trees[tree_idx]);
   return tree.getPrediction(sample_idx);
 }
 
-size_t ForestOnlineRegression::getTreePredictionTerminalNodeID(size_t tree_idx, size_t sample_idx) const {
-  const auto& tree = dynamic_cast<const TreeRegression&>(*trees[tree_idx]);
+size_t ForestOnlineRegression::getTreePredictionTerminalNodeID(size_t tree_idx, size_t sample_idx) const
+{
+  const auto &tree = dynamic_cast<const TreeRegression &>(*trees[tree_idx]);
   return tree.getPredictionTerminalNodeID(sample_idx);
 }
 
 // #nocov end
 
-}// namespace ranger
+} // namespace ranger

@@ -25,7 +25,7 @@ std::unique_ptr<T_DEST> unique_cast(std::unique_ptr<T_SRC> &&src)
     return ret;
 }
 
-BOOST_AUTO_TEST_CASE(InitForestOnlineClass, *boost::unit_test::tolerance(2e-2))
+BOOST_AUTO_TEST_CASE(InitForestOnlineClass, *boost::unit_test::tolerance(1e-3))
 {
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", 0);
     auto nstat = myread.stats_names.size();
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(InitForestOnlineClass, *boost::unit_test::tolerance(2e-2))
                      ntree,                     // number of trees
                      123456,                    // seed rd()
                      nthreads,                  // number of threads
-                     ranger::IMP_GINI,  // Default IMP_NONE
+                     DEFAULT_IMPORTANCE_MODE,  // Default IMP_NONE
                      0,                         // default min node size (classif = 1, regression 5)
                      "",                        // status variable name, only for survival
                      false,                     // prediction mode (true = predict)
@@ -94,6 +94,6 @@ BOOST_AUTO_TEST_CASE(InitForestOnlineClass, *boost::unit_test::tolerance(2e-2))
     forestclass.run(true, true);
     auto preds = forestclass.getPredictions();
     auto oob_prior_error = forestclass.getOverallPredictionError();
-    BOOST_TEST(oob_prior_error == 0.232417);
+    BOOST_TEST(oob_prior_error == 0.231833);
     BOOST_TEST(preds[1][0][0] == 3.0);
 }

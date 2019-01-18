@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE ForestClassCpp
+#define BOOST_TEST_MODULE ForestOnlineRegCpp
 #include <boost/test/unit_test.hpp>
 
 #include "ForestOnlineRegression.hpp"
@@ -26,7 +26,7 @@ std::unique_ptr<T_DEST> unique_cast(std::unique_ptr<T_SRC> &&src)
     return ret;
 }
 
-BOOST_AUTO_TEST_CASE(InitForestOnlineReg, *boost::unit_test::tolerance(2e-2))
+BOOST_AUTO_TEST_CASE(InitForestOnlineReg, *boost::unit_test::tolerance(1e-3))
 {
     size_t nref = 0;
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", nref);
@@ -35,7 +35,9 @@ BOOST_AUTO_TEST_CASE(InitForestOnlineReg, *boost::unit_test::tolerance(2e-2))
     statobs = Map<MatrixXd>(readStatObs("statobsRF.txt").data(),1,nstat);
     auto colnames = myread.stats_names;
     auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(statobs, colnames, myread.nrec, nstat + 1));
-    addCols(myread.stats, Map<VectorXd>(error.data(),std::max(error.size(),nref)));
+    if (nref != 0 && nref <= error.size()) 
+        error.erase(error.begin() + nref,error.end());
+    addCols(myread.stats, Map<VectorXd>(error.data(),nref));
     colnames.push_back("Y");
     auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, myread.nrec, nstat + 1));
     ForestOnlineRegression forestreg;
@@ -71,6 +73,10 @@ BOOST_AUTO_TEST_CASE(InitForestOnlineReg, *boost::unit_test::tolerance(2e-2))
     forestreg.run(true,true);
     auto preds = forestreg.getPredictions();
     auto oob_prior_error = forestreg.getOverallPredictionError();
-    BOOST_TEST(oob_prior_error == 0.143003);
-    BOOST_TEST(preds[1][0][0] == 0.159167);
+    BOOST_TEST(oob_prior_error == 0.148368);
+    BOOST_TEST(preds[1][0][0] == 0.242067);
+    // double predicted = 0.0;
+    // for(auto i = 0; i < ntree; i++) predicted += preds[1][0][i];
+    // predicted /= static_cast<double>(ntree);
+    // BOOST_TEST(predicted == 0.159167);
 }

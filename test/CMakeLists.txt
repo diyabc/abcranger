@@ -11,8 +11,10 @@ if(UNIX)
 endif()
 
 if(NOT RFTEST_TOLERANCE)
-    add_definitions(-DRFTEST_TOLERANCE=1e-3)
+    set(RFTEST_TOLERANCE 1e-3)
 endif()
+
+add_definitions(-DRFTEST_TOLERANCE=${RFTEST_TOLERANCE})
 
 ### HDF5
 set(HDF5_USE_STATIC_LIBRARIES 1)

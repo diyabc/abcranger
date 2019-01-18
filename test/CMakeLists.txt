@@ -10,6 +10,10 @@ if(UNIX)
     add_definitions(-DBOOST_TEST_DYN_LINK)
 endif()
 
+if(NOT RFTEST_TOLERANCE)
+    add_definitions(-DRFTEST_TOLERANCE=1e-3)
+endif()
+
 ### HDF5
 set(HDF5_USE_STATIC_LIBRARIES 1)
 if(HDF5_DIR_ROOT)

@@ -26,7 +26,7 @@ std::unique_ptr<T_DEST> unique_cast(std::unique_ptr<T_SRC> &&src)
     return ret;
 }
 
-BOOST_AUTO_TEST_CASE(InitForestReg, *boost::unit_test::tolerance(1e-3))
+BOOST_AUTO_TEST_CASE(InitForestReg, *boost::unit_test::tolerance(1e-2))
 {
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", 0);
     auto nstat = myread.stats_names.size();

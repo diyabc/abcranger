@@ -1,5 +1,7 @@
 # ABC random forests for model choice and parameters estimation
 
+[![Build Status](https://travis-ci.com/fradav/abcranger.svg?branch=master)](https://travis-ci.com/fradav/abcranger)
+
 Methodologies based on :
 
 - [@pudlo2015reliable]

@@ -6,8 +6,6 @@
 #include "readstatobs.hpp"
 #include "threadpool.hpp"
 
-#include <highfive/H5DataSet.hpp>
-#include <highfive/H5DataSpace.hpp>
 #include <highfive/H5File.hpp>
 
 #include "H5Cpp.h"    

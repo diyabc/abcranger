@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <string>
+#include <cmath>
 
 #include "utility.h"
 #include "ForestOnlineRegression.hpp"
@@ -16,8 +17,8 @@ void ForestOnlineRegression::initInternal(std::string status_variable_name)
   // If mtry not set, use floored square root of number of independent variables
   if (mtry == 0)
   {
-    unsigned long temp = sqrt((double)(num_variables - 1));
-    mtry = std::max((unsigned long)1, temp);
+    long temp = std::round(sqrt((double)(num_variables - 1)));
+    mtry = std::max(1l, temp);
   }
 
   // Set minimal node size

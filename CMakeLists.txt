@@ -33,6 +33,7 @@ include_directories("${CPPRANGER_SOURCE_DIR}"
                     "${RANGER_SOURCE_DIR}")
 
 IF(MSVC)
+  add_compile_options(/permissive-)
   add_subdirectory (wingetopt)
   link_directories (${wingetopt_BINARY_DIR})
 ENDIF()
@@ -69,6 +70,8 @@ include_directories(${LAPACK_ROOT}/../../include)
 include_directories(${CMAKE_SOURCE_DIR}/eigen)
 add_compile_definitions(PRIVATE EIGEN_USE_MKL_ALL)
 
+### Range v3
+include_directories(${CMAKE_SOURCE_DIR}/range-v3/include)
 
 # if (WIN32)
 #     set(WINDOWS_EXPORT_ALL_SYMBOLS True)

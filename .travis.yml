@@ -37,7 +37,7 @@ script:
   - cmake -DLAPACK_ROOT=/opt/intel/compilers_and_libraries/linux/mkl/lib/intel64
           -DLAPACK_LIBRARIES="mkl_intel_lp64;mkl_gnu_thread;mkl_core;gomp"
           -DCMAKE_BUILD_TYPE=Release
-          -DRFTEST_TOLERANCE=1e-2
+          -DRFTEST_TOLERANCE=2e-2
           ..
   - make -j 2 VERBOSE=1
   - make test

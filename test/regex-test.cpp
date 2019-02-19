@@ -1,3 +1,6 @@
+#define BOOST_TEST_MODULE RegexTest
+#include <boost/test/unit_test.hpp>
+
 #if defined(_MSC_VER)
 #include <boost/regex.hpp>
 using namespace boost;
@@ -5,9 +8,6 @@ using namespace boost;
 #include <regex>
 #endif
 #include <string>
-
-#define BOOST_TEST_MODULE RegexTest
-#include <boost/test/unit_test.hpp>
 
 using namespace std;
 

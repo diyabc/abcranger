@@ -1,5 +1,5 @@
-#define BOOST_TEST_MODULE ForestOnlineClassCpp
-#include <boost/test/unit_test.hpp>
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
 #include "ForestClassification.h"
 #include "readstatobs.hpp"
@@ -7,25 +7,13 @@
 #include "matutils.hpp"
 #include "DataDense.h"
 
+#include "unique_cast.hpp"
+
 using namespace ranger;
 
 std::vector<double> DEFAULT_SAMPLE_FRACTION = std::vector<double>({1});
 
-template <class T_SRC, class T_DEST>
-std::unique_ptr<T_DEST> unique_cast(std::unique_ptr<T_SRC> &&src)
-{
-    if (!src)
-        return std::unique_ptr<T_DEST>();
-
-    // Throws a std::bad_cast() if this doesn't work out
-    T_DEST *dest_ptr = &dynamic_cast<T_DEST &>(*src.get());
-
-    src.release();
-    std::unique_ptr<T_DEST> ret(dest_ptr);
-    return ret;
-}
-
-BOOST_AUTO_TEST_CASE(InitForestClass, *boost::unit_test::tolerance(RFTEST_TOLERANCE))
+TEST_CASE( "Standard Ranger classifier" ) 
 {
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", 0);
     auto nstat = myread.stats_names.size();
@@ -91,5 +79,5 @@ BOOST_AUTO_TEST_CASE(InitForestClass, *boost::unit_test::tolerance(RFTEST_TOLERA
 //    auto preds = forestclass.getPredictions();
     auto oob_prior_error = forestclass.getOverallPredictionError();
     std::cout << "OOB error : " << oob_prior_error << endl;
-    BOOST_TEST(oob_prior_error == 0.231833);
+    CHECK(oob_prior_error == Approx(0.231833).margin(RFTEST_TOLERANCE));
 }

@@ -1,5 +1,5 @@
-#define BOOST_TEST_MODULE ForestOnlineClassCpp
-#include <boost/test/unit_test.hpp>
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
 #include "ForestOnlineClassification.hpp"
 #include "readstatobs.hpp"
@@ -11,21 +11,9 @@ using namespace Eigen;
 
 std::vector<double> DEFAULT_SAMPLE_FRACTION = std::vector<double>({1});
 
-template <class T_SRC, class T_DEST>
-std::unique_ptr<T_DEST> unique_cast(std::unique_ptr<T_SRC> &&src)
-{
-    if (!src)
-        return std::unique_ptr<T_DEST>();
+#include "unique_cast.hpp"
 
-    // Throws a std::bad_cast() if this doesn't work out
-    T_DEST *dest_ptr = &dynamic_cast<T_DEST &>(*src.get());
-
-    src.release();
-    std::unique_ptr<T_DEST> ret(dest_ptr);
-    return ret;
-}
-
-BOOST_AUTO_TEST_CASE(InitForestOnlineClass, *boost::unit_test::tolerance(RFTEST_TOLERANCE))
+TEST_CASE("Online Ranger classifier")
 {
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", 0);
     auto nstat = myread.stats_names.size();
@@ -94,6 +82,6 @@ BOOST_AUTO_TEST_CASE(InitForestOnlineClass, *boost::unit_test::tolerance(RFTEST_
     forestclass.run(true, true);
     auto preds = forestclass.getPredictions();
     auto oob_prior_error = forestclass.getOverallPredictionError();
-    BOOST_TEST(oob_prior_error == 0.231833);
-    BOOST_TEST(preds[1][0][0] == 3.0);
+    CHECK(oob_prior_error == Approx(0.231833).margin(RFTEST_TOLERANCE));
+    CHECK(preds[1][0][0] == 3.0);
 }

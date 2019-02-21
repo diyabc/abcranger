@@ -1,5 +1,5 @@
-#define BOOST_TEST_MODULE PLSEigenTest
-#include <boost/test/unit_test.hpp>
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -53,7 +53,7 @@ MatrixXd read_matrix_file(string filename, char sep) {
     return X;
 }
 
-BOOST_AUTO_TEST_CASE(PLSEigenTestSimple, *boost::unit_test::tolerance(1e-7)) {
+TEST_CASE("PLS with eigen") {
     MatrixXd X = read_matrix_file("gasolineX.csv",',');
     VectorXd Y = read_matrix_file("gasolineY.csv",',');
 
@@ -66,5 +66,5 @@ BOOST_AUTO_TEST_CASE(PLSEigenTestSimple, *boost::unit_test::tolerance(1e-7)) {
            0.9826665,
            0.9867306,
            0.9890077;
-    BOOST_TEST((res - exp).lpNorm<Infinity>() == 0.0);
+    CHECK((res - exp).lpNorm<Infinity>() == Approx(0.0).margin(1e-7));
 }

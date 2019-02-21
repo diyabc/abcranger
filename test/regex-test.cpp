@@ -1,12 +1,8 @@
 #define BOOST_TEST_MODULE RegexTest
 #include <boost/test/unit_test.hpp>
 
-#if defined(_MSC_VER)
-#include <boost/regex.hpp>
-using namespace boost;
-#else
+#define _REGEX_MAX_STACK_COUNT 1000
 #include <regex>
-#endif
 #include <string>
 
 using namespace std;
@@ -40,7 +36,7 @@ ra4 A UN[0.1,0.9,0.0,0.0]
 )#";
 
 BOOST_AUTO_TEST_CASE( SimpleRegex ) {
-    string reparamlistrestr = R"#(\nfoo\n((?:\w+\W[^\n]*\n)*\n\n))#";
+    string reparamlistrestr = R"#(\nfoo\n((?:\w+\W[^\n]*\n){22}\n\n))#";
     const regex reparamlist(reparamlistrestr);
     sregex_token_iterator endregexp;
 

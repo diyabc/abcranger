@@ -1,5 +1,5 @@
-#define BOOST_TEST_MODULE ReadReftable
-#include <boost/test/unit_test.hpp>
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
 #include "readreftable.hpp"
 #include "statobsTest.hpp"
@@ -32,13 +32,13 @@ std::vector<std::string> readcolnames(H5::DataSet& dataset, const std::string& a
     return res;
 }
 
-BOOST_AUTO_TEST_CASE(ReadColNames) {
+TEST_CASE("Read Column Names from h5 file") {
     auto myread = readreftable("headerRF.txt","reftableRF.bin");
     auto file = H5::H5File("reftable.h5", H5F_ACC_RDONLY);
     auto dataset_stats = file.openDataSet("/stats");
-    BOOST_TEST(myread.stats_names == readcolnames(dataset_stats,"stats_names"));
+    CHECK_THAT(myread.stats_names, Catch::Equals(readcolnames(dataset_stats,"stats_names")));
     auto dataset_params = file.openDataSet("/params");
-    BOOST_TEST(myread.params_names == readcolnames(dataset_params,"params_names"));
+    CHECK_THAT(myread.params_names, Catch::Equals(readcolnames(dataset_params,"params_names")));
 }
 
 
@@ -48,7 +48,7 @@ void test_against_field(HighFive::File& file, std::string field, T& p)
     T op;
     HighFive::DataSet dataset = file.getDataSet(field);
     dataset.read(op);
-    BOOST_TEST(op == p);
+    CHECK(op == p);
 }
 
 bool equalifnan(double const& t1, double const& t2) {
@@ -99,8 +99,8 @@ void test_random_lines(HighFive::File& file, const string& dataname, MatrixXd p)
         //                           std::next(std::begin(p),(i+1)*ncol),
         //                           data[i].begin(),
         //                           data[i].end() ));
-        BOOST_TEST( compare_lists(std::begin(p.row(i)),
-                                  std::end(p.row(i)),
+        BOOST_TEST( compare_lists(p.row(i).array().begin(),
+                                  p.row(i).array().end(),
                                   data[i].begin(),
                                   data[i].end() ));
     }); 

@@ -1,5 +1,5 @@
-#define BOOST_TEST_MODULE KolmogorovSmirnoffTest
-#include <boost/test/unit_test.hpp>
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
 #include "ks.hpp"
 
@@ -25,10 +25,10 @@ std::vector<double> y = { 1.891418850, -1.205411675, -0.297229152, 0.706283885, 
 0.372459953, 0.925945152, -0.750986581, 0.327844328, -1.236515677 };
 
 
-BOOST_AUTO_TEST_CASE(UniformKS, *boost::unit_test::tolerance(1e-10))
+TEST_CASE( "Kolmogorov-Smirnoff test of uniform")
 {
     auto D = KSTest(x,y);
     auto pvalue = 1-psmirnov2x(D,x.size(),y.size());
-    BOOST_TEST(D == 0.24);
-    BOOST_TEST(pvalue == 0.11238524845512376515);
+    CHECK_THAT( D,  Catch::WithinULP(0.24,1));
+    CHECK_THAT(pvalue, Catch::WithinULP(0.11238524845512376515,1));
 }

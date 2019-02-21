@@ -1,9 +1,5 @@
-#if defined(_MSC_VER)
-#include <boost/regex.hpp>
-using namespace boost;
-#else
+#define _REGEX_MAX_STACK_COUNT 1000
 #include <regex>
-#endif
 #include <string>
 #include <map>
 #include <algorithm>

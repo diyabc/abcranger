@@ -1,5 +1,5 @@
-#define BOOST_TEST_MODULE LDAEigenTest
-#include <boost/test/unit_test.hpp>
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
 #include <iostream>
 #include <Eigen/Dense>
@@ -165,9 +165,8 @@ std::vector<double> V{
     5.9, 3.0, 5.1, 1.8};
 
 
-BOOST_AUTO_TEST_CASE(LDAEigenTestSimple, *boost::unit_test::tolerance(1e-7))
+TEST_CASE("LDA with Eigen")
 {
-    BOOST_TEST(1 == 1);
     const size_t K = 3;
     const size_t p = 4;
     const size_t n = (S.size() + C.size() + V.size()) / p;
@@ -206,6 +205,6 @@ BOOST_AUTO_TEST_CASE(LDAEigenTestSimple, *boost::unit_test::tolerance(1e-7))
     auto LdPlus = Ld + LdMass;
     auto LdMinus = Ld - LdMass;
     for(auto c = 0; c < K - 1; c++) {
-        BOOST_TEST(std::min(LdPlus.col(c).lpNorm<Infinity>(),LdMinus.col(c).lpNorm<Infinity>()) == 0.0);
+        CHECK(std::min(LdPlus.col(c).lpNorm<Infinity>(),LdMinus.col(c).lpNorm<Infinity>()) == Approx(0.0).margin(1e-7));
     }
 }

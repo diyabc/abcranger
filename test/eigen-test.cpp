@@ -1,16 +1,18 @@
-// https://www.seehuhn.de/pages/matrixfn.html
-#define BOOST_TEST_MODULE EigenTest
-#include <boost/test/unit_test.hpp>
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
+// https://www.seehuhn.de/pages/matrixfn.html
 #include <iostream>
 #include <Eigen/Dense>
+#include "floatvectormatcher.hpp"
 
 using namespace Eigen;
 using namespace std;
 
 static const int N = 7;
 
-BOOST_AUTO_TEST_CASE(EigenSimple, *boost::unit_test::tolerance(1e-10))
+
+TEST_CASE( "Simple eigen square root" )
 {
     vector<double> mbuf(N*N);
     vector<double> mdbuf(N*N);
@@ -39,7 +41,7 @@ BOOST_AUTO_TEST_CASE(EigenSimple, *boost::unit_test::tolerance(1e-10))
     md  = d * d;
     cout << "Here is the result of d * d" << endl;
     cout << md << endl;
-    BOOST_TEST(mbuf == mdbuf, boost::test_tools::per_element());
+    CHECK_THAT( mbuf, Catch::Matchers::Approx(mdbuf).margin(1e-10) );
 
 
 }

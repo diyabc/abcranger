@@ -1,5 +1,5 @@
-#define BOOST_TEST_MODULE ForestOnlineRegCpp
-#include <boost/test/unit_test.hpp>
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
 #include "readreftable.hpp"
 
@@ -11,26 +11,14 @@
 #include "forestonlinereg-predsR.hpp"
 #include "ks.hpp"
 
+#include "unique_cast.hpp"
+
 using namespace ranger;
 using namespace Eigen;
 
 std::vector<double> DEFAULT_SAMPLE_FRACTION = std::vector<double>({1});
 
-template <class T_SRC, class T_DEST>
-std::unique_ptr<T_DEST> unique_cast(std::unique_ptr<T_SRC> &&src)
-{
-    if (!src)
-        return std::unique_ptr<T_DEST>();
-
-    // Throws a std::bad_cast() if this doesn't work out
-    T_DEST *dest_ptr = &dynamic_cast<T_DEST &>(*src.get());
-
-    src.release();
-    std::unique_ptr<T_DEST> ret(dest_ptr);
-    return ret;
-}
-
-BOOST_AUTO_TEST_CASE(InitForestOnlineReg, *boost::unit_test::tolerance(RFTEST_TOLERANCE))
+TEST_CASE("Online Ranger Regressor")
 {
     size_t nref = 0;
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", nref);
@@ -77,10 +65,10 @@ BOOST_AUTO_TEST_CASE(InitForestOnlineReg, *boost::unit_test::tolerance(RFTEST_TO
     forestreg.run(true,true);
     auto preds = forestreg.getPredictions();
     auto oob_prior_error = forestreg.getOverallPredictionError();
-    BOOST_TEST(oob_prior_error == 0.148368);
+    CHECK(oob_prior_error == Approx(0.148368).margin(RFTEST_TOLERANCE));
 }
 
-BOOST_AUTO_TEST_CASE(InitForestOnlineRegKS)
+TEST_CASE("Online Ranger Regressor Distribution")
 {
     size_t nref = 1000;
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", nref);
@@ -135,7 +123,7 @@ BOOST_AUTO_TEST_CASE(InitForestOnlineRegKS)
     }
     auto D = KSTest(predsR,mypredsR);
     auto pvalue = 1-psmirnov2x(D,ntest,ntest);
-    BOOST_TEST ( pvalue >= 0.05 );
+    CHECK( pvalue >= 0.05 );
 }
 
 // BOOST_AUTO_TEST_CASE(InitForestOnlineReg, *boost::unit_test::tolerance(RFTEST_TOLERANCE))

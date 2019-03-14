@@ -5,6 +5,7 @@
 #include "statobsTest.hpp"
 #include "readstatobs.hpp"
 #include "threadpool.hpp"
+#include "floatvectormatcher.hpp"
 
 #include <highfive/H5File.hpp>
 
@@ -55,25 +56,6 @@ bool equalifnan(double const& t1, double const& t2) {
     return ((std::isnan(t1) && std::isnan(t2)) || t1 == t2);
 }
 
-template<class T, class U>
-boost::test_tools::predicate_result
-compare_lists( T l1b, T l1e, U l2b, U l2e )
-{
-    
-    if( std::distance(l1b,l1e) != std::distance(l2b,l2e) ) {
-        boost::test_tools::predicate_result res( false );
-
-        res.message() << "Different sizes [" << std::distance(l1b,l1e)  << "!=" << std::distance(l2b,l2e) << "]";
-
-        return res;
-    } else {
-        bool res = true;
-        while(res && l1b != l1e) {
-            res = res && equalifnan(*(l1b++),*(l2b++));
-         }
-        return res;
-    }
-}
 
 using namespace HighFive;
 
@@ -94,19 +76,12 @@ void test_random_lines(HighFive::File& file, const string& dataname, MatrixXd p)
     
     ThreadPool::ParallelFor((size_t) 0u, nloop, [&] (size_t j){
         auto i = indices[j];
-        // BOOST_TEST( compare_lists(&p[i*ncol],&p[(i+1)*ncol],data[i].begin(),data[i].end() ));
-        // BOOST_TEST( compare_lists(std::next(std::begin(p),i*ncol),
-        //                           std::next(std::begin(p),(i+1)*ncol),
-        //                           data[i].begin(),
-        //                           data[i].end() ));
-        BOOST_TEST( compare_lists(p.row(i).array().begin(),
-                                  p.row(i).array().end(),
-                                  data[i].begin(),
-                                  data[i].end() ));
+        const auto& expected = Catch::Matchers::Approx<std::vector<double>,decltype(p.row(i))>(data[i]);
+        CHECK_THAT( p.row(i), expected);
     }); 
 }
 
-BOOST_AUTO_TEST_CASE(ReadRefTableData) {
+TEST_CASE("Check various components of a reftable") {
     auto myread = readreftable("headerRF.txt","reftableRF.bin");
     File file("reftable.h5", File::ReadOnly);
     test_against_field(file,"nrec",myread.nrec);
@@ -117,6 +92,8 @@ BOOST_AUTO_TEST_CASE(ReadRefTableData) {
     test_random_lines(file,"params",myread.params);
 }
 
-BOOST_AUTO_TEST_CASE(ReadStatobs, * boost::unit_test::tolerance(0.001)) {
-    BOOST_TEST( statobs == readStatObs("statobsRF.txt"), boost::test_tools::per_element());
+TEST_CASE("Read statobs from txt") {
+    const auto& readstatobs = readStatObs("statobsRF.txt");
+    const auto& expected = Catch::Matchers::Approx<std::vector<double>,decltype(readstatobs)>(statobs).epsilon(0.001);
+    CHECK_THAT( readstatobs, expected );
 }

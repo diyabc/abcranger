@@ -69,26 +69,15 @@ include_directories(${LAPACK_ROOT}/../../include)
 ### Eigen
 find_package(Eigen3 CONFIG REQUIRED)
 link_libraries(Eigen3::Eigen)
-# include_directories(${CMAKE_SOURCE_DIR}/eigen)
 add_compile_definitions(PRIVATE EIGEN_USE_MKL_ALL)
 
 ### Range v3
 find_package(range-v3 CONFIG REQUIRED)
 link_libraries(meta range-v3)
-# include_directories(${CMAKE_SOURCE_DIR}/range-v3/include)
 
 # if (WIN32)
 #     set(WINDOWS_EXPORT_ALL_SYMBOLS True)
 # endif()
-
-### Boost
-if (MSVC)
-  ### Boost::regex for msvc, bug in msvc's std::regex...
-  set(Boost_USE_STATIC_LIBS TRUE)
-  # find_package(Boost REQUIRED COMPONENTS regex)
-  # include_directories(Boost::boost)
-  # link_libraries(Boost::regex)
-endif()
 
 add_subdirectory(src)
 include_directories(src)

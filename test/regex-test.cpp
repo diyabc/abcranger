@@ -1,7 +1,7 @@
-#define BOOST_TEST_MODULE RegexTest
-#include <boost/test/unit_test.hpp>
-
 #define _REGEX_MAX_STACK_COUNT 1000
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
+
 #include <regex>
 #include <string>
 
@@ -35,18 +35,18 @@ ra4 A UN[0.1,0.9,0.0,0.0]
 
 )#";
 
-BOOST_AUTO_TEST_CASE( SimpleRegex ) {
+TEST_CASE( "Regex test on diybabc typical header" ) {
     string reparamlistrestr = R"#(\nfoo\n((?:\w+\W[^\n]*\n){22}\n\n))#";
     const regex reparamlist(reparamlistrestr);
     sregex_token_iterator endregexp;
 
     smatch base_match;
-    BOOST_CHECK(regex_search(filestr,base_match,reparamlist));
-    BOOST_CHECK_EQUAL(base_match.size(),2);
+    CHECK(regex_search(filestr,base_match,reparamlist));
+    CHECK(base_match.size() == 2);
     const string paramlistmatch = base_match[1];
 
     smatch line_match;
     const regex reparam(R"#((\w+)\W+\w\W+\w\w\[([^,\]]+),([^,\]]+)[,\]][^\n]*\n)#");
     sregex_token_iterator reparamit(std::begin(paramlistmatch),std::end(paramlistmatch), reparam, {1});
-    BOOST_CHECK_EQUAL(std::distance(reparamit,endregexp),22);
+    CHECK(std::distance(reparamit,endregexp) == 22);
 }

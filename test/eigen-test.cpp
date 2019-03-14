@@ -41,7 +41,8 @@ TEST_CASE( "Simple eigen square root" )
     md  = d * d;
     cout << "Here is the result of d * d" << endl;
     cout << md << endl;
-    CHECK_THAT( mbuf, Catch::Matchers::Approx(mdbuf).margin(1e-10) );
+    const auto& expected = Catch::Matchers::Approx<std::vector<double>,std::vector<double>>(mdbuf).margin(1e-10);
+    CHECK_THAT( mbuf, expected );
 
 
 }

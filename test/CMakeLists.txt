@@ -12,7 +12,16 @@ endif()
 add_definitions(-DRFTEST_TOLERANCE=${RFTEST_TOLERANCE})
 
 ### HDF5 et HighFive
-find_package(hdf5 CONFIG REQUIRED)
+### HDF5
+set(HDF5_USE_STATIC_LIBRARIES 1)
+if(HDF5_DIR_ROOT)
+    set(ENV{HDF5_DIR} "${HDF5_DIR_ROOT}/${CMAKE_BUILD_TYPE}/cmake")
+endif()
+message("HDF5_DIR : $ENV{HDF5_DIR}")
+find_package(HDF5 REQUIRED COMPONENTS CXX)
+include_directories(${HDF5_INCLUDE_DIRS})
+
+#find_package(hdf5 CONFIG REQUIRED)
 find_package(HighFive CONFIG REQUIRED)
 
 find_package(Catch2 CONFIG REQUIRED)

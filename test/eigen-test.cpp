@@ -7,15 +7,14 @@
 #include "floatvectormatcher.hpp"
 
 using namespace Eigen;
-using namespace std;
 
 static const int N = 7;
 
 
 TEST_CASE( "Simple eigen square root" )
 {
-    vector<double> mbuf(N*N);
-    vector<double> mdbuf(N*N);
+    std::vector<double> mbuf(N*N);
+    std::vector<double> mdbuf(N*N);
     Map<MatrixXd> m(mbuf.data(), N,N);
     Map<MatrixXd> md(mdbuf.data(),N,N);
 
@@ -27,8 +26,8 @@ TEST_CASE( "Simple eigen square root" )
     m(0, 0) = 1;
     m(N - 1, N - 1) = 1;
 
-    cout << "Here is the matrix m:" << endl
-         << m << endl;
+    std::cout << "Here is the matrix m:" << std::endl
+         << m << std::endl;
 
     JacobiSVD<MatrixXd> svd(m, ComputeFullU);
     auto D = svd.singularValues().array().sqrt().matrix().asDiagonal();
@@ -39,9 +38,9 @@ TEST_CASE( "Simple eigen square root" )
 
     auto d = U * D * U.transpose(); 
     md  = d * d;
-    cout << "Here is the result of d * d" << endl;
-    cout << md << endl;
-    const auto& expected = Catch::Matchers::Approx<std::vector<double>,std::vector<double>>(mdbuf).margin(1e-10);
+    std::cout << "Here is the result of d * d" << std::endl;
+    std::cout << md << std::endl;
+    const auto expected = Catch::Matchers::Approx<std::vector<double>,std::vector<double>>(mdbuf).margin(1e-10);
     CHECK_THAT( mbuf, expected );
 
 

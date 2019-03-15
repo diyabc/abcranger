@@ -94,6 +94,6 @@ TEST_CASE("Check various components of a reftable") {
 
 TEST_CASE("Read statobs from txt") {
     const auto& readstatobs = readStatObs("statobsRF.txt");
-    const auto& expected = Catch::Matchers::Approx<std::vector<double>,decltype(readstatobs)>(statobs).epsilon(0.001);
+    const auto expected = Catch::Matchers::Approx<std::vector<double>,decltype(readstatobs)>(statobs).epsilon(0.001);
     CHECK_THAT( readstatobs, expected );
 }

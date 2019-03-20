@@ -21,12 +21,10 @@ matrix:
             - g++-8
             - clang-7
             - cmake
-            - libboost1.68-dev
-            - libhdf5-dev
+            - ninja-build
             - intel-mkl-64bit-2019.2-057
-            - libgomp1
       env:
-        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
+        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7 LDFLAGS=-static-libgcc -static-libstdc++ MKLROOT=/opt/intel/compilers_and_libraries/linux/mkl"
 
     # - os: osx
     #   osx_image: xcode8
@@ -34,32 +32,40 @@ matrix:
     #     - MATRIX_EVAL="brew install clang && CC=clang && CXX=clang++"
 
 script:
+  - git clone https://github.com/fradav/vcpkg.git
+  - cd vcpkg
+  - ./bootstrap-vcpkg -useSystemBinaries -disableMetrics
+  - ./vcpkg integrate install
+  - ./vcpkg install range-v3 eigen3 catch2 hdf5[cpp] highfive
+  - cd ..
   - mkdir build
   - cd build
   - eval "${MATRIX_EVAL}"
-  - cmake -DLAPACK_ROOT=/opt/intel/compilers_and_libraries/linux/mkl/lib/intel64
-          -DLAPACK_LIBRARIES="mkl_intel_lp64;mkl_gnu_thread;mkl_core;gomp"
+  - cmake -G Ninja 
+           -DCMAKE=../vcpkg/scripts/buildsystems/vcpkg.cmake
+          -DLAPACK_ROOT=${MKLROOT}/lib/intel64
+          -DLAPACK_LIBRARIES="-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group;dl"
           -DCMAKE_BUILD_TYPE=Release
           -DRFTEST_TOLERANCE=2e-2
           ..
-  - make -j 2 VERBOSE=1
-  - make test
+  - ninja
+  - ninja test
 
 # Disable notifications
 notifications:
   email: false
 
-before_deploy:
-# Set up git user name and tag this commit
-  - git config --local user.name "François-David Collin"
-  - git config --local user.email "Francois-David.Collin@umontpellier.fr"
-  - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
-  - git tag $TRAVIS_TAG
-deploy:
-  provider: releases
-  api_key: 
-    secure: "5569e68ec5dbc0c1066b86a80ed3207a81b58195"
-  file: "ModelChoice"
-  skip_cleanup: true
-  on:
-    tags: true
+# before_deploy:
+# # Set up git user name and tag this commit
+#   - git config --local user.name "François-David Collin"
+#   - git config --local user.email "Francois-David.Collin@umontpellier.fr"
+#   - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
+#   - git tag $TRAVIS_TAG
+# deploy:
+#   provider: releases
+#   api_key: 
+#     secure: "5569e68ec5dbc0c1066b86a80ed3207a81b58195"
+#   file: "ModelChoice"
+#   skip_cleanup: true
+#   on:
+#     tags: true

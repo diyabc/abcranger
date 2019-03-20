@@ -42,7 +42,7 @@ script:
   - cd build
   - eval "${MATRIX_EVAL}"
   - cmake -G Ninja 
-           -DCMAKE=../vcpkg/scripts/buildsystems/vcpkg.cmake
+          -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
           -DLAPACK_ROOT=${MKLROOT}/lib/intel64
           -DLAPACK_LIBRARIES="-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group;dl"
           -DCMAKE_BUILD_TYPE=Release

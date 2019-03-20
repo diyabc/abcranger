@@ -24,7 +24,7 @@ matrix:
             - ninja-build
             - intel-mkl-64bit-2019.2-057
       env:
-        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7 LDFLAGS=-static-libgcc -static-libstdc++ MKLROOT=/opt/intel/compilers_and_libraries/linux/mkl"
+        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7 LDFLAGS=\"-static-libgcc -static-libstdc++\" MKLROOT=/opt/intel/compilers_and_libraries/linux/mkl"
 
     # - os: osx
     #   osx_image: xcode8

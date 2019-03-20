@@ -29,6 +29,7 @@ TEST_CASE("Online Ranger Regressor")
     auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(statobs, colnames, 1, nstat + 1));
     if (nref != 0 && nref <= error.size()) 
         error.erase(error.begin() + nref,error.end());
+    nref = nref == 0 ? error.size() : nref;
     addCols(myread.stats, Map<VectorXd>(error.data(),nref));
     colnames.push_back("Y");
     auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, myread.nrec, nstat + 1));

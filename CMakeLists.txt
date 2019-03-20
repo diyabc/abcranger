@@ -36,7 +36,10 @@ IF(MSVC)
   add_compile_options(/permissive-)
   add_subdirectory (wingetopt)
   link_directories (${wingetopt_BINARY_DIR})
-ENDIF()
+  # https://stackoverflow.com/questions/14172856/compile-with-mt-instead-of-md-using-cmake
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+  ENDIF()
                   
 add_executable(ranger ${PROJECT_cppranger_SRCS})
 if (MSVC)

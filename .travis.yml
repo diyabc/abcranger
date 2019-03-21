@@ -68,7 +68,7 @@ deploy:
   file: "ModelChoice"
   skip_cleanup: true
   on:
-    repo: frada/abcranger
+    repo: fradav/abcranger
     branches:    
       only:      
         - master

@@ -2,6 +2,7 @@
 #include <catch2/catch.hpp>
 
 #include <initializer_list>
+#include <string.h>
 
 #include "cxxopts.hpp"
 

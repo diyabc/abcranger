@@ -1,9 +1,7 @@
-#define __STDC_WANT_LIB_EXT1__ 1
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
 #include <initializer_list>
-#include <string.h>
 
 #include "cxxopts.hpp"
 
@@ -20,7 +18,7 @@ class Argv {
       auto len = strlen(*iter) + 1;
       auto ptr = std::unique_ptr<char[]>(new char[len]);
 
-      strcpy_s(ptr.get(), sizeof(char)*len, *iter);
+      strcpy(ptr.get(), *iter);
       m_args.push_back(std::move(ptr));
       m_argv.get()[i] = m_args.back().get();
 

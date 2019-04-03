@@ -9,9 +9,7 @@
 using namespace ranger;
 using namespace Eigen;
 
-std::vector<double> DEFAULT_SAMPLE_FRACTION = std::vector<double>({1});
-
-#include "unique_cast.hpp"
+#include "various.hpp"
 
 TEST_CASE("Online Ranger classifier")
 {

@@ -2,35 +2,34 @@
 #include "readstatobs.hpp"
 #include "readreftable.hpp"
 #include "matutils.hpp"
+#include "various.hpp"
 #include "DataDense.h"
+#include <range/v3/all.hpp>
+
 using namespace ranger;
 using namespace Eigen;
+using namespace ranges;
 
-std::vector<double> DEFAULT_SAMPLE_FRACTION = std::vector<double>({1});
-
-template <class T_SRC, class T_DEST>
-std::unique_ptr<T_DEST> unique_cast(std::unique_ptr<T_SRC> &&src)
-{
-    if (!src)
-        return std::unique_ptr<T_DEST>();
-
-    // Throws a std::bad_cast() if this doesn't work out
-    T_DEST *dest_ptr = &dynamic_cast<T_DEST &>(*src.get());
-
-    src.release();
-    std::unique_ptr<T_DEST> ret(dest_ptr);
-    return ret;
-}
+auto print = [](int i) { std::cout << i << ' '; };
 
 int main()
 {
     size_t nref = 3000;
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", nref);
+    std::string parameter_of_interest = "ra";
     auto nstat = myread.stats_names.size();
+    auto nparam = myread.params_names.size();
     size_t noisecols = 5;
     size_t K = myread.nrecscen.size();
     MatrixXd statobs(1, nstat);
     statobs = Map<MatrixXd>(readStatObs("statobsRF.txt").data(), 1, nstat);
+
+    const double chosenscen = 1.0;
+    std::vector<size_t> indexesModel = myread.scenarios 
+        | view::enumerate
+        | view::filter([chosenscen](const auto& a){ return a.second == chosenscen; })
+        | view::keys;
+//    ranges::for_each(indexesModel, print);
     addLda(myread, statobs);
     addNoise(myread, statobs, noisecols);
     addScen(myread);

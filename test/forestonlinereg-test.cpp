@@ -11,12 +11,10 @@
 #include "forestonlinereg-predsR.hpp"
 #include "ks.hpp"
 
-#include "unique_cast.hpp"
+#include "various.hpp"
 
 using namespace ranger;
 using namespace Eigen;
-
-std::vector<double> DEFAULT_SAMPLE_FRACTION = std::vector<double>({1});
 
 TEST_CASE("Online Ranger Regressor")
 {

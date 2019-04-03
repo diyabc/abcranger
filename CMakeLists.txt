@@ -85,9 +85,14 @@ link_libraries(meta range-v3)
 add_subdirectory(src)
 include_directories(src)
 
-link_libraries(abcrangerlib ${LAPACK_LIBRARIES} Threads::Threads)
+link_libraries(${LAPACK_LIBRARIES} Threads::Threads)
+
+## CXXOPTS
+find_package(cxxopts CONFIG REQUIRED)
 
 add_executable(ModelChoice model_choice.cpp)
 add_executable(EstimParam estim_param.cpp)
+target_link_libraries(ModelChoice cxxopts::cxxopts abcrangerlib)
+target_link_libraries(EstimParam cxxopts::cxxopts abcrangerlib)
 
 add_subdirectory(test)

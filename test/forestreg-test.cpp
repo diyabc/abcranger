@@ -8,11 +8,9 @@
 #include "DataDense.h"
 #include "test-error.hpp"
 
-#include "unique_cast.hpp"
+#include "various.hpp"
 
 using namespace ranger;
-
-std::vector<double> DEFAULT_SAMPLE_FRACTION = std::vector<double>({1});
 
 
 TEST_CASE("Standard Ranger Regresser")

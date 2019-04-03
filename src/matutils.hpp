@@ -63,3 +63,4 @@ void addScen(Reftable& rf) {
     addCols(rf.stats, Map<VectorXd>(rf.scenarios.data(),rf.nrec));
     rf.stats_names.push_back("Y");
 }
+

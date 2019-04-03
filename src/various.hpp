@@ -1,5 +1,8 @@
 #pragma once
+#include <vector>
 #include <memory>
+
+std::vector<double> DEFAULT_SAMPLE_FRACTION = std::vector<double>({1});
 
 template <class T_SRC, class T_DEST>
 std::unique_ptr<T_DEST> unique_cast(std::unique_ptr<T_SRC> &&src)

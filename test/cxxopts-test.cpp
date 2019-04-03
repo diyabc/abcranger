@@ -1,3 +1,4 @@
+#define __STDC_WANT_LIB_EXT1__ 1
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 

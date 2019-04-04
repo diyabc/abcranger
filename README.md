@@ -16,7 +16,7 @@ Libraries we use :
 ```
  - ABC Random Forest/Model choice command line options
 Usage:
-  .\build\ModelChoice.exe [OPTION...]
+  ModelChoice [OPTION...]
 
   -h, --header arg        Header file (default: headerRF.txt)
   -r, --reftable arg      Reftable file (default: reftableRF.bin)

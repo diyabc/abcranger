@@ -36,7 +36,7 @@ script:
   - cd vcpkg
   - CC=clang-7 && CXX=clang++-7 ./bootstrap-vcpkg.sh -useSystemBinaries -disableMetrics
   - ./vcpkg integrate install
-  - ./vcpkg install range-v3 eigen3 catch2 hdf5[cpp] highfive
+  - ./vcpkg install range-v3 eigen3 catch2 hdf5[cpp] highfive cxxopts
   - cd ..
   - mkdir build
   - cd build

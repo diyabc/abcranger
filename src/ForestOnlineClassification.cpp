@@ -237,6 +237,21 @@ void ForestOnlineClassification::writeOutputInternal()
   }
 }
 
+void ForestOnlineClassification::writeOOBErrorFile() {
+  // Open confusion file for writing
+  std::string filename = output_prefix + ".ooberror";
+  std::ofstream outfile;
+  outfile.open(filename, std::ios::out);
+  if (!outfile.good())
+  {
+    throw std::runtime_error("Could not write to confusion file: " + filename + ".");
+  }
+
+  for (auto tree_idx = 0; tree_idx < num_trees; tree_idx++) {
+    outfile << predictions[2][0][tree_idx]/num_samples << std::endl;
+  }
+}
+
 void ForestOnlineClassification::writeConfusionFile()
 {
 

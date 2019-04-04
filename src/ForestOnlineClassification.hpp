@@ -29,7 +29,8 @@ public:
   // Manually set the outputstream for verbose out
   void setverboseOutput(std::ostream* verbose_output);
   void writeConfusionFile() override;
-  
+  void writeOOBErrorFile();   
+
 protected:
   void initInternal(std::string status_variable_name) override;
   void growInternal() override;

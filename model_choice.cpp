@@ -6,20 +6,70 @@
 #include "various.hpp"
 
 #include "DataDense.h"
+#include "cxxopts.hpp"
 
 using namespace ranger;
 using namespace Eigen;
 
-
-int main()
+int main(int argc, char* argv[])
 {
-    size_t nref = 3000;
-    auto myread = readreftable("headerRF.txt", "reftableRF.bin", nref);
+    size_t nref, ntree, nthreads, noisecols, seed, minnodesize;
+    std::string headerfile,reftablefile,statobsfile,outfile;   
+    bool lda;
+
+    try {
+        cxxopts::Options options(argv[0], " - ABC Random Forest/Model choice command line options");
+
+        options
+            .positional_help("[optional args]")
+            .show_positional_help();
+
+        options.add_options()
+            ("h,header","Header file",cxxopts::value<std::string>()->default_value("headerRF.txt"))
+            ("r,reftable","Reftable file",cxxopts::value<std::string>()->default_value("reftableRF.bin"))
+            ("b,statobs","Statobs file",cxxopts::value<std::string>()->default_value("statobsRF.txt"))
+            ("o,output","Prefix output",cxxopts::value<std::string>()->default_value("onlineranger_out"))
+            ("n,nref","Number of samples, 0 means all",cxxopts::value<size_t>()->default_value("0"))
+            ("m,minnodesize","Minimal node size. 0 means 1 for classification or 5 for regression",cxxopts::value<size_t>()->default_value("0"))
+            ("t,ntree","Number of trees",cxxopts::value<size_t>()->default_value("500"))
+            ("j,threads","Number of threads, 0 means all",cxxopts::value<size_t>()->default_value("0"))
+            ("s,seed","Seed, 0 means generated",cxxopts::value<size_t>()->default_value("0"))
+            ("c,noisecolumns","Number of noise columns",cxxopts::value<size_t>()->default_value("5"))
+            ("l,lda","Enable LDA",cxxopts::value<bool>()->default_value("true"))
+            ("help", "Print help")
+            ;
+        auto result = options.parse(argc,argv);
+
+        if (result.count("help")) {
+          std::cout << options.help({"", "Group"}) << std::endl;
+            exit(0);
+        }
+
+        nref = result["n"].as<size_t>();
+        ntree = result["t"].as<size_t>();
+        nthreads = result["j"].as<size_t>();
+        noisecols = result["c"].as<size_t>();
+        seed = result["s"].as<size_t>();
+        minnodesize = result["m"].as<size_t>();
+        headerfile = result["h"].as<std::string>();
+        reftablefile = result["r"].as<std::string>();
+        statobsfile = result["b"].as<std::string>();
+        outfile = result["o"].as<std::string>();
+        lda = result["l"].as<bool>();
+
+    } catch (const cxxopts::OptionException& e)
+      {
+        std::cout << "error parsing options: " << e.what() << std::endl;
+        exit(1);
+    } 
+
+
+
+    auto myread = readreftable(headerfile, reftablefile, nref);
     auto nstat = myread.stats_names.size();
-    size_t noisecols = 5;
     size_t K = myread.nrecscen.size();
     MatrixXd statobs(1, nstat);
-    statobs = Map<MatrixXd>(readStatObs("statobsRF.txt").data(), 1, nstat);
+    statobs = Map<MatrixXd>(readStatObs(statobsfile).data(), 1, nstat);
     addLda(myread, statobs);
     addNoise(myread, statobs, noisecols);
     addScen(myread);
@@ -30,19 +80,17 @@ int main()
     auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, myread.stats_names, myread.nrec, myread.stats_names.size()));
 
     ForestOnlineClassification forestclass;
-    auto ntree = 1000;
-    auto nthreads = 8;
     forestclass.init("Y",                       // dependant variable
                      MemoryMode::MEM_DOUBLE,    // memory mode double or float
                      std::move(datastats),      // data
                      std::move(datastatobs),    // predict
                      0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
-                     "onlineranger_out",        // output file name prefix
+                     outfile,        // output file name prefix
                      ntree,                     // number of trees
-                     123457,                    // seed rd()
+                     seed,                    // seed rd()
                      nthreads,                  // number of threads
                      ranger::IMP_GINI,          // Default IMP_NONE
-                     0,                         // default min node size (classif = 1, regression 5)
+                     minnodesize,                         // default min node size (classif = 1, regression 5)
                      "",                        // status variable name, only for survival
                      false,                     // prediction mode (true = predict)
                      true,                      // replace
@@ -64,6 +112,7 @@ int main()
     auto oob_prior_error = forestclass.getOverallPredictionError();
     forestclass.writeConfusionFile();
     forestclass.writeImportanceFile();
+    forestclass.writeOOBErrorFile();
     vector<double> votes(K);
     for(auto& tree_pred : preds[1][0]) votes[static_cast<size_t>(tree_pred-1)]++;
     size_t predicted_model = std::distance(votes.begin(),std::max_element(votes.begin(),votes.end()));
@@ -88,9 +137,9 @@ int main()
                      std::move(dataptr),    // data
                      std::move(statobsreleased),  // predict
                      0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
-                     "originalranger_out",              // output file name prefix
+                     outfile,              // output file name prefix
                      ntree,                     // number of trees
-                     123457,                    // seed rd()
+                     seed,                    // seed rd()
                      nthreads,                  // number of threads
                      DEFAULT_IMPORTANCE_MODE,  // Default IMP_NONE
                      0,                         // default min node size (classif = 1, regression 5)

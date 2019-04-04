@@ -224,7 +224,7 @@ void ForestOnline::writeImportanceFile() {
     }
     std::string variable_name = data->getVariableNames()[varID];
     importanceTable[i] = std::make_pair(variable_name,variable_importance[i]);    
-    std::cout << variable_name << ": " << variable_importance[i] << std::endl;
+    // std::cout << variable_name << ": " << variable_importance[i] << std::endl;
 //    importance_file << variable_name << ": " << variable_importance[i] << std::endl;
   }
   std::sort(importanceTable.begin(),importanceTable.end(), [](std::pair<std::string,double> const &a, 

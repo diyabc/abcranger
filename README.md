@@ -13,8 +13,6 @@ Libraries we use :
 - [Eigen : C++ template library for linear algebra: matrices, vectors, numerical solvers, and related algorithms.](http://eigen.tuxfamily.org)
 
 # Usage
-Header, reftable and statobs files should be in the current directory.
-
 ```
  - ABC Random Forest/Model choice command line options
 Usage:
@@ -34,3 +32,10 @@ Usage:
   -l, --lda               Enable LDA (default: true)
       --help              Print help
 ```
+
+Header, reftable and statobs files should be in the current directory.
+Three files are created : 
+- `onlineranger_out.ooberror` : OOB Error rate vs number of trees (line number is the number of trees)
+- `onlineranger_out.confusion` : OOB Confusion matrix of the classifier
+- `onlineranger_out.importance` : variables importance (sorted)
+

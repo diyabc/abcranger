@@ -3,10 +3,26 @@
 
 #include <limits>
 #include <Eigen/Dense>
+#include <vector>
+#include <range/v3/all.hpp>
 #include "floatvectormatcher.hpp"
 
 using namespace Eigen;
+using namespace ranges;
 
+TEST_CASE("Shuffle and split")
+{
+      std::default_random_engine gen;
+      size_t n = 10;
+      size_t s = 3;
+      auto tosplit = view::ints(static_cast<size_t>(0), n) 
+            | to_vector 
+            | action::shuffle(gen);
+      auto a = tosplit | view::take(s);
+      auto b = tosplit | view::slice(s, n);
+      CHECK(distance(a) == 3);
+      CHECK(distance(b) == 7);
+}
 
 TEST_CASE("Eigen with ranges") {
     MatrixXi m1(2,3);

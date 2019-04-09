@@ -10,6 +10,22 @@
 using namespace Eigen;
 using namespace ranges;
 
+TEST_CASE("Extract indices rows from a matrix")
+{
+      MatrixXi m(10,4);
+      m.reshaped() = VectorXi::LinSpaced(40,1,40);
+      std::vector<size_t> indices{3,5,8};
+      m = m(indices,all).eval();
+      std::cout << m << std::endl;
+}
+TEST_CASE("Enumerate and find")
+{
+      std::vector<std::string> v{"blah","blih","blouh","machin","truc"};
+      auto venum = v | view::enumerate | to_vector;
+      auto i = find_if(venum,[](auto& s) { return s.second == "machin";});
+      CHECK(i->first == 3);
+}
+
 TEST_CASE("Shuffle and split")
 {
       std::default_random_engine gen;

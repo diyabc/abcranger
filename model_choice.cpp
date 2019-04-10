@@ -1,3 +1,4 @@
+#include "fmt/format.h"
 #include "ForestOnlineClassification.hpp"
 #include "ForestOnlineRegression.hpp"
 #include "readstatobs.hpp"
@@ -116,11 +117,7 @@ int main(int argc, char* argv[])
     vector<double> votes(K);
     for(auto& tree_pred : preds[1][0]) votes[static_cast<size_t>(tree_pred-1)]++;
     size_t predicted_model = std::distance(votes.begin(),std::max_element(votes.begin(),votes.end()));
-    std::cout << "Predicted model : " << predicted_model + 1 << std::endl;
-    std::cout << "Votes : " << std::endl;
-    for(auto i = 0; i < votes.size(); i++) {
-        std::cout << "class " << i+1 << " : " << votes[i]/ntree << endl;
-    }
+
     bool machin = false;
     auto dataptr = forestclass.releaseData();
     auto& datareleased = static_cast<DataDense&>(*dataptr.get());
@@ -161,8 +158,17 @@ int main(int argc, char* argv[])
 
     forestreg.run(true,true);
     auto predserr = forestreg.getPredictions();
-    std::cout << "Post proba : " << predserr[1][0][0] << std::endl;
-    // for(auto i = 0; i < ntree; i++) 
-    //     std::cout << i << " -> " << preds[2][0][i]/nref << std::endl;
-    std::cout << "OK !" << std::endl;
+    // std::cout << "Predicted model : " << predicted_model + 1 << std::endl;
+    // std::cout << "Votes : " << std::endl;
+    for(auto i = 0; i < votes.size(); i++) {
+        fmt::print(" votes model{0}",i+1);
+    }
+    fmt::print(" selected model");
+    fmt::print(" post proba\n");
+    for(auto i = 0; i < votes.size(); i++) {
+        fmt::print("{:13.3f}",votes[i]/static_cast<double>(ntree));
+    }
+    fmt::print("{:>15}", predicted_model + 1);
+    fmt::print("{:11.3f}\n",predserr[1][0][0]);
+    std::cout.flush();
 }

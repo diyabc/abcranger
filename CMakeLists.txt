@@ -91,9 +91,13 @@ link_libraries(${LAPACK_LIBRARIES} Threads::Threads)
 ## CXXOPTS
 find_package(cxxopts CONFIG REQUIRED)
 
+add_subdirectory(test)
+
 add_executable(ModelChoice model_choice.cpp)
 add_executable(EstimParam estim_param.cpp)
 target_link_libraries(ModelChoice cxxopts::cxxopts abcrangerlib)
 target_link_libraries(EstimParam cxxopts::cxxopts abcrangerlib)
 
-add_subdirectory(test)
+if (CLANG)
+  link_libraries(c++ c++abi)
+endif()

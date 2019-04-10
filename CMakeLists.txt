@@ -39,7 +39,9 @@ IF(MSVC)
   # https://stackoverflow.com/questions/14172856/compile-with-mt-instead-of-md-using-cmake
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
-  ENDIF()
+else()
+  link_libraries(c++ c++abi)
+endif()
                   
 add_executable(ranger ${PROJECT_cppranger_SRCS})
 if (MSVC)
@@ -63,7 +65,6 @@ find_package(Threads REQUIRED)
 
 ### LAPACK
 link_directories(${LAPACK_ROOT})
-set(BLA_STATIC TRUE)
 find_package(LAPACK)
 include_directories(${LAPACK_ROOT}/../include)
 include_directories(${LAPACK_ROOT}/../../include)

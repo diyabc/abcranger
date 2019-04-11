@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
     forestclass.writeConfusionFile();
     forestclass.writeImportanceFile();
     forestclass.writeOOBErrorFile();
-    vector<double> votes(K);
+    vector<size_t> votes(K);
     for(auto& tree_pred : preds[1][0]) votes[static_cast<size_t>(tree_pred-1)]++;
     size_t predicted_model = std::distance(votes.begin(),std::max_element(votes.begin(),votes.end()));
 
@@ -158,17 +158,29 @@ int main(int argc, char* argv[])
 
     forestreg.run(true,true);
     auto predserr = forestreg.getPredictions();
-    // std::cout << "Predicted model : " << predicted_model + 1 << std::endl;
-    // std::cout << "Votes : " << std::endl;
+    const std::string& predict_filename = outfile + ".predictions";
+
+    std::ostringstream os;
     for(auto i = 0; i < votes.size(); i++) {
-        fmt::print(" votes model{0}",i+1);
+        os << fmt::format(" votes model{0}",i+1);
     }
-    fmt::print(" selected model");
-    fmt::print(" post proba\n");
+    os << fmt::format(" selected model");
+    os << fmt::format(" post proba\n");
     for(auto i = 0; i < votes.size(); i++) {
-        fmt::print("{:13.3f}",votes[i]/static_cast<double>(ntree));
+        os << fmt::format("{:>13}",votes[i]);
     }
-    fmt::print("{:>15}", predicted_model + 1);
-    fmt::print("{:11.3f}\n",predserr[1][0][0]);
+    os << fmt::format("{:>15}", predicted_model + 1);
+    os << fmt::format("{:11.3f}\n",predserr[1][0][0]);
+    std::cout << os.str();
     std::cout.flush();
+
+    std::ofstream predict_file;
+    predict_file.open(predict_filename, std::ios::out);
+    if (!predict_file.good()) {
+        throw std::runtime_error("Could not write to prediction file: " + predict_filename + ".");
+    }
+    predict_file << os.str();
+    predict_file.flush();
+    predict_file.close();
+
 }

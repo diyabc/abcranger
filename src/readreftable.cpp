@@ -1,4 +1,4 @@
-#define _REGEX_MAX_STACK_COUNT 1000
+#define _REGEX_MAX_STACK_COUNT 5000
 #include <regex>
 #include <string>
 #include <map>
@@ -48,9 +48,10 @@ Reftable readreftable(string headerpath, string reftablepath, size_t N) {
 //    cout << nparamtoth << endl;
     string reparamlistrestr = R"#(\bhistorical parameters priors.*?\n((?:\w+\W[^\n]*?\n){)#" + to_string(nparamtoth) + "})";
     const regex reparamlist(reparamlistrestr);
-    regex_search(begin(hS), end(hS),base_match,reparamlist);
+    smatch base_match2;
+    regex_search(begin(hS), end(hS),base_match2,reparamlist);
     //cout << base_match[1] << endl;
-    const string paramlistmatch = base_match[1];
+    const string paramlistmatch = base_match2[1];
     const regex reparam(R"#((\w+)\W+\w\W+\w\w\[((?:\d|\.)+?)\W*,((?:\d|\.)+?)(?:,.+?)?\]?\n)#");
     sregex_token_iterator reparamit(begin(paramlistmatch),end(paramlistmatch), reparam, {1,2,3});
     it = reparamit;
@@ -85,9 +86,10 @@ Reftable readreftable(string headerpath, string reftablepath, size_t N) {
     //     for(auto p : scen) cout << p << " ";
     //     cout << endl;       
     // }
+    smatch base_match3;
     const regex restatsname(R"#(\n\s*\nscenario\s+)#");
-    regex_search(begin(hS), end(hS),base_match,restatsname);
-    const string allstatsname = base_match.suffix();
+    regex_search(begin(hS), end(hS),base_match3,restatsname);
+    const string allstatsname = base_match3.suffix();
     const regex splitre2(R"#(\s+)#");
     vector<string> allcolspre;
     for(sregex_token_iterator it(allstatsname.begin(),allstatsname.end(),splitre2,-1); it != endregexp; it++)

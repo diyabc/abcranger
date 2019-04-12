@@ -3,6 +3,7 @@ cmake_policy(SET CMP0074 NEW)
 
 project(abcrangerlib VERSION 0.2.0 LANGUAGES CXX)
 
+
 set(PROJECT_abcranger_SRCS
 ${RANGER_SOURCE_DIR}/Data.cpp
 ${RANGER_SOURCE_DIR}/DataFloat.cpp
@@ -20,6 +21,11 @@ ${ABCRANGER_SOURCE_DIR}/ForestOnlineRegression.cpp
 )
 
 add_library(abcrangerlib STATIC ${PROJECT_abcranger_SRCS})
+
+if(MSVC)
+    find_package(Boost REQUIRED COMPONENTS regex)
+    target_link_libraries(abcrangerlib Boost::regex)
+endif()
 
 # if (WIN32)
 #     set(WINDOWS_EXPORT_ALL_SYMBOLS True)

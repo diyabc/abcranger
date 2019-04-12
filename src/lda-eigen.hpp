@@ -73,7 +73,11 @@ void lda(const MatrixBase<Derived> &x,
     // [4,4]((0.265008,0.0927211,0.167514,0.0384014),(0.0927211,0.115388,0.0552435,0.0327102),(0.167514,0.0552435,0.185188,0.0426653),(0.0384014,0.0327102,0.0426653,0.0418816))
 
     SelfAdjointEigenSolver<MatrixXd> svd(W);
-    auto W12 = svd.eigenvectors() * svd.eigenvalues().array().inverse().sqrt().matrix().asDiagonal() * svd.eigenvectors().transpose();
+    if (svd.info() != Success) {
+        throw std::runtime_error("LDA's first solver failed");
+    }
+//    auto W12 = svd.eigenvectors() * svd.eigenvalues().array().inverse().sqrt().matrix().asDiagonal() * svd.eigenvectors().transpose();
+    auto W12 = svd.operatorInverseSqrt();
     // [4,4]((2.87992,-0.787459,-1.37944,0.163224),(-0.787459,3.57306,0.106208,-0.914195),(-1.37944,0.106208,3.46983,-0.913961),(0.163224,-0.914195,-0.913961,5.92239))
 
     MatrixXd Mstar = M * W12;
@@ -83,9 +87,13 @@ void lda(const MatrixBase<Derived> &x,
     mstar /= static_cast<double>(K);
 
     Mstar.rowwise() -= mstar.transpose();
-    auto Bstar = Mstar.transpose() * Mstar / (K - 1);
+    auto Bstar = Mstar.transpose() * Mstar / static_cast<double>(K - 1);
 
-    SelfAdjointEigenSolver<MatrixXd> svd2(Bstar);
+    SelfAdjointEigenSolver<MatrixXd> svd2(Bstar,ComputeEigenvectors);
+    if (svd2.info() != Success) {
+        throw std::runtime_error("LDA's second solver failed");
+    }
+
     MatrixXd Vl = W12 * svd2.eigenvectors();
 
     Ld = Vl.rowwise().reverse().block(0,0,p,K-1);

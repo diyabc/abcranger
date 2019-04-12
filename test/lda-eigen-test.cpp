@@ -198,13 +198,18 @@ TEST_CASE("LDA with Eigen")
 
     MatrixXd LdMass(p,K-1);
     LdMass << 
-         0.8293776,  0.02410215,
-         1.5344731,  2.16452123,
-        -2.2012117, -0.93192121,
-        -2.8104603,  2.83918785; 
+        //  0.8293776,  0.02410215,
+        //  1.5344731,  2.16452123,
+        // -2.2012117, -0.93192121,
+        // -2.8104603,  2.83918785; 
+        -0.82937764226600674,  0.024102148876954166,
+        -1.53447306770001091,  2.164521234658435489,
+         2.20121165556177356, -0.931921210029371894,
+         2.81046030884310172,  2.839187852982734128;
+
     auto LdPlus = Ld + LdMass;
     auto LdMinus = Ld - LdMass;
     for(auto c = 0; c < K - 1; c++) {
-        CHECK(std::min(LdPlus.col(c).lpNorm<Infinity>(),LdMinus.col(c).lpNorm<Infinity>()) == Approx(0.0).margin(1e-7));
+        CHECK(std::min(LdPlus.col(c).lpNorm<Infinity>(),LdMinus.col(c).lpNorm<Infinity>()) == Approx(0.0).margin(1e-14));
     }
 }

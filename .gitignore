@@ -409,3 +409,4 @@ obj
 
 packages/
 paket-files/
+.vscode/*.json

@@ -210,6 +210,6 @@ TEST_CASE("LDA with Eigen")
     auto LdPlus = Ld + LdMass;
     auto LdMinus = Ld - LdMass;
     for(auto c = 0; c < K - 1; c++) {
-        CHECK(std::min(LdPlus.col(c).lpNorm<Infinity>(),LdMinus.col(c).lpNorm<Infinity>()) == Approx(0.0).margin(1e-14));
+        CHECK(std::min(LdPlus.col(c).lpNorm<Infinity>(),LdMinus.col(c).lpNorm<Infinity>()) == Approx(0.0).margin(1e-13));
     }
 }

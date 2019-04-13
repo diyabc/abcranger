@@ -1,3 +1,4 @@
+#include <fmt/format.h>
 #include "ForestOnlineRegression.hpp"
 #include "readstatobs.hpp"
 #include "readreftable.hpp"
@@ -18,6 +19,8 @@ int main()
     // size_t nref = 3000;
     std::random_device r;
     std::default_random_engine gen(r());
+    const std::string& outfile = "onlineranger_out";
+    double p_threshold_PLS = 0.99;
 
     size_t ncores = 8;
     auto myread = readreftable("headerRF.txt", "reftableRF.bin");
@@ -63,12 +66,42 @@ int main()
     indicesTest = view::ints(static_cast<size_t>(0),n-ntrain)
         | view::sample(ntest,gen);
 
-    // size_t ncomp_total = static_cast<size_t>(lround(1.0 * static_cast<double>(nstat)));
-    // MatrixXd Pls;
-    // VectorXd res = pls(myread.stats(indicesTrain,all),
-    //                    myread.params(indicesTrain,all).col(param_num).matrix(),
-    //                    ncomp_total,0.99,Pls);
-    // std::cout << res << std::endl;
+    size_t ncomp_total = static_cast<size_t>(lround(1.0 * static_cast<double>(nstat)));
+    MatrixXd Pls;
+    VectorXd percentYvar = pls(myread.stats(indicesTrain,all),
+                       myread.params(indicesTrain,param_num),
+                       ncomp_total,0.99,Pls);
+
+    const std::string& pls_filename = outfile + ".plsvar";
+    std::ofstream pls_file;
+    pls_file.open(pls_filename, std::ios::out);
+    for(auto& v: percentYvar.array()) pls_file << v << std::endl;
+    pls_file.close();
+    double p_var_PLS = percentYvar(percentYvar.rows()-1) * p_threshold_PLS;
+
+    const auto& enum_p_var_PLS = percentYvar
+                        | view::enumerate
+                        | to_vector;  
+    size_t nComposante_sel = 
+        ranges::find_if(enum_p_var_PLS,
+                        [&p_var_PLS](auto v) { return v.second > p_var_PLS; })->first-1;
+
+    std::cout << "Selecting only " << nComposante_sel << " pls components.";
+
+    const std::string& plsweights_filename = outfile + ".plsweights";
+    std::ofstream plsweights_file;
+    plsweights_file.open(plsweights_filename, std::ios::out);
+    // for(auto& s: myread.stats_names) plsweights_file << fmt::format(" {:>12}",s);
+    // plsweights_file << std::endl;
+    double sumPlsweights = Pls.col(0).array().abs().sum();
+    auto weightedPlsfirst = Pls.col(0)/sumPlsweights;
+    auto sortPlsweights = view::zip(myread.stats_names, weightedPlsfirst)
+        | to_vector;
+    sortPlsweights |= action::sort([](auto& a, auto& b){ return std::abs(a.second) > std::abs(b.second); });
+    ranges::for_each(sortPlsweights,[&plsweights_file](auto& p) { plsweights_file << p.first << " " << p.second << std::endl; });
+
+    // for(auto& v: Pls.col(0)) plsweights_file << fmt::format(" {:12f}",v/sumPlsweights);
+    plsweights_file.close();
     // addLda(myread, statobs);
     // addNoise(myread, statobs, noisecols);
     // addScen(myread);

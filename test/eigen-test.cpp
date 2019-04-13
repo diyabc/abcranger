@@ -10,6 +10,15 @@ using namespace Eigen;
 
 static const int N = 7;
 
+TEST_CASE( "Column mean")
+{
+    MatrixXi m(3,3);
+    m << 1,2,3,
+         4,5,6,
+         7,8,9;
+
+    CHECK( m.col(1).mean() == 5.0);
+}
 
 TEST_CASE( "Simple eigen square root" )
 {

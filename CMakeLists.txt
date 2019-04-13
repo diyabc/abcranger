@@ -100,7 +100,7 @@ add_executable(ModelChoice model_choice.cpp)
 add_executable(EstimParam estim_param.cpp)
 # target_link_libraries(main PRIVATE fmt::fmt fmt::fmt-header-only)
 target_link_libraries(ModelChoice cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
-target_link_libraries(EstimParam cxxopts::cxxopts abcrangerlib)
+target_link_libraries(EstimParam cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
 
 if (CLANG)
   link_libraries(c++ c++abi)

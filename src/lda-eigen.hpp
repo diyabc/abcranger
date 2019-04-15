@@ -15,6 +15,15 @@
 using namespace Eigen;
 using namespace std;
 
+template<typename _Matrix_Type_>
+bool pseudoInverseSqrt(const _Matrix_Type_ &a, _Matrix_Type_ &result, double epsilon = std::numeric_limits<double>::epsilon())
+{
+  if(a.rows() < a.cols())
+   return false;
+  Eigen::JacobiSVD< _Matrix_Type_ > svd = a.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
+  double tolerance = epsilon * std::max(a.cols(), a.rows()) * svd.singularValues().array().abs().maxCoeff();
+  result = svd.matrixV() * _Matrix_Type_( (svd.singularValues().array().abs() > tolerance).select(svd.singularValues().array().inverse().sqrt(), 0) ).asDiagonal() * svd.matrixU().adjoint();
+}
 
 /**
  * @brief Computes lda with Trevor/hastie algorithm
@@ -76,12 +85,15 @@ void lda(const MatrixBase<Derived> &x,
     W /= static_cast<double>(n - K);
 
     // Calculate inverse square root for W with eigen solver
-    SelfAdjointEigenSolver<MatrixXd> svd(W);
-    if (svd.info() != Success) {
-        throw std::runtime_error("LDA's first solver failed");
-    }
-//    auto W12 = svd.eigenvectors() * svd.eigenvalues().array().inverse().sqrt().matrix().asDiagonal() * svd.eigenvectors().transpose();
-    auto W12 = svd.operatorInverseSqrt();
+    JacobiSVD<MatrixXd> svd(W,ComputeFullU|ComputeFullV);
+    double tolerance = std::numeric_limits<double>::epsilon() * std::max(W.cols(), W.rows()) * svd.singularValues().array().abs().maxCoeff();
+    auto W12 = svd.matrixV() * (svd.singularValues().array().abs() > tolerance).select(svd.singularValues().array().inverse().sqrt(), 0).matrix().asDiagonal() * svd.matrixU().adjoint();
+    // SelfAdjointEigenSolver<MatrixXd> svd(W);
+    // if (svd.info() != Success) {
+    //     throw std::runtime_error("LDA's first solver failed");
+    // }
+    //auto W12 = svd.matrixU() * svd.eigenvalues().array().inverse().sqrt().matrix().asDiagonal() * svd.matrixU().transpose();
+//    auto W12 = svd.operatorInverseSqrt();
 
     // M* from friedman2001elements
     MatrixXd Mstar = M * W12;
@@ -97,7 +109,7 @@ void lda(const MatrixBase<Derived> &x,
 
     // We get the eigenvectors of B* via SVD
     // https://math.stackexchange.com/a/1176942
-    JacobiSVD<MatrixXd> svd2(Bstar,ComputeFullU);
+    JacobiSVD<MatrixXd> svd2(Bstar,ComputeThinU);
     MatrixXd Vl = W12 * svd2.matrixU();
     Ld = Vl.block(0,0,p,K-1);
 }

@@ -34,12 +34,9 @@ void lda(const MatrixBase<Derived> &x,
 
     // M = Centroids
     MatrixXd M = MatrixXd::Zero(K, p);
-    // m = means by features
     VectorXd m = VectorXd::Zero(p);
-    // d = counts by class
     Matrix<size_t, -1, 1> d = Matrix<size_t, -1, 1>::Zero(K);
 
-    // Loop for M, m and d
     for (auto i = 0; i < n; i++)
     {
         auto c = y[i];
@@ -49,13 +46,12 @@ void lda(const MatrixBase<Derived> &x,
         m += r;
     }
 
-    // Finalize M 
     for (auto c = 0; c < K; c++)
     {
         M.row(c) /= static_cast<double>(d[c]);
     }
 
-    // Finalize m
+    // m = Global mean
     m /= static_cast<double>(n);
 
     // D is x centered data and sorted by classes
@@ -74,19 +70,17 @@ void lda(const MatrixBase<Derived> &x,
         slicepos += d[c];
     }
     W /= static_cast<double>(n - K);
+    // [4,4]((0.265008,0.0927211,0.167514,0.0384014),(0.0927211,0.115388,0.0552435,0.0327102),(0.167514,0.0552435,0.185188,0.0426653),(0.0384014,0.0327102,0.0426653,0.0418816))
 
-    // Calculate inverse square root for W with eigen solver
     SelfAdjointEigenSolver<MatrixXd> svd(W);
     if (svd.info() != Success) {
         throw std::runtime_error("LDA's first solver failed");
     }
 //    auto W12 = svd.eigenvectors() * svd.eigenvalues().array().inverse().sqrt().matrix().asDiagonal() * svd.eigenvectors().transpose();
     auto W12 = svd.operatorInverseSqrt();
+    // [4,4]((2.87992,-0.787459,-1.37944,0.163224),(-0.787459,3.57306,0.106208,-0.914195),(-1.37944,0.106208,3.46983,-0.913961),(0.163224,-0.914195,-0.913961,5.92239))
 
-    // M* from friedman2001elements
     MatrixXd Mstar = M * W12;
-
-    // Now we calculate B* covariance matrix of M*
     VectorXd mstar = VectorXd::Zero(p);
     for (auto c = 0; c < K; c++)
         mstar += Mstar.row(c);
@@ -95,9 +89,12 @@ void lda(const MatrixBase<Derived> &x,
     Mstar.rowwise() -= mstar.transpose();
     auto Bstar = Mstar.transpose() * Mstar / static_cast<double>(K - 1);
 
-    // We get the eigenvectors of B* via SVD
-    // https://math.stackexchange.com/a/1176942
-    JacobiSVD<MatrixXd> svd2(Bstar,ComputeFullU);
-    MatrixXd Vl = W12 * svd2.matrixU();
-    Ld = Vl.block(0,0,p,K-1);
+    SelfAdjointEigenSolver<MatrixXd> svd2(Bstar,ComputeEigenvectors);
+    if (svd2.info() != Success) {
+        throw std::runtime_error("LDA's second solver failed");
+    }
+
+    MatrixXd Vl = W12 * svd2.eigenvectors();
+
+    Ld = Vl.rowwise().reverse().block(0,0,p,K-1);
 }

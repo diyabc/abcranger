@@ -15,16 +15,6 @@
 using namespace Eigen;
 using namespace std;
 
-template<typename _Matrix_Type_>
-bool pseudoInverseSqrt(const _Matrix_Type_ &a, _Matrix_Type_ &result, double epsilon = std::numeric_limits<double>::epsilon())
-{
-  if(a.rows() < a.cols())
-   return false;
-  Eigen::JacobiSVD< _Matrix_Type_ > svd = a.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
-  double tolerance = epsilon * std::max(a.cols(), a.rows()) * svd.singularValues().array().abs().maxCoeff();
-  result = svd.matrixV() * _Matrix_Type_( (svd.singularValues().array().abs() > tolerance).select(svd.singularValues().array().inverse().sqrt(), 0) ).asDiagonal() * svd.matrixU().adjoint();
-}
-
 /**
  * @brief Computes lda with Trevor/hastie algorithm
  * 
@@ -84,7 +74,8 @@ void lda(const MatrixBase<Derived> &x,
     }
     W /= static_cast<double>(n - K);
 
-    // Calculate inverse square root for W with eigen solver
+    // Calculate pseudo-inverse square root for W with SVD
+    // https://math.stackexchange.com/a/1176942
     JacobiSVD<MatrixXd> svd(W,ComputeFullU|ComputeFullV);
     double tolerance = std::numeric_limits<double>::epsilon() * std::max(W.cols(), W.rows()) * svd.singularValues().array().abs().maxCoeff();
     auto W12 = svd.matrixV() * (svd.singularValues().array().abs() > tolerance).select(svd.singularValues().array().inverse().sqrt(), 0).matrix().asDiagonal() * svd.matrixU().adjoint();
@@ -108,7 +99,6 @@ void lda(const MatrixBase<Derived> &x,
     auto Bstar = Mstar.transpose() * Mstar / static_cast<double>(K - 1);
 
     // We get the eigenvectors of B* via SVD
-    // https://math.stackexchange.com/a/1176942
     JacobiSVD<MatrixXd> svd2(Bstar,ComputeThinU);
     MatrixXd Vl = W12 * svd2.matrixU();
     Ld = Vl.block(0,0,p,K-1);

@@ -15,7 +15,6 @@
 using namespace Eigen;
 using namespace std;
 
-
 /**
  * @brief Computes lda with Trevor/hastie algorithm
  * 
@@ -72,13 +71,17 @@ void lda(const MatrixBase<Derived> &x,
     W /= static_cast<double>(n - K);
     // [4,4]((0.265008,0.0927211,0.167514,0.0384014),(0.0927211,0.115388,0.0552435,0.0327102),(0.167514,0.0552435,0.185188,0.0426653),(0.0384014,0.0327102,0.0426653,0.0418816))
 
-    SelfAdjointEigenSolver<MatrixXd> svd(W);
-    if (svd.info() != Success) {
-        throw std::runtime_error("LDA's first solver failed");
-    }
-//    auto W12 = svd.eigenvectors() * svd.eigenvalues().array().inverse().sqrt().matrix().asDiagonal() * svd.eigenvectors().transpose();
-    auto W12 = svd.operatorInverseSqrt();
-    // [4,4]((2.87992,-0.787459,-1.37944,0.163224),(-0.787459,3.57306,0.106208,-0.914195),(-1.37944,0.106208,3.46983,-0.913961),(0.163224,-0.914195,-0.913961,5.92239))
+    // Calculate pseudo-inverse square root for W with SVD
+    // https://math.stackexchange.com/a/1176942
+    JacobiSVD<MatrixXd> svd(W,ComputeFullU|ComputeFullV);
+    double tolerance = std::numeric_limits<double>::epsilon() * std::max(W.cols(), W.rows()) * svd.singularValues().array().abs().maxCoeff();
+    auto W12 = svd.matrixV() * (svd.singularValues().array().abs() > tolerance).select(svd.singularValues().array().inverse().sqrt(), 0).matrix().asDiagonal() * svd.matrixU().adjoint();
+    // SelfAdjointEigenSolver<MatrixXd> svd(W);
+    // if (svd.info() != Success) {
+    //     throw std::runtime_error("LDA's first solver failed");
+    // }
+    //auto W12 = svd.matrixU() * svd.eigenvalues().array().inverse().sqrt().matrix().asDiagonal() * svd.matrixU().transpose();
+//    auto W12 = svd.operatorInverseSqrt();
 
     MatrixXd Mstar = M * W12;
     VectorXd mstar = VectorXd::Zero(p);
@@ -89,12 +92,8 @@ void lda(const MatrixBase<Derived> &x,
     Mstar.rowwise() -= mstar.transpose();
     auto Bstar = Mstar.transpose() * Mstar / static_cast<double>(K - 1);
 
-    SelfAdjointEigenSolver<MatrixXd> svd2(Bstar,ComputeEigenvectors);
-    if (svd2.info() != Success) {
-        throw std::runtime_error("LDA's second solver failed");
-    }
-
-    MatrixXd Vl = W12 * svd2.eigenvectors();
-
-    Ld = Vl.rowwise().reverse().block(0,0,p,K-1);
+    // We get the eigenvectors of B* via SVD
+    JacobiSVD<MatrixXd> svd2(Bstar,ComputeThinU);
+    MatrixXd Vl = W12 * svd2.matrixU();
+    Ld = Vl.block(0,0,p,K-1);
 }

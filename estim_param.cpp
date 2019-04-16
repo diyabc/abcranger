@@ -88,19 +88,20 @@ int main()
 
     std::cout << "Selecting only " << nComposante_sel << " pls components.";
 
-    const std::string& plsweights_filename = outfile + ".plsweights";
-    std::ofstream plsweights_file;
-    plsweights_file.open(plsweights_filename, std::ios::out);
     // for(auto& s: myread.stats_names) plsweights_file << fmt::format(" {:>12}",s);
     // plsweights_file << std::endl;
     double sumPlsweights = Pls.col(0).array().abs().sum();
     auto weightedPlsfirst = Pls.col(0)/sumPlsweights;
-    auto sortPlsweights = view::zip(myread.stats_names, weightedPlsfirst)
-        | to_vector;
-    sortPlsweights |= action::sort([](auto& a, auto& b){ return std::abs(a.second) > std::abs(b.second); });
-    ranges::for_each(sortPlsweights,[&plsweights_file](auto& p) { plsweights_file << p.first << " " << p.second << std::endl; });
 
-    // for(auto& v: Pls.col(0)) plsweights_file << fmt::format(" {:12f}",v/sumPlsweights);
+
+    const std::string& plsweights_filename = outfile + ".plsweights";
+    std::ofstream plsweights_file;
+    plsweights_file.open(plsweights_filename, std::ios::out);
+    for(auto& p : view::zip(myread.stats_names, weightedPlsfirst)
+        | to_vector
+        | action::sort([](auto& a, auto& b){ return std::abs(a.second) > std::abs(b.second); }))
+        plsweights_file << p.first << " " << p.second << std::endl;
+
     plsweights_file.close();
     // addLda(myread, statobs);
     // addNoise(myread, statobs, noisecols);

@@ -98,7 +98,7 @@ int main()
     plsweights_file.open(plsweights_filename, std::ios::out);
     for(auto& p : view::zip(myread.stats_names, weightedPlsfirst)
         | to_vector
-        | action::sort([](auto& a, auto& b){ return std::abs(a.second) > std::abs(b.second); }))
+        | action::sort([](auto& a, auto& b){ return std::abs(a.second) < std::abs(b.second); }))
         plsweights_file << p.first << " " << p.second << std::endl;
 
     plsweights_file.close();

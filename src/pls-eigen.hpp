@@ -23,12 +23,10 @@ template<class Derived, class OtherDerived>
 VectorXd pls(const MatrixBase<Derived>& x,
          const MatrixBase<OtherDerived>& y,
          size_t ncomp,
-         double threshold,
          MatrixXd& Pls)
 {
-    size_t n = x.rows();
-    size_t p = x.cols();
-    size_t r = std::min(ncomp,p-1);
+    auto n = x.rows();
+    auto p = x.cols();
     RowVectorXd mean = x.colwise().mean();
     RowVectorXd std = ((x.rowwise() - mean).array().square().colwise().sum() / (x.rows() - 1)).sqrt();;
     MatrixXd X = (x.rowwise() - mean).array().rowwise() / std.array();
@@ -45,13 +43,9 @@ VectorXd pls(const MatrixBase<Derived>& x,
         Z.col(m) = Zm;
         double Thetam = Zm.dot(y) / Znorm;
         Y.col(m + 1) = Y.col(m) + Thetam * Zm;
-        // if ((Y.col(m+1).array() - ymean).array().square().sum() / SSTO >= threshold) {
-        //     r = m - 1;
-        //     break;
-        // }
         X -= Zm.rowwise().replicate(p) * ((Zm/Znorm).transpose() * X).asDiagonal();
     }
-    Pls = Z.block(0,0,n,r);
-    VectorXd res = (Y.block(0,1,n,r + 1).array() - ymean).array().square().colwise().sum() / SSTO;
+    Pls = Z.leftCols(ncomp);
+    VectorXd res = (Y.block(0,1,n,ncomp).array() - ymean).array().square().colwise().sum() / SSTO;
     return res;
 }

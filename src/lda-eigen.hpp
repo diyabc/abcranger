@@ -15,6 +15,8 @@
 using namespace Eigen;
 using namespace std;
 
+typedef Matrix<size_t, Dynamic, 1> VectorXs;
+
 /**
  * @brief Computes lda with Trevor/hastie algorithm
  * 
@@ -24,7 +26,7 @@ using namespace std;
  */
 template<class Derived>
 void lda(const MatrixBase<Derived> &x,
-         const Matrix<size_t, -1, 1> &y,
+         const VectorXs &y,
          MatrixXd& Ld)
 {
     auto n = x.rows();
@@ -34,7 +36,7 @@ void lda(const MatrixBase<Derived> &x,
     // M = Centroids
     MatrixXd M = MatrixXd::Zero(K, p);
     VectorXd m = VectorXd::Zero(p);
-    Matrix<size_t, -1, 1> d = Matrix<size_t, -1, 1>::Zero(K);
+    VectorXs d = VectorXs::Zero(K);
 
     for (auto i = 0; i < n; i++)
     {
@@ -95,5 +97,5 @@ void lda(const MatrixBase<Derived> &x,
     // We get the eigenvectors of B* via SVD
     JacobiSVD<MatrixXd> svd2(Bstar,ComputeThinU);
     MatrixXd Vl = W12 * svd2.matrixU();
-    Ld = Vl.block(0,0,p,K-1);
+    Ld = Vl.leftCols(K-1);
 }

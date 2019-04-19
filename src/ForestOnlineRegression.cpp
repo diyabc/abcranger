@@ -2,11 +2,20 @@
 #include <stdexcept>
 #include <string>
 #include <cmath>
+#include <range/v3/all.hpp>
 
 #include "utility.h"
 #include "ForestOnlineRegression.hpp"
 #include "TreeRegression.h"
 #include "Data.h"
+
+constexpr std::size_t operator "" _z ( unsigned long long n )
+    { return n; }
+
+auto sz = 5_z;
+static_assert( std::is_same< decltype( sz ), std::size_t >::value, "" );
+
+using namespace ranges;
 
 namespace ranger
 {
@@ -53,6 +62,8 @@ void ForestOnlineRegression::allocatePredictMemory()
   predictions = std::vector<std::vector<std::vector<double>>>(2);
   /// predictions oob
   predictions[0] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
+  // Inbag counts
+  if (keep_inbag) global_inbag_counts = std::vector<size_t>(num_trees * num_samples, 0);
 
   if (predict_all || prediction_type == TERMINALNODES)
   {
@@ -102,6 +113,9 @@ void ForestOnlineRegression::predictInternal(size_t tree_idx)
     {
       predictions[1][0][sample_idx] += getTreePrediction(tree_idx, sample_idx);
     }
+  }
+  if (keep_inbag) {
+
   }
 }
 
@@ -303,6 +317,13 @@ size_t ForestOnlineRegression::getTreePredictionTerminalNodeID(size_t tree_idx, 
   return tree.getPredictionTerminalNodeID(sample_idx);
 }
 
+
+void ForestOnlineRegression::getInbagCounts(size_t tree_idx)
+{
+  const auto &tree = dynamic_cast<const TreeRegression &>(*trees[tree_idx]);
+  const auto& chunked = global_inbag_counts | view::chunk(num_samples);
+  ranges::copy(tree.getInbagCounts(),chunked[tree_idx].begin());
+}
 // #nocov end
 
 } // namespace ranger

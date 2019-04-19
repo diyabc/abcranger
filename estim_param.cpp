@@ -17,8 +17,6 @@ auto print = [](int i) { std::cout << i << ' '; };
 int main()
 {
     // size_t nref = 3000;
-    std::random_device r;
-    std::default_random_engine gen(r());
     const std::string& outfile = "onlineranger_out";
     double p_threshold_PLS = 0.99;
 
@@ -47,6 +45,7 @@ int main()
     
     myread.stats = std::move(myread.stats(indexesModel,all)).eval();
     myread.params = std::move(myread.params(indexesModel,all)).eval();
+
     size_t ntrain = 1000;
     size_t ntest = 50;
     size_t n = indexesModel.size();
@@ -57,11 +56,11 @@ int main()
     std::vector<size_t> indicesTrain = tosplit | view::take(ntrain);
     std::vector<size_t> indicesTest  = tosplit | view::slice(ntrain,n);
 
-    auto y = myread.params(indicesTrain,parameter_of_interest);
-    auto ytest = myread.params(indicesTest,parameter_of_interest);
+    MatrixXd y = myread.params(indicesTrain,param_num);
+    MatrixXd ytest = myread.params(indicesTest,param_num);
 
-    auto x = myread.stats(indicesTrain,all);
-    auto xtest = myread.stats(indicesTest,all);
+    MatrixXd x = myread.stats(indicesTrain,all);
+    MatrixXd xtest = myread.stats(indicesTest,all);
 
     indicesTest = view::ints(static_cast<size_t>(0),n-ntrain)
         | view::sample(ntest,gen);
@@ -103,6 +102,25 @@ int main()
         plsweights_file << p.first << " " << p.second << std::endl;
 
     plsweights_file.close();
+
+    Reftable myreadTrain = {
+        ntrain,
+        myread.nrecscen,
+        myread.nparam,
+        {parameter_of_interest},
+        myread.stats_names,
+        x,
+        y,
+        myread.scenarios
+    };
+    
+    addCols(x,Pls.leftCols(nComposante_sel));
+    for(auto i = 0; i < nComposante_sel; i++)
+        myread.stats_names.push_back("Comp " + std::to_string(i+1));
+
+    addNoise(myreadTrain, statobs, noisecols);
+
+    
     // addLda(myread, statobs);
     // addNoise(myread, statobs, noisecols);
     // addScen(myread);

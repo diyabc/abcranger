@@ -31,14 +31,19 @@ VectorXd pls(const MatrixBase<Derived>& x,
     RowVectorXd std = ((x.rowwise() - mean).array().square().colwise().sum() / (x.rows() - 1)).sqrt();;
     MatrixXd X = (x.rowwise() - mean).array().rowwise() / std.array();
     MatrixXd Y = MatrixXd::Zero(n, ncomp + 1);
+    MatrixXd W(p,ncomp);
     MatrixXd Z(n,ncomp);
+    VectorXd XY(ncomp); 
     // Y.col(0) = y.rowwise() - y.colwise().mean();
     double ymean = y.mean();
     Y.col(0).array() = ymean;
     double SSTO = (y.array() - ymean).array().square().sum();
     for (auto m = 0; m < ncomp; m++)
     {
-        VectorXd Zm = X * X.transpose() * y;
+        XY = X.transpose() * Y;
+        SelfAdjointEigenSolver<MatrixXd> es( XY.transpose() * XY );
+        q = dominant_eigenvector(es)
+        VectorXd Zm = X * XY;
         double Znorm = Zm.array().square().sum();
         Z.col(m) = Zm;
         double Thetam = Zm.dot(y) / Znorm;

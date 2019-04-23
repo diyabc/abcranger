@@ -56,9 +56,12 @@ MatrixXd read_matrix_file(string filename, char sep) {
 TEST_CASE("PLS with eigen") {
     MatrixXd X = read_matrix_file("gasolineX.csv",',');
     VectorXd Y = read_matrix_file("gasolineY.csv",',');
+    MatrixXd W = read_matrix_file("weights.csv", ',');
+    MatrixXd S = read_matrix_file("scores.csv", ',');
 
-    MatrixXd Pls;
-    VectorXd res = pls(X,Y,6,Pls);
+    MatrixXd Projection;
+    RowVectorXd mean,std;
+    VectorXd res = pls(X,Y,6,Projection,mean,std);
     VectorXd exp(6);
     exp << 0.3054273,
            0.7979361,
@@ -67,4 +70,10 @@ TEST_CASE("PLS with eigen") {
            0.9867306,
            0.9890077;
     CHECK((res - exp).lpNorm<Infinity>() == Approx(0.0).margin(1e-7));
+    CHECK((Projection-W).lpNorm<Infinity>() == Approx(0.0).margin(1e-10));
+    MatrixXd Scores = ((X.rowwise() - mean).array().rowwise() / std.array()).matrix() * Projection;
+    CHECK((Scores - S).lpNorm<Infinity>() == Approx(0.0).margin(1e-10));
+
+    // std::cout << Scores.col(1) << std::endl;
+    // CHECK((Scores-S).lpNorm<Infinity>() == Approx(0.0).margin(1e-10));
 }

@@ -26,18 +26,23 @@ VectorXd pls(const MatrixBase<Derived>& x,
          const MatrixBase<OtherDerived>& y,
          size_t ncomp,
          MatrixXd& Projection,
-         RowVectorXd mean,
-         RowVectorXd std)
+         RowVectorXd& mean,
+         RowVectorXd& std)
 {
     auto n = x.rows();
     auto p = x.cols();
     mean = x.colwise().mean();
     std = ((x.rowwise() - mean).array().square().colwise().sum() / (x.rows() - 1)).sqrt();;
     MatrixXd X = (x.rowwise() - mean).array().rowwise() / std.array();
+    MatrixXd Xo = X;
+    MatrixXd XX = X.transpose() * X;
     MatrixXd Y = MatrixXd::Zero(n, ncomp + 1);
-    MatrixXd W(p,ncomp);
+    MatrixXd P(p,ncomp);
+    MatrixXd R(p,ncomp);
     VectorXd XY(n); 
     VectorXd w(p);
+    VectorXd r(p);
+    VectorXd t(p);
     // Y.col(0) = y.rowwise() - y.colwise().mean();
     double ymean = y.mean();
     Y.col(0).array() = ymean;
@@ -51,14 +56,21 @@ VectorXd pls(const MatrixBase<Derived>& x,
         auto q = es.eigenvectors().col(max_eigenvalue_indice);
         w = XY * q;
         w /= sqrt((w.transpose()*w)(0,0));
-        W.col(m) = w;
+        r=w;
+        for (auto j=0; j<=m-1;j++)
+        {
+            r -= (P.col(j).transpose()*w)(0,0)*R.col(j);
+        }
+        R.col(m) = r;
+        t = Xo * r;
+        P.col(m) = XX *r/(t.transpose()*t)(0,0);
         VectorXd Zm = X * XY;
         double Znorm = Zm.array().square().sum();
         double Thetam = Zm.dot(y) / Znorm;
         Y.col(m + 1) = Y.col(m) + Thetam * Zm;
         X -= Zm.rowwise().replicate(p) * ((Zm/Znorm).transpose() * X).asDiagonal();
     }
-    Projection = W.leftCols(ncomp);
+    Projection = R;
     VectorXd res = (Y.block(0,1,n,ncomp).array() - ymean).array().square().colwise().sum() / SSTO;
     return res;
 }

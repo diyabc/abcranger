@@ -1,14 +1,4 @@
-/**
- * @file pls-eigen-test.cpp
- * @author François-David Collin <Francois-David.Collin@umontpellier.fr>
- * @brief from Dayal and MacGregor (1997) 
- *        "Improved PLS Algorithms" J. of Chemometrics. 11,73-85.
- * @version 0.1
- * @date 2019-04-25
- * 
- * @copyright Copyright (c) 2019
- * 
- */
+#define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
 #include <iostream>

@@ -79,8 +79,13 @@ add_compile_definitions(PRIVATE EIGEN_USE_MKL_ALL)
 find_package(range-v3 CONFIG REQUIRED)
 link_libraries(meta range-v3)
 
+### Boost::regex with MSVC
+if(MSVC)
+    find_package(Boost REQUIRED COMPONENTS regex)
+endif()
+
 # if (WIN32)
-#     set(WINDOWS_EXPORT_ALL_SYMBOLS True)
+#      set(WINDOWS_EXPORT_ALL_SYMBOLS True)
 # endif()
 
 add_subdirectory(src)
@@ -98,7 +103,6 @@ add_subdirectory(test)
 
 add_executable(ModelChoice model_choice.cpp)
 add_executable(EstimParam estim_param.cpp)
-# target_link_libraries(main PRIVATE fmt::fmt fmt::fmt-header-only)
 target_link_libraries(ModelChoice cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
 target_link_libraries(EstimParam cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
 

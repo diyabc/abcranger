@@ -33,6 +33,10 @@ endforeach(filename)
 
 target_sources(readreftable-test PRIVATE ${ABCRANGER_SOURCE_DIR}/readreftable.cpp)
 target_link_libraries(readreftable-test HighFive hdf5::hdf5_cpp-static)
+if(MSVC)
+    target_link_libraries(readreftable-test Boost::regex)
+endif()
+
 target_link_libraries(cxxopts-test cxxopts::cxxopts)
 
 target_sources(forestclass-test PRIVATE ${RANGER_SOURCE_DIR}/ForestClassification.cpp)

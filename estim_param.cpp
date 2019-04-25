@@ -66,10 +66,11 @@ int main()
         | view::sample(ntest,gen);
 
     size_t ncomp_total = static_cast<size_t>(lround(1.0 * static_cast<double>(nstat)));
-    MatrixXd Pls;
+    MatrixXd Projection;
+    RowVectorXd mean,std;
     VectorXd percentYvar = pls(myread.stats(indicesTrain,all),
                        myread.params(indicesTrain,param_num),
-                       ncomp_total,0.99,Pls);
+                       ncomp_total,Projection, mean, std);
 
     const std::string& pls_filename = outfile + ".plsvar";
     std::ofstream pls_file;
@@ -89,8 +90,8 @@ int main()
 
     // for(auto& s: myread.stats_names) plsweights_file << fmt::format(" {:>12}",s);
     // plsweights_file << std::endl;
-    double sumPlsweights = Pls.col(0).array().abs().sum();
-    auto weightedPlsfirst = Pls.col(0)/sumPlsweights;
+    double sumPlsweights = Projection.col(0).array().abs().sum();
+    auto weightedPlsfirst = Projection.col(0)/sumPlsweights;
 
 
     const std::string& plsweights_filename = outfile + ".plsweights";
@@ -113,8 +114,8 @@ int main()
         y,
         myread.scenarios
     };
-    
-    addCols(x,Pls.leftCols(nComposante_sel));
+    auto Xc = (x.array().rowwise()-mean.array()).rowwise()/std.array();
+    addCols(x,(Xc.matrix() * Projection).leftCols(nComposante_sel));
     for(auto i = 0; i < nComposante_sel; i++)
         myread.stats_names.push_back("Comp " + std::to_string(i+1));
 

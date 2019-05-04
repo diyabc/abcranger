@@ -116,15 +116,15 @@ void ForestOnlineRegression::predictInternal(size_t tree_idx)
       {
         auto value = getTreePrediction(tree_idx, sample_idx);
         predictions[1][sample_idx][tree_idx] = value;
-        double Lb = 0.0;
-        for (size_t sample_internal_idx = 0; sample_internal_idx < num_samples; ++sample_internal_idx) {
+        size_t Lb = 0;
+        for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx) {
               if (value == predictions[3][0][sample_internal_idx]) {
                 Lb += inbag_count[sample_internal_idx];
               }
         }
-        for (size_t sample_internal_idx = 0; sample_internal_idx < num_samples; ++sample_internal_idx) {
+        for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx) {
               if (value == predictions[3][0][sample_internal_idx]) {
-                predictions[4][0][sample_internal_idx] += inbag_count[sample_internal_idx]/Lb;
+                predictions[4][0][sample_internal_idx] += static_cast<double>(inbag_count[sample_internal_idx])/static_cast<double>(Lb);
               }
         }
       }

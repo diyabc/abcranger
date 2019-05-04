@@ -97,15 +97,19 @@ void ForestOnlineClassification::allocatePredictMemory()
   size_t num_prediction_samples = predict_data->getNumRows();
   class_count = std::vector<std::unordered_map<double, size_t>>(num_prediction_samples);
   predictions = std::vector<std::vector<std::vector<double>>>(3);
+  // Predictions on the training set 
   predictions[0] = std::vector<std::vector<double>>(1,std::vector<double>(num_samples));
+  // OOB Error classifications on n-trees (cumulative)
   predictions[2] = std::vector<std::vector<double>>(1,std::vector<double>(num_trees,0.0));
   // predictions[2] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
   if (predict_all || prediction_type == TERMINALNODES)
   {
+    // Predictions on the provided samples by each tree
     predictions[1] = std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees));
   }
   else
   {
+    // Predictions on the provided samples
     predictions[1] = std::vector<std::vector<double>>(1, std::vector<double>(num_prediction_samples));
   }
 }
@@ -157,16 +161,21 @@ void ForestOnlineClassification::predictInternal(size_t tree_idx)
 
 void ForestOnlineClassification::calculateAfterGrow(size_t tree_idx, bool oob) {
   // For each tree loop over OOB samples and count classes
-      for (size_t sample_idx = 0; sample_idx < trees[tree_idx]->getNumSamplesOob(); ++sample_idx)
+      double to_add = 0.0;
+      auto numOOB = trees[tree_idx]->getNumSamplesOob();
+      for (size_t sample_idx = 0; sample_idx < numOOB; ++sample_idx)
       {
         size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
-        auto res = getTreePrediction(tree_idx, sample_idx);
+        auto res = static_cast<size_t>(getTreePrediction(tree_idx, sample_idx));
         ++class_counts[sampleID][res];
+        if (!class_counts[sample_idx].empty())
+          to_add += (mostFrequentValue(class_counts[sampleID], random_number_generator) == data->get(sampleID,dependent_varID)) ? 0.0 : 1.0;
       }
-    for (size_t sample_idx = 0; sample_idx < num_samples; sample_idx++) {
-      if (!class_counts[sample_idx].empty())
-        predictions[2][0][tree_idx] += (mostFrequentValue(class_counts[sample_idx], random_number_generator) == data->get(sample_idx,dependent_varID)) ? 0.0 : 1.0;
-    }
+      predictions[2][0][tree_idx] += to_add/static_cast<double>(numOOB);
+    // for (size_t sample_idx = 0; sample_idx < num_samples; sample_idx++) {
+    //   if (!class_counts[sample_idx].empty())
+    //     predictions[2][0][tree_idx] += (mostFrequentValue(class_counts[sample_idx], random_number_generator) == data->get(sample_idx,dependent_varID)) ? 0.0 : 1.0;
+    // }
 
     // else 
     //   for (size_t sample_idx = 0; sample_idx < num_samples; ++sample_idx)
@@ -248,7 +257,7 @@ void ForestOnlineClassification::writeOOBErrorFile() {
   }
 
   for (auto tree_idx = 0; tree_idx < num_trees; tree_idx++) {
-    outfile << predictions[2][0][tree_idx]/num_samples << std::endl;
+    outfile << predictions[2][0][tree_idx] << std::endl;
   }
 }
 

@@ -35,12 +35,12 @@ private:
   // Storing prediction sum by tree
   std::vector<double> prediction_sum;
   // inbag counts
-  std::vector<size_t> global_inbag_counts;
+//  std::vector<size_t> global_inbag_counts;
 
 private:
   double getTreePrediction(size_t tree_idx, size_t sample_idx) const;
   size_t getTreePredictionTerminalNodeID(size_t tree_idx, size_t sample_idx) const;
-  void getInbagCounts(size_t tree_idx);
+  const std::vector<size_t>& getInbagCounts(size_t tree_idx);
 };
 
 } // namespace ranger

@@ -86,7 +86,7 @@ int main()
         ranges::find_if(enum_p_var_PLS,
                         [&p_var_PLS](auto v) { return v.second > p_var_PLS; })->first-1;
 
-    std::cout << "Selecting only " << nComposante_sel << " pls components.";
+    std::cout << "Selecting only " << nComposante_sel << " pls components." << std::endl;
 
     // for(auto& s: myread.stats_names) plsweights_file << fmt::format(" {:>12}",s);
     // plsweights_file << std::endl;
@@ -99,7 +99,7 @@ int main()
     plsweights_file.open(plsweights_filename, std::ios::out);
     for(auto& p : view::zip(myread.stats_names, weightedPlsfirst)
         | to_vector
-        | action::sort([](auto& a, auto& b){ return std::abs(a.second) < std::abs(b.second); }))
+        | action::sort([](auto& a, auto& b){ return std::abs(a.second) > std::abs(b.second); }))
         plsweights_file << p.first << " " << p.second << std::endl;
 
     plsweights_file.close();
@@ -112,16 +112,63 @@ int main()
         myread.stats_names,
         x,
         y,
-        myread.scenarios
+        std::vector<double>{}
     };
     auto Xc = (x.array().rowwise()-mean.array()).rowwise()/std.array();
-    addCols(x,(Xc.matrix() * Projection).leftCols(nComposante_sel));
+    addCols(myreadTrain.stats,(Xc.matrix() * Projection).leftCols(nComposante_sel));
     for(auto i = 0; i < nComposante_sel; i++)
-        myread.stats_names.push_back("Comp " + std::to_string(i+1));
+        myreadTrain.stats_names.push_back("Comp " + std::to_string(i+1));
 
     addNoise(myreadTrain, statobs, noisecols);
+    std::vector<string> varwithouty = myreadTrain.stats_names;
+    auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(statobs,varwithouty, 1, varwithouty.size()));
+    addCols(myreadTrain.stats,y);
+    myreadTrain.stats_names.push_back("Y");
+//    addScen(myreadTrain);
+    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myreadTrain.stats,myreadTrain.stats_names, ntrain, myreadTrain.stats_names.size()));
 
-    
+    size_t ntree = 10000;
+    size_t nthreads = 8;
+
+    ForestOnlineRegression forestreg;
+    forestreg.init("Y",                       // dependant variable
+                     MemoryMode::MEM_DOUBLE,    // memory mode double or float
+                     std::move(datastats),    // data
+                     std::move(datastatobs),  // predict
+                     0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
+                     "estimparam_out",              // output file name prefix
+                     ntree,                     // number of trees
+                     123456,                    // seed rd()
+                     nthreads,                  // number of threads
+                     ImportanceMode::IMP_GINI,  // Default IMP_NONE
+                     0,                         // default min node size (classif = 1, regression 5)
+                     "",                        // status variable name, only for survival
+                     false,                     // prediction mode (true = predict)
+                     true,                      // replace
+                     std::vector<string>(0),        // unordered variables names
+                     false,                     // memory_saving_splitting
+                     DEFAULT_SPLITRULE,         // gini for classif variance for  regression
+                     true,                     // predict_all
+                     DEFAULT_SAMPLE_FRACTION,   // sample_fraction 1 if replace else 0.632
+                     DEFAULT_ALPHA,             // alpha
+                     DEFAULT_MINPROP,           // miniprop
+                     false,                     // holdout
+                     DEFAULT_PREDICTIONTYPE,    // prediction type
+                     DEFAULT_NUM_RANDOM_SPLITS, // num_random_splits
+                     false,                     //order_snps
+                     DEFAULT_MAXDEPTH);         // max_depth
+    forestreg.run(true,true);
+    auto preds = forestreg.getPredictions();
+    forestreg.writeImportanceFile();
+    // for(auto i = 0; i < ntrain; i++) std::cout << y(i) <<  " " << preds[4][0][i] << std::endl;
+
+    double expectation = ranges::accumulate(
+        view::ints(static_cast<size_t>(0),ntrain)
+        | view::transform([&preds,&y](auto i){ return y(i) * preds[4][0][i]; }), 
+        0.0);
+    expectation /= static_cast<double>(ntree);
+    std::cout << "Expectation : " << expectation << std::endl;
+
     // addLda(myread, statobs);
     // addNoise(myread, statobs, noisecols);
     // addScen(myread);

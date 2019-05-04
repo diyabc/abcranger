@@ -567,7 +567,7 @@ void ForestOnline::growTreesInThread(uint thread_idx, std::vector<double>* varia
   if (thread_ranges.size() > thread_idx + 1) {
     for (size_t i = thread_ranges[thread_idx]; i < thread_ranges[thread_idx + 1]; ++i) {
       trees[i]->grow(variable_importance);
-      trees[i]->predict(input_data, true);
+      trees[i]->predict(input_data, !keep_inbag);
       // Check for user interrupt
 #ifdef R_BUILD
       if (aborted) {

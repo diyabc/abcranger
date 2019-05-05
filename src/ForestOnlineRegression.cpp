@@ -63,18 +63,18 @@ void ForestOnlineRegression::allocatePredictMemory()
   size_t num_prediction_samples = predict_data->getNumRows();
   predictions = std::vector<std::vector<std::vector<double>>>(5);
   /// predictions oob
-  predictions[0] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
+  predictions[0] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples,0.0));
     // OOB square error on n-trees (cumulative)
   predictions[2] = std::vector<std::vector<double>>(1,std::vector<double>(num_trees,0.0));
   // tree predictions
   predictions[3] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
-  // Weights
-  predictions[4] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
 
   if (predict_all || prediction_type == TERMINALNODES)
   {
     /// predictions on data
     predictions[1] = std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees));
+    // Weights
+    predictions[4] = std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_samples,0.0));
   }
   else
   {
@@ -118,13 +118,15 @@ void ForestOnlineRegression::predictInternal(size_t tree_idx)
         predictions[1][sample_idx][tree_idx] = value;
         size_t Lb = 0;
         for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx) {
-              if (value == predictions[3][0][sample_internal_idx]) {
-                Lb += inbag_count[sample_internal_idx];
+              auto nb = inbag_count[sample_internal_idx];              
+              if (nb > 0 && predictions[3][sample_idx][sample_internal_idx] == value) {
+                Lb += nb;
               }
         }
         for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx) {
-              if (value == predictions[3][0][sample_internal_idx]) {
-                predictions[4][0][sample_internal_idx] += static_cast<double>(inbag_count[sample_internal_idx])/static_cast<double>(Lb);
+              auto nb = inbag_count[sample_internal_idx];
+              if (nb > 0 && predictions[3][sample_idx][sample_internal_idx] == value) {
+                predictions[4][sample_idx][sample_internal_idx] += static_cast<double>(nb)/static_cast<double>(Lb);
               }
         }
       }
@@ -139,36 +141,28 @@ void ForestOnlineRegression::predictInternal(size_t tree_idx)
 void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx, bool oob)
 {
   // For each tree loop over OOB samples and count classes
-  double to_add = 0.0;
+  double se = 0.0;
+  size_t num_predictions = 0;
   // std::map<double,size_t> leaves_map;
   const std::vector<size_t>& inbag_count = getInbagCounts(tree_idx);
   for (size_t sample_idx = 0; sample_idx < num_samples; sample_idx++) {
     double value = getTreePrediction(tree_idx, sample_idx);
     auto nb = inbag_count[sample_idx];
     if (nb > 0) { // INBAG
-      // auto search_leaf = leaves_map.find(value);
-      // if (search_leaf == leaves_map.end())
-      //   leaves_map.emplace(value,1);
-      // else
-      //   search_leaf->second += nb;
+      predictions[3][0][sample_idx] = value;
     } else { // OOB
       predictions[0][0][sample_idx] += value;
       ++samples_oob_count[sample_idx];
+    }
+    if (samples_oob_count[sample_idx] > 0) {
+      num_predictions++;
       auto real_value = data->get(sample_idx,dependent_varID);
-      to_add += (value - real_value) * (value - real_value);
+      auto oob_value = predictions[0][0][sample_idx]/static_cast<double>(samples_oob_count[sample_idx]) - real_value;
+      se += oob_value * oob_value;
 
     }
-
-    predictions[3][0][sample_idx] = value;
   }
-  predictions[2][0][tree_idx] += to_add/trees[tree_idx]->getNumSamplesOob();
-  // for (size_t sample_idx = 0; sample_idx < num_samples; sample_idx++) {
-  //   auto nb = inbag_count[sample_idx];
-  //   if (nb > 0) {
-  //     auto Lb = leaves_map[predictions[3][0][sample_idx]];
-  //     predictions[4][0][sample_idx] += static_cast<double>(nb) / static_cast<double>(Lb);
-  //   }
-  // }
+  predictions[2][0][tree_idx] = se/static_cast<double>(num_predictions);
 }
 
 void ForestOnlineRegression::computePredictionErrorInternal()
@@ -220,6 +214,21 @@ void ForestOnlineRegression::writeOutputInternal()
   {
     *verbose_out << "Tree type:                         "
                  << "Regression" << std::endl;
+  }
+}
+
+void ForestOnlineRegression::writeOOBErrorFile() {
+  // Open confusion file for writing
+  std::string filename = output_prefix + ".ooberror";
+  std::ofstream outfile;
+  outfile.open(filename, std::ios::out);
+  if (!outfile.good())
+  {
+    throw std::runtime_error("Could not write to confusion file: " + filename + ".");
+  }
+
+  for (auto tree_idx = 0; tree_idx < num_trees; tree_idx++) {
+    outfile << predictions[2][0][tree_idx] << std::endl;
   }
 }
 

@@ -253,7 +253,7 @@ void ForestOnlineClassification::writeOOBErrorFile() {
   outfile.open(filename, std::ios::out);
   if (!outfile.good())
   {
-    throw std::runtime_error("Could not write to confusion file: " + filename + ".");
+    throw std::runtime_error("Could not write to OOBError file: " + filename + ".");
   }
 
   for (auto tree_idx = 0; tree_idx < num_trees; tree_idx++) {

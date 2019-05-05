@@ -64,6 +64,10 @@ void addLda(Reftable& rf, MatrixBase<Derived> const &statobs) {
     }
 }
 
+template<class Derived>
+void addPls(Reftable& rf, MatrixBase<Derived> const &statobs) {
+    
+}
 
 void addScen(Reftable& rf) {
     addCols(rf.stats, Map<VectorXd>(rf.scenarios.data(),rf.nrec));

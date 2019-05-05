@@ -17,7 +17,7 @@ auto print = [](int i) { std::cout << i << ' '; };
 int main()
 {
     // size_t nref = 3000;
-    const std::string& outfile = "onlineranger_out";
+    const std::string& outfile = "estimparam_out";
     double p_threshold_PLS = 0.99;
 
     size_t ncores = 8;
@@ -46,31 +46,37 @@ int main()
     myread.stats = std::move(myread.stats(indexesModel,all)).eval();
     myread.params = std::move(myread.params(indexesModel,all)).eval();
 
-    size_t ntrain = 1000;
-    size_t ntest = 50;
     size_t n = indexesModel.size();
-    size_t npossible_test = n - ntrain;
+    size_t ntrain = n;
+    size_t ntest = 0;
+    // size_t ntrain = 1000;
+    // size_t ntest = 50;
+
     auto tosplit = view::ints(static_cast<size_t>(0),n)
         | to_vector
         | action::shuffle(gen);
     std::vector<size_t> indicesTrain = tosplit | view::take(ntrain);
     std::vector<size_t> indicesTest  = tosplit | view::slice(ntrain,n);
 
-    MatrixXd y = myread.params(indicesTrain,param_num);
-    MatrixXd ytest = myread.params(indicesTest,param_num);
+    VectorXd y = myread.params(indicesTrain,param_num);
+    // MatrixXd ytest = myread.params(indicesTest,param_num);
+    std::cout << y.mean() << std::endl;
 
     MatrixXd x = myread.stats(indicesTrain,all);
-    MatrixXd xtest = myread.stats(indicesTest,all);
+    // MatrixXd xtest = myread.stats(indicesTest,all);
 
-    indicesTest = view::ints(static_cast<size_t>(0),n-ntrain)
-        | view::sample(ntest,gen);
+    // indicesTest = view::ints(static_cast<size_t>(0),n-ntrain)
+    //     | view::sample(ntest,gen);
 
     size_t ncomp_total = static_cast<size_t>(lround(1.0 * static_cast<double>(nstat)));
     MatrixXd Projection;
     RowVectorXd mean,std;
-    VectorXd percentYvar = pls(myread.stats(indicesTrain,all),
-                       myread.params(indicesTrain,param_num),
-                       ncomp_total,Projection, mean, std);
+    // VectorXd percentYvar = pls(myread.stats(indicesTrain,all),
+    //                    myread.params(indicesTrain,param_num),
+    //                    ncomp_total,Projection, mean, std);
+    VectorXd percentYvar = pls(x,
+                               y,
+                               ncomp_total,Projection, mean, std);
 
     const std::string& pls_filename = outfile + ".plsvar";
     std::ofstream pls_file;
@@ -116,6 +122,9 @@ int main()
     };
     auto Xc = (x.array().rowwise()-mean.array()).rowwise()/std.array();
     addCols(myreadTrain.stats,(Xc.matrix() * Projection).leftCols(nComposante_sel));
+    MatrixXd xobs(statobs);
+    auto Xcobs = (xobs.array().rowwise()-mean.array()).rowwise()/std.array();
+    addCols(xobs,(Xcobs.matrix() * Projection).leftCols(nComposante_sel));
     for(auto i = 0; i < nComposante_sel; i++)
         myreadTrain.stats_names.push_back("Comp " + std::to_string(i+1));
 
@@ -127,7 +136,7 @@ int main()
 //    addScen(myreadTrain);
     auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myreadTrain.stats,myreadTrain.stats_names, ntrain, myreadTrain.stats_names.size()));
 
-    size_t ntree = 10000;
+    size_t ntree = 1000;
     size_t nthreads = 8;
 
     ForestOnlineRegression forestreg;
@@ -135,10 +144,10 @@ int main()
                      MemoryMode::MEM_DOUBLE,    // memory mode double or float
                      std::move(datastats),    // data
                      std::move(datastatobs),  // predict
-                     0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
-                     "estimparam_out",              // output file name prefix
+                     static_cast<double>(myreadTrain.stats_names.size()-1)/3.0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
+                     outfile,              // output file name prefix
                      ntree,                     // number of trees
-                     123456,                    // seed rd()
+                     0,                    // seed rd()
                      nthreads,                  // number of threads
                      ImportanceMode::IMP_GINI,  // Default IMP_NONE
                      0,                         // default min node size (classif = 1, regression 5)
@@ -148,7 +157,7 @@ int main()
                      std::vector<string>(0),        // unordered variables names
                      false,                     // memory_saving_splitting
                      DEFAULT_SPLITRULE,         // gini for classif variance for  regression
-                     true,                     // predict_all
+                     false,                     // predict_all
                      DEFAULT_SAMPLE_FRACTION,   // sample_fraction 1 if replace else 0.632
                      DEFAULT_ALPHA,             // alpha
                      DEFAULT_MINPROP,           // miniprop
@@ -160,14 +169,21 @@ int main()
     forestreg.run(true,true);
     auto preds = forestreg.getPredictions();
     forestreg.writeImportanceFile();
+    forestreg.writeOOBErrorFile();
+    forestreg.writeConfusionFile();
     // for(auto i = 0; i < ntrain; i++) std::cout << y(i) <<  " " << preds[4][0][i] << std::endl;
 
-    double expectation = ranges::accumulate(
-        view::ints(static_cast<size_t>(0),ntrain)
-        | view::transform([&preds,&y](auto i){ return y(i) * preds[4][0][i]; }), 
-        0.0);
-    expectation /= static_cast<double>(ntree);
-    std::cout << "Expectation : " << expectation << std::endl;
+    std::cout << "Prediction : " << preds[1][0][0] << std::endl;
+    // double prediction = 0.0;
+    // for(auto i =0; i < ntree; i++) prediction += preds[1][0][i];
+    // prediction /= static_cast<double>(ntree);
+    // std::cout << "Prediction : " << prediction << std::endl;
+
+    // double expectation = 0.0;
+    // for(auto i = 0; i < ntrain; i++) expectation += y(i) * preds[4][0][i];
+    // expectation /= static_cast<double>(ntree);
+    // std::cout << "Expectation : " << expectation << std::endl;
+
 
     // addLda(myread, statobs);
     // addNoise(myread, statobs, noisecols);

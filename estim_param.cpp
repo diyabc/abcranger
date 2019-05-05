@@ -44,7 +44,7 @@ int main()
         | view::keys;
     
     myread.stats = std::move(myread.stats(indexesModel,all)).eval();
-    myread.params = std::move(myread.params(indexesModel,all)).eval();
+    myread.params = std::move(myread.params(indexesModel,param_num)).eval();
 
     size_t n = indexesModel.size();
     size_t ntrain = n;
@@ -58,8 +58,8 @@ int main()
     std::vector<size_t> indicesTrain = tosplit | view::take(ntrain);
     std::vector<size_t> indicesTest  = tosplit | view::slice(ntrain,n);
 
-    VectorXd y = myread.params(indicesTrain,param_num);
-    // MatrixXd ytest = myread.params(indicesTest,param_num);
+    VectorXd y = myread.params(indicesTrain,0);
+    // MatrixXd ytest = myread.params(indicesTest,0);
     std::cout << y.mean() << std::endl;
 
     MatrixXd x = myread.stats(indicesTrain,all);
@@ -72,7 +72,7 @@ int main()
     MatrixXd Projection;
     RowVectorXd mean,std;
     // VectorXd percentYvar = pls(myread.stats(indicesTrain,all),
-    //                    myread.params(indicesTrain,param_num),
+    //                    myread.params(indicesTrain,0),
     //                    ncomp_total,Projection, mean, std);
     VectorXd percentYvar = pls(x,
                                y,

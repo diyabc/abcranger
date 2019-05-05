@@ -1,4 +1,9 @@
 #include <fmt/format.h>
+
+
+// using namespace boost::accumulators;
+// // typedef accumulator_set<double, stats<tag::weighted_tail_quantile<right> >, double> accumulator_t;
+
 #include "ForestOnlineRegression.hpp"
 #include "readstatobs.hpp"
 #include "readreftable.hpp"
@@ -8,9 +13,16 @@
 #include "pls-eigen.hpp"
 #include <range/v3/all.hpp>
 
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics.hpp>
+#include <boost/accumulators/statistics/weighted_tail_quantile.hpp>
+
+
+namespace bacc = boost::accumulators;
 using namespace ranger;
 using namespace Eigen;
 using namespace ranges;
+
 
 auto print = [](int i) { std::cout << i << ' '; };
 
@@ -52,15 +64,16 @@ int main()
     // size_t ntrain = 1000;
     // size_t ntest = 50;
 
+    // auto tosplit = view::ints(static_cast<size_t>(0),n)
+    //     | to_vector
+    //     | action::shuffle(gen);
     auto tosplit = view::ints(static_cast<size_t>(0),n)
-        | to_vector
-        | action::shuffle(gen);
+        | to_vector;
     std::vector<size_t> indicesTrain = tosplit | view::take(ntrain);
     std::vector<size_t> indicesTest  = tosplit | view::slice(ntrain,n);
 
     VectorXd y = myread.params(indicesTrain,0);
     // MatrixXd ytest = myread.params(indicesTest,0);
-    std::cout << y.mean() << std::endl;
 
     MatrixXd x = myread.stats(indicesTrain,all);
     // MatrixXd xtest = myread.stats(indicesTest,all);
@@ -90,7 +103,7 @@ int main()
                         | to_vector;  
     size_t nComposante_sel = 
         ranges::find_if(enum_p_var_PLS,
-                        [&p_var_PLS](auto v) { return v.second > p_var_PLS; })->first-1;
+                        [&p_var_PLS](auto v) { return v.second > p_var_PLS; })->first;
 
     std::cout << "Selecting only " << nComposante_sel << " pls components." << std::endl;
 
@@ -122,9 +135,8 @@ int main()
     };
     auto Xc = (x.array().rowwise()-mean.array()).rowwise()/std.array();
     addCols(myreadTrain.stats,(Xc.matrix() * Projection).leftCols(nComposante_sel));
-    MatrixXd xobs(statobs);
-    auto Xcobs = (xobs.array().rowwise()-mean.array()).rowwise()/std.array();
-    addCols(xobs,(Xcobs.matrix() * Projection).leftCols(nComposante_sel));
+    auto Xcobs = (statobs.array().rowwise()-mean.array()).rowwise()/std.array();
+    addCols(statobs,(Xcobs.matrix() * Projection).leftCols(nComposante_sel));
     for(auto i = 0; i < nComposante_sel; i++)
         myreadTrain.stats_names.push_back("Comp " + std::to_string(i+1));
 
@@ -147,7 +159,7 @@ int main()
                      static_cast<double>(myreadTrain.stats_names.size()-1)/3.0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
                      outfile,              // output file name prefix
                      ntree,                     // number of trees
-                     0,                    // seed rd()
+                     r(),                    // seed rd()
                      nthreads,                  // number of threads
                      ImportanceMode::IMP_GINI,  // Default IMP_NONE
                      0,                         // default min node size (classif = 1, regression 5)
@@ -157,7 +169,7 @@ int main()
                      std::vector<string>(0),        // unordered variables names
                      false,                     // memory_saving_splitting
                      DEFAULT_SPLITRULE,         // gini for classif variance for  regression
-                     false,                     // predict_all
+                     true,                     // predict_all
                      DEFAULT_SAMPLE_FRACTION,   // sample_fraction 1 if replace else 0.632
                      DEFAULT_ALPHA,             // alpha
                      DEFAULT_MINPROP,           // miniprop
@@ -173,17 +185,46 @@ int main()
     forestreg.writeConfusionFile();
     // for(auto i = 0; i < ntrain; i++) std::cout << y(i) <<  " " << preds[4][0][i] << std::endl;
 
-    std::cout << "Prediction : " << preds[1][0][0] << std::endl;
-    // double prediction = 0.0;
-    // for(auto i =0; i < ntree; i++) prediction += preds[1][0][i];
-    // prediction /= static_cast<double>(ntree);
-    // std::cout << "Prediction : " << prediction << std::endl;
+    //std::cout << "Prediction : " << preds[1][0][0] << std::endl;
+    double prediction = 0.0;
+    for(auto i =0; i < ntree; i++) prediction += preds[1][0][i];
+    prediction /= static_cast<double>(ntree);
+    std::cout << "Prediction : " << prediction << std::endl;
 
-    // double expectation = 0.0;
-    // for(auto i = 0; i < ntrain; i++) expectation += y(i) * preds[4][0][i];
-    // expectation /= static_cast<double>(ntree);
-    // std::cout << "Expectation : " << expectation << std::endl;
+    double expectation = 0.0;
+    for(auto i = 0; i < ntrain; i++) expectation += preds[4][0][i] * y(i);
+    expectation /= static_cast<double>(ntree);
+    std::cout << "Expectation : " << expectation << std::endl;
 
+    double variance = 0.0;
+    for(auto i = 0; i < ntrain; i++) 
+        if (!std::isnan(preds[0][0][i]))
+            variance += preds[4][0][i] * (y(i) - preds[0][0][i]) * (y(i) - preds[0][0][i]);
+    variance /= static_cast<double>(ntree);
+    std::cout << "Variance : " << variance << std::endl;
+
+    bacc::accumulator_set<double, bacc::stats<bacc::tag::weighted_tail_quantile<bacc::left> >, double> 
+        accleft(bacc::left_tail_cache_size = 1000);
+
+    bacc::accumulator_set<double, bacc::stats<bacc::tag::weighted_tail_quantile<bacc::right> >, double> 
+        accright(bacc::right_tail_cache_size = 1000);
+
+    for(auto i = 0; i < ntrain; i++) {
+        accleft(y(i), bacc::weight = preds[4][0][i]);
+        accright(y(i), bacc::weight = preds[4][0][i]);
+    }
+
+    // std::vector<double> probs{0.05,0.5,0.95};
+    std::vector<double> probs{0.05,0.5,0.95};
+
+    for(auto prob : probs){
+        double res;
+        if (prob <= 0.5) 
+            res = bacc::quantile(accleft, bacc::quantile_probability = prob);
+        else
+            res = bacc::quantile(accright, bacc::quantile_probability = prob);
+        std::cout << "quantile = " << prob << " : " << res << std::endl;
+    }
 
     // addLda(myread, statobs);
     // addNoise(myread, statobs, noisecols);

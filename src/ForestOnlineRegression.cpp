@@ -119,13 +119,13 @@ void ForestOnlineRegression::predictInternal(size_t tree_idx)
         size_t Lb = 0;
         for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx) {
               auto nb = inbag_count[sample_internal_idx];              
-              if (nb > 0 && predictions[3][sample_idx][sample_internal_idx] == value) {
+              if (nb > 0 && predictions[3][0][sample_internal_idx] == value) {
                 Lb += nb;
               }
         }
         for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx) {
               auto nb = inbag_count[sample_internal_idx];
-              if (nb > 0 && predictions[3][sample_idx][sample_internal_idx] == value) {
+              if (nb > 0 && predictions[3][0][sample_internal_idx] == value) {
                 predictions[4][sample_idx][sample_internal_idx] += static_cast<double>(nb)/static_cast<double>(Lb);
               }
         }
@@ -226,11 +226,26 @@ void ForestOnlineRegression::writeOOBErrorFile() {
   outfile.open(filename, std::ios::out);
   if (!outfile.good())
   {
-    throw std::runtime_error("Could not write to confusion file: " + filename + ".");
+    throw std::runtime_error("Could not write to oob error file: " + filename + ".");
   }
 
   for (auto tree_idx = 0; tree_idx < num_trees; tree_idx++) {
     outfile << predictions[2][0][tree_idx] << std::endl;
+  }
+}
+
+void ForestOnlineRegression::writeWeightsFile() {
+  // Open confusion file for writing
+  std::string filename = output_prefix + ".predweights";
+  std::ofstream outfile;
+  outfile.open(filename, std::ios::out);
+  if (!outfile.good())
+  {
+    throw std::runtime_error("Could not write to predweights file: " + filename + ".");
+  }
+
+  for (auto sample_idx = 0; sample_idx < num_samples; sample_idx++) {
+    outfile << predictions[4][0][sample_idx] << std::endl;
   }
 }
 

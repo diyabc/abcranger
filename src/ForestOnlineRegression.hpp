@@ -18,6 +18,7 @@ public:
   virtual ~ForestOnlineRegression() override = default;
 
   void writeOOBErrorFile();   
+  void writeWeightsFile();
   void writeConfusionFile() override;
 
 private:

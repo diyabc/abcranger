@@ -19,6 +19,15 @@ MatrixBase<Derived>& constCastAddColsMatrix(MatrixBase<Derived> const & M_, size
     return M;
 }
 
+template<class Derived>
+MatrixBase<Derived>& constCastAddRowsMatrix(MatrixBase<Derived> const & M_, size_t n)
+{
+    auto nrows = M_.rows();
+    MatrixBase<Derived>& M = const_cast<MatrixBase<Derived>&>(M_);
+    M.derived().conservativeResize(nrows + n,NoChange);
+    return M;
+}
+
 template<class Derived, class OtherDerived>
 void addCols(MatrixBase<Derived> const &X_, const MatrixBase<OtherDerived>& M) {
     auto ncols = X_.cols();
@@ -27,6 +36,13 @@ void addCols(MatrixBase<Derived> const &X_, const MatrixBase<OtherDerived>& M) {
     // X.block(0,ncols,X.rows(),M.cols()) = M;
 }
 
+template<class Derived, class OtherDerived>
+void addRows(MatrixBase<Derived> const &X_, const MatrixBase<OtherDerived>& M) {
+    auto nrows = X_.rows();
+    auto& X = constCastAddRowsMatrix(X_,M.rows());
+    X.bottomRows(M.rows()) = M;
+    // X.block(0,ncols,X.rows(),M.cols()) = M;
+}
 
 template<class Derived>
 void addNoiseCols(MatrixBase<Derived> const &X_, size_t n)
@@ -62,11 +78,6 @@ void addLda(Reftable& rf, MatrixBase<Derived> const &statobs) {
     for(auto i = 0; i < rf.nrecscen.size() - 1; i++) {
         rf.stats_names.push_back("LDA" + std::to_string(i+1));
     }
-}
-
-template<class Derived>
-void addPls(Reftable& rf, MatrixBase<Derived> const &statobs) {
-    
 }
 
 void addScen(Reftable& rf) {

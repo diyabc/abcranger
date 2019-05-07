@@ -8,6 +8,7 @@
 
 #include "DataDense.h"
 #include "cxxopts.hpp"
+#include <algorithm>
 
 using namespace ranger;
 using namespace Eigen;
@@ -16,7 +17,7 @@ int main(int argc, char* argv[])
 {
     size_t nref, ntree, nthreads, noisecols, seed, minnodesize;
     std::string headerfile,reftablefile,statobsfile,outfile;   
-    bool lda;
+    bool lda,seeded;
 
     try {
         cxxopts::Options options(argv[0], " - ABC Random Forest/Model choice command line options");
@@ -29,7 +30,7 @@ int main(int argc, char* argv[])
             ("h,header","Header file",cxxopts::value<std::string>()->default_value("headerRF.txt"))
             ("r,reftable","Reftable file",cxxopts::value<std::string>()->default_value("reftableRF.bin"))
             ("b,statobs","Statobs file",cxxopts::value<std::string>()->default_value("statobsRF.txt"))
-            ("o,output","Prefix output",cxxopts::value<std::string>()->default_value("onlineranger_out"))
+            ("o,output","Prefix output",cxxopts::value<std::string>()->default_value("modelchoice_out"))
             ("n,nref","Number of samples, 0 means all",cxxopts::value<size_t>()->default_value("0"))
             ("m,minnodesize","Minimal node size. 0 means 1 for classification or 5 for regression",cxxopts::value<size_t>()->default_value("0"))
             ("t,ntree","Number of trees",cxxopts::value<size_t>()->default_value("500"))
@@ -50,7 +51,9 @@ int main(int argc, char* argv[])
         ntree = result["t"].as<size_t>();
         nthreads = result["j"].as<size_t>();
         noisecols = result["c"].as<size_t>();
-        seed = result["s"].as<size_t>();
+        seeded = result.count("s") != 0;
+        if (seeded)
+            seed = result["s"].as<size_t>();
         minnodesize = result["m"].as<size_t>();
         headerfile = result["h"].as<std::string>();
         reftablefile = result["r"].as<std::string>();
@@ -67,12 +70,16 @@ int main(int argc, char* argv[])
 
 
     auto myread = readreftable(headerfile, reftablefile, nref);
+    std::vector<double> samplefract{std::min(1e5,static_cast<double>(myread.nrec))/static_cast<double>(myread.nrec)};
     auto nstat = myread.stats_names.size();
     size_t K = myread.nrecscen.size();
     MatrixXd statobs(1, nstat);
     statobs = Map<MatrixXd>(readStatObs(statobsfile).data(), 1, nstat);
-    addLda(myread, statobs);
+
+    if (lda) addLda(myread, statobs);
+
     addNoise(myread, statobs, noisecols);
+
     addScen(myread);
     std::vector<string> varwithouty(myread.stats_names.size()-1);
     for(auto i = 0; i < varwithouty.size(); i++) varwithouty[i] = myread.stats_names[i];
@@ -88,7 +95,7 @@ int main(int argc, char* argv[])
                      0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
                      outfile,        // output file name prefix
                      ntree,                     // number of trees
-                     seed,                    // seed rd()
+                     (seeded ? seed : r()),                    // seed rd()
                      nthreads,                  // number of threads
                      ranger::IMP_GINI,          // Default IMP_NONE
                      minnodesize,                         // default min node size (classif = 1, regression 5)
@@ -99,7 +106,7 @@ int main(int argc, char* argv[])
                      false,                     // memory_saving_splitting
                      DEFAULT_SPLITRULE,         // gini for classif variance for  regression
                      true,                     // predict_all
-                     DEFAULT_SAMPLE_FRACTION,   // sample_fraction 1 if replace else 0.632
+                     samplefract,   // sample_fraction 1 if replace else 0.632
                      DEFAULT_ALPHA,             // alpha
                      DEFAULT_MINPROP,           // miniprop
                      false,                     // holdout
@@ -136,7 +143,7 @@ int main(int argc, char* argv[])
                      0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
                      outfile,              // output file name prefix
                      ntree,                     // number of trees
-                     seed,                    // seed rd()
+                     (seeded ? seed : r()),                    // seed rd()
                      nthreads,                  // number of threads
                      DEFAULT_IMPORTANCE_MODE,  // Default IMP_NONE
                      0,                         // default min node size (classif = 1, regression 5)
@@ -147,7 +154,7 @@ int main(int argc, char* argv[])
                      false,                     // memory_saving_splitting
                      DEFAULT_SPLITRULE,         // gini for classif variance for  regression
                      false,                     // predict_all
-                     DEFAULT_SAMPLE_FRACTION,   // sample_fraction 1 if replace else 0.632
+                     samplefract,   // sample_fraction 1 if replace else 0.632
                      DEFAULT_ALPHA,             // alpha
                      DEFAULT_MINPROP,           // miniprop
                      false,                     // holdout

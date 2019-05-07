@@ -84,3 +84,33 @@ if pls enabled :
 
 - `estimparam_out.plsvar` : variance explained by number of components
 - `estimparam_out.plsweights` : variable weight in the first component (sorted by absolute value)
+
+## TODO
+
+### Input/Output
+
+- [ ] Integrate hdf5 routines to save/load reftables/observed stats with associated metadata
+  - [ ] Provide R code to save in hdf5
+  - [ ]  Provide Python code to save in hdf5
+
+### C++ standalone
+
+- [ ] Merge the two methodologies in a single executable with options
+- [ ] Mo ve to another options parser (CLI?)
+
+### External interfaces
+
+- [ ] R package
+- [ ] Python package
+  
+### Documentation
+
+- [ ] Code documentation
+- [ ] Documentate the build
+
+### Continuous integration
+
+- [ ] Fix travis build. Currently the vcpkg download of eigen3 head is broken.
+- [ ] osX travis build
+- [ ] Appeveoyr win32 build
+

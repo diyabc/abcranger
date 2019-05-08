@@ -9,8 +9,8 @@ Methodologies based on :
 
 Libraries we use :
 
-- [Ranger : A Fast Implementation of Random Forests](https://github.com/imbs-hl/ranger) [@wright2015ranger], there tuned to make "online" calculations (not storing the whole forests in memory)
-- [Eigen : C++ template library for linear algebra: matrices, vectors, numerical solvers, and related algorithms.](http://eigen.tuxfamily.org)
+- [@wright2015ranger] We use our own fork and have tuned forests to do "online" computations (Growing trees AND making predictions at the same time, in order to avoid to store the whole forests in memory).
+- [@guennebaud2010eigen]
 
 ## Model Choice
 
@@ -117,3 +117,5 @@ if pls enabled :
 
 - Write our own tree/rf implementation with better storage efficiency than ranger
 - Make functional tests for the two methodologies
+
+## References

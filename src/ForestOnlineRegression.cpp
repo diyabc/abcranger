@@ -243,9 +243,9 @@ void ForestOnlineRegression::writeWeightsFile() {
   {
     throw std::runtime_error("Could not write to predweights file: " + filename + ".");
   }
-
+  outfile << "value,weight" << std::endl;
   for (auto sample_idx = 0; sample_idx < num_samples; sample_idx++) {
-    outfile << predictions[4][0][sample_idx] << std::endl;
+    outfile << data->get(sample_idx,dependent_varID) << "," << predictions[4][0][sample_idx] << std::endl;
   }
 }
 

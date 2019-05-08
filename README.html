@@ -1,0 +1,135 @@
+<h1 id="abc-random-forests-for-model-choice-and-parameters-estimation">ABC random forests for model choice and parameters estimation</h1>
+<p><a href="https://travis-ci.com/fradav/abcranger"><img src="https://travis-ci.com/fradav/abcranger.svg?branch=master" alt="Build Status" /></a></p>
+<p>Methodologies based on :</p>
+<ul>
+<li><span class="citation" data-cites="pudlo2015reliable">(Pudlo et al. 2015)</span></li>
+<li><span class="citation" data-cites="raynal2016abc">(Raynal et al. 2016)</span></li>
+</ul>
+<p>Libraries we use :</p>
+<ul>
+<li><span class="citation" data-cites="wright2015ranger">(Wright and Ziegler 2015)</span> We use our own fork and have tuned forests to do “online” computations (Growing trees AND making predictions at the same time, in order to avoid to store the whole forests in memory).</li>
+<li><span class="citation" data-cites="guennebaud2010eigen">(Guennebaud, Jacob, and others 2010)</span></li>
+</ul>
+<h2 id="model-choice">Model Choice</h2>
+<pre class="text"><code> - ABC Random Forest/Model choice command line options
+Usage:
+  ModelChoice [OPTION...]
+
+  -h, --header arg        Header file (default: headerRF.txt)
+  -r, --reftable arg      Reftable file (default: reftableRF.bin)
+  -b, --statobs arg       Statobs file (default: statobsRF.txt)
+  -o, --output arg        Prefix output (default: modelchoice_out)
+  -n, --nref arg          Number of samples, 0 means all (default: 0)
+  -m, --minnodesize arg   Minimal node size. 0 means 1 for classification or
+                          5 for regression (default: 0)
+  -t, --ntree arg         Number of trees (default: 500)
+  -j, --threads arg       Number of threads, 0 means all (default: 0)
+  -s, --seed arg          Seed, 0 means generated (default: 0)
+  -c, --noisecolumns arg  Number of noise columns (default: 5)
+  -l, --lda               Enable LDA (default: true)
+      --help              Print help</code></pre>
+<p>Header, reftable and statobs files should be in the current directory.</p>
+<p>Three files are created :</p>
+<ul>
+<li><code>modelchoice_out.ooberror</code> : OOB Error rate vs number of trees (line number is the number of trees)</li>
+<li><code>modelchoice_out.importance</code> : variables importance (sorted)</li>
+<li><code>modelchoice_out.predictions</code> : votes, prediction and posterior error rate</li>
+<li><code>modelchoice_out.confusion</code> : OOB Confusion matrix of the classifier</li>
+</ul>
+<h2 id="parameter-estimation">Parameter Estimation</h2>
+<pre class="text"><code> - ABC Random Forest/Model parameter estimation command line options
+Usage:
+  EstimParam [OPTION...]
+
+  -h, --header arg        Header file (default: headerRF.txt)
+  -r, --reftable arg      Reftable file (default: reftableRF.bin)
+  -b, --statobs arg       Statobs file (default: statobsRF.txt)
+  -o, --output arg        Prefix output (default: estimparam_out)
+  -n, --nref arg          Number of samples, 0 means all (default: 0)
+  -m, --minnodesize arg   Minimal node size. 0 means 1 for classification or
+                          5 for regression (default: 0)
+  -t, --ntree arg         Number of trees (default: 500)
+  -j, --threads arg       Number of threads, 0 means all (default: 0)
+  -s, --seed arg          Seed, 0 means generated (default: 0)
+  -c, --noisecolumns arg  Number of noise columns (default: 5)
+  -p, --pls               Enable PLS (default: true)
+      --chosenscen arg    Chosen scenario (mandatory)
+      --ntrain arg        number of training samples (mandatory)
+      --ntest arg         number of testing samples (mandatory)
+      --parameter arg     name of the parameter of interest (mandatory)
+      --help              Print help</code></pre>
+<p>Header, reftable and statobs files should be in the current directory.</p>
+<p>Five files (or seven if pls activated) are created :</p>
+<ul>
+<li><code>estimparam_out.ooberror</code> : OOB MSE rate vs number of trees (line number is the number of trees)</li>
+<li><code>estimparam_out.importance</code> : variables importance (sorted)</li>
+<li><code>estimparam_out.predictions</code> : expectation, variance and 0.05, 0.5, 0.95 quantile for prediction</li>
+<li><code>estimparam_out.predweights</code> : csv of the value/weights pairs of the prediction (for density plot)</li>
+<li><code>estimparam_out.teststats</code> : various statistics on test (MSE, NMSE, NMAE etc.)</li>
+</ul>
+<p>if pls enabled :</p>
+<ul>
+<li><code>estimparam_out.plsvar</code> : variance explained by number of components</li>
+<li><code>estimparam_out.plsweights</code> : variable weight in the first component (sorted by absolute value)</li>
+</ul>
+<h2 id="todo">TODO</h2>
+<h3 id="inputoutput">Input/Output</h3>
+<ul>
+<li><input type="checkbox" disabled="" />
+Integrate hdf5 routines to save/load reftables/observed stats with associated metadata<ul>
+<li><input type="checkbox" disabled="" />
+Provide R code to save in hdf5</li>
+<li><input type="checkbox" disabled="" />
+Provide Python code to save in hdf5</li>
+</ul></li>
+</ul>
+<h3 id="c-standalone">C++ standalone</h3>
+<ul>
+<li><input type="checkbox" disabled="" />
+Merge the two methodologies in a single executable with options</li>
+<li><input type="checkbox" disabled="" />
+Mo ve to another options parser (CLI?)</li>
+</ul>
+<h3 id="external-interfaces">External interfaces</h3>
+<ul>
+<li><input type="checkbox" disabled="" />
+R package</li>
+<li><input type="checkbox" disabled="" />
+Python package</li>
+</ul>
+<h3 id="documentation">Documentation</h3>
+<ul>
+<li><input type="checkbox" disabled="" />
+Code documentation</li>
+<li><input type="checkbox" disabled="" />
+Documentate the build</li>
+</ul>
+<h3 id="continuous-integration">Continuous integration</h3>
+<ul>
+<li><input type="checkbox" disabled="" />
+Fix travis build. Currently the vcpkg download of eigen3 head is broken.</li>
+<li><input type="checkbox" disabled="" />
+osX travis build</li>
+<li><input type="checkbox" disabled="" />
+Appveyor win32 build</li>
+</ul>
+<h2 id="longmid-term-todo">Long/Mid term TODO</h2>
+<ul>
+<li>Write our own tree/rf implementation with better storage efficiency than ranger</li>
+<li>Make functional tests for the two methodologies</li>
+</ul>
+<h2 id="references" class="unnumbered">References</h2>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-guennebaud2010eigen">
+<p>Guennebaud, Gaël, Benoit Jacob, and others. 2010. “Eigen.” <em>URl: Http://Eigen. Tuxfamily. Org</em>.</p>
+</div>
+<div id="ref-pudlo2015reliable">
+<p>Pudlo, Pierre, Jean-Michel Marin, Arnaud Estoup, Jean-Marie Cornuet, Mathieu Gautier, and Christian P Robert. 2015. “Reliable Abc Model Choice via Random Forests.” <em>Bioinformatics</em> 32 (6): 859–66.</p>
+</div>
+<div id="ref-raynal2016abc">
+<p>Raynal, Louis, Jean-Michel Marin, Pierre Pudlo, Mathieu Ribatet, Christian P Robert, and Arnaud Estoup. 2016. “ABC Random Forests for Bayesian Parameter Inference.” <em>arXiv Preprint arXiv:1605.05537</em>.</p>
+</div>
+<div id="ref-wright2015ranger">
+<p>Wright, Marvin N, and Andreas Ziegler. 2015. “Ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R.” <em>arXiv Preprint arXiv:1508.04409</em>.</p>
+</div>
+</div>

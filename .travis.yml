@@ -10,7 +10,7 @@ matrix:
       addons:
         apt:
           sources: 
-            - sourceline: 'deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main'
+            - sourceline: 'deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-8 main'
               key_url: https://apt.llvm.org/llvm-snapshot.gpg.key
             - sourceline: 'ppa:mhier/libboost-latest'
             # https://software.intel.com/en-us/articles/installing-intel-free-libs-and-python-apt-repo
@@ -19,12 +19,14 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-8
-            - clang-7
+            - clang-8
+            - libc++-8-dev
+            - libc++abi-8-dev
             - cmake
             - ninja-build
             - intel-mkl-64bit-2019.2-057
       env:
-        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7 LDFLAGS=\"-static-libgcc -static-libstdc++\" MKLROOT=/opt/intel/compilers_and_libraries/linux/mkl"
+        - MATRIX_EVAL="CC=clang-8 && CXX=clang++-8 CXXFLAGS=\"-static -stdlib=libc++\" MKLROOT=/opt/intel/compilers_and_libraries/linux/mkl"
 
     # - os: osx
     #   osx_image: xcode8
@@ -34,16 +36,17 @@ matrix:
 script:
   - git clone https://github.com/Microsoft/vcpkg.git
   - cd vcpkg
-  - CC=clang-7 && CXX=clang++-7 ./bootstrap-vcpkg.sh -useSystemBinaries -disableMetrics
+  - CC=clang-8 && CXX=clang++-8 ./bootstrap-vcpkg.sh -useSystemBinaries -disableMetrics
   - ./vcpkg integrate install
+  - eval "${MATRIX_EVAL}"
   - ./vcpkg install range-v3 catch2 hdf5[cpp] highfive cxxopts fmt boost-accumulators
   - ./vcpkg install eigen3 --head
   - cd ..
   - mkdir build
   - cd build
-  - eval "${MATRIX_EVAL}"
   - cmake -G Ninja 
           -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
+          -DBLA_VENDOR=Intel10_64lp
           -DLAPACK_ROOT=${MKLROOT}/lib/intel64
           -DLAPACK_LIBRARIES="-Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_lp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group;dl"
           -DCMAKE_BUILD_TYPE=Release

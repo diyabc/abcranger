@@ -112,5 +112,9 @@ if pls enabled :
 
 - [ ] Fix travis build. Currently the vcpkg download of eigen3 head is broken.
 - [ ] osX travis build
-- [ ] Appeveoyr win32 build
+- [ ] Appeveyor win32 build
 
+## Long/Mid term TODO
+
+- Write our own tree/rf implementation with better storage efficiency than ranger
+- Make functional tests for the two methodologies

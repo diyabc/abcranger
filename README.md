@@ -1,20 +1,27 @@
 # ABC random forests for model choice and parameters estimation
 
-[![Build Status](https://travis-ci.com/fradav/abcranger.svg?branch=master)](https://travis-ci.com/fradav/abcranger)
+[![Build
+Status](https://travis-ci.com/fradav/abcranger.svg?branch=master)](https://travis-ci.com/fradav/abcranger)
 
 Methodologies based on :
 
-- [@pudlo2015reliable]
-- [@raynal2016abc]
+  - (Pudlo et al. 2015)
+  - (Raynal et al. 2016)
 
 Libraries we use :
 
-- [@wright2015ranger] We use our own fork and have tuned forests to do "online" computations (Growing trees AND making predictions at the same time, in order to avoid to store the whole forests in memory).
-- [@guennebaud2010eigen]
+  - (Wright and Ziegler 2015) We use our own fork and have tuned forests
+    to do “online” computations (Growing trees AND making predictions at
+    the same time, in order to avoid to store the whole forests in
+    memory).
+  - (Guennebaud, Jacob, and others 2010)
+
+As a mention, we use LDA and PLS from (Friedman, Hastie, and Tibshirani
+2001).
 
 ## Model Choice
 
-```text
+``` text
  - ABC Random Forest/Model choice command line options
 Usage:
   ModelChoice [OPTION...]
@@ -38,14 +45,16 @@ Header, reftable and statobs files should be in the current directory.
 
 Three files are created :
 
-- `modelchoice_out.ooberror` : OOB Error rate vs number of trees (line number is the number of trees)
-- `modelchoice_out.importance` : variables importance (sorted)
-- `modelchoice_out.predictions` : votes, prediction and posterior error rate
-- `modelchoice_out.confusion` : OOB Confusion matrix of the classifier
+  - `modelchoice_out.ooberror` : OOB Error rate vs number of trees (line
+    number is the number of trees)
+  - `modelchoice_out.importance` : variables importance (sorted)
+  - `modelchoice_out.predictions` : votes, prediction and posterior
+    error rate
+  - `modelchoice_out.confusion` : OOB Confusion matrix of the classifier
 
 ## Parameter Estimation
 
-```text
+``` text
  - ABC Random Forest/Model parameter estimation command line options
 Usage:
   EstimParam [OPTION...]
@@ -73,49 +82,100 @@ Header, reftable and statobs files should be in the current directory.
 
 Five files (or seven if pls activated) are created :
 
-- `estimparam_out.ooberror` : OOB MSE rate vs number of trees (line number is the number of trees)
-- `estimparam_out.importance` : variables importance (sorted)
-- `estimparam_out.predictions` : expectation, variance and 0.05, 0.5, 0.95 quantile for prediction
-- `estimparam_out.predweights` : csv of the value/weights pairs of the prediction (for density plot)
-- `estimparam_out.teststats` : various statistics on test (MSE, NMSE, NMAE etc.)
+  - `estimparam_out.ooberror` : OOB MSE rate vs number of trees (line
+    number is the number of trees)
+  - `estimparam_out.importance` : variables importance (sorted)
+  - `estimparam_out.predictions` : expectation, variance and 0.05, 0.5,
+    0.95 quantile for prediction
+  - `estimparam_out.predweights` : csv of the value/weights pairs of the
+    prediction (for density plot)
+  - `estimparam_out.teststats` : various statistics on test (MSE, NMSE,
+    NMAE etc.)
 
 if pls enabled :
 
-- `estimparam_out.plsvar` : variance explained by number of components
-- `estimparam_out.plsweights` : variable weight in the first component (sorted by absolute value)
+  - `estimparam_out.plsvar` : variance explained by number of components
+  - `estimparam_out.plsweights` : variable weight in the first component
+    (sorted by absolute value)
 
 ## TODO
 
 ### Input/Output
 
-- [ ] Integrate hdf5 routines to save/load reftables/observed stats with associated metadata
-  - [ ] Provide R code to save in hdf5
-  - [ ]  Provide Python code to save in hdf5
+  - [ ] Integrate hdf5 routines to save/load reftables/observed stats
+    with associated metadata
+      - [ ] Provide R code to save in hdf5
+      - [ ] Provide Python code to save in hdf5
 
 ### C++ standalone
 
-- [ ] Merge the two methodologies in a single executable with options
-- [ ] Mo ve to another options parser (CLI?)
+  - [ ] Merge the two methodologies in a single executable with options
+  - [ ] Mo ve to another options parser (CLI?)
 
 ### External interfaces
 
-- [ ] R package
-- [ ] Python package
-  
+  - [ ] R package
+  - [ ] Python package
+
 ### Documentation
 
-- [ ] Code documentation
-- [ ] Documentate the build
+  - [ ] Code documentation
+  - [ ] Documentate the build
 
 ### Continuous integration
 
-- [ ] Fix travis build. Currently the vcpkg download of eigen3 head is broken.
-- [ ] osX travis build
-- [ ] Appveyor win32 build
+  - [ ] Fix travis build. Currently the vcpkg download of eigen3 head is
+    broken.
+  - [ ] osX travis build
+  - [ ] Appveyor win32 build
 
 ## Long/Mid term TODO
 
-- Write our own tree/rf implementation with better storage efficiency than ranger
-- Make functional tests for the two methodologies
+  - Write our own tree/rf implementation with better storage efficiency
+    than ranger
+  - Make functional tests for the two methodologies
 
 ## References
+
+<div id="refs" class="references">
+
+<div id="ref-friedman2001elements">
+
+Friedman, Jerome, Trevor Hastie, and Robert Tibshirani. 2001. *The
+Elements of Statistical Learning*. Vol. 1. 10. Springer series in
+statistics New York, NY, USA:
+
+</div>
+
+<div id="ref-eigenweb">
+
+Guennebaud, Gaël, Benoît Jacob, and others. 2010. “Eigen V3.”
+http://eigen.tuxfamily.org.
+
+</div>
+
+<div id="ref-pudlo2015reliable">
+
+Pudlo, Pierre, Jean-Michel Marin, Arnaud Estoup, Jean-Marie Cornuet,
+Mathieu Gautier, and Christian P Robert. 2015. “Reliable Abc Model
+Choice via Random Forests.” *Bioinformatics* 32 (6): 859–66.
+
+</div>
+
+<div id="ref-raynal2016abc">
+
+Raynal, Louis, Jean-Michel Marin, Pierre Pudlo, Mathieu Ribatet,
+Christian P Robert, and Arnaud Estoup. 2016. “ABC Random Forests for
+Bayesian Parameter Inference.” *arXiv Preprint arXiv:1605.05537*.
+
+</div>
+
+<div id="ref-wright2015ranger">
+
+Wright, Marvin N, and Andreas Ziegler. 2015. “Ranger: A Fast
+Implementation of Random Forests for High Dimensional Data in C++ and
+R.” *arXiv Preprint arXiv:1508.04409*.
+
+</div>
+
+</div>

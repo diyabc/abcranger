@@ -48,7 +48,7 @@ Three files are created :
 ```text
  - ABC Random Forest/Model parameter estimation command line options
 Usage:
-  ..\..\build\EstimParam.exe [OPTION...]
+  EstimParam [OPTION...]
 
   -h, --header arg        Header file (default: headerRF.txt)
   -r, --reftable arg      Reftable file (default: reftableRF.bin)
@@ -76,7 +76,7 @@ Five files (or seven if pls activated) are created :
 - `estimparam_out.ooberror` : OOB MSE rate vs number of trees (line number is the number of trees)
 - `estimparam_out.importance` : variables importance (sorted)
 - `estimparam_out.predictions` : expectation, variance and 0.05, 0.5, 0.95 quantile for prediction
-- `estimparam_out.predweights` : weights of the prediction (for density plot)
+- `estimparam_out.predweights` : csv of the value/weights pairs of the prediction (for density plot)
 - `estimparam_out.teststats` : various statistics on test (MSE, NMSE, NMAE etc.)
 
 if pls enabled :

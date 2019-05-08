@@ -112,7 +112,7 @@ if pls enabled :
 
 - [ ] Fix travis build. Currently the vcpkg download of eigen3 head is broken.
 - [ ] osX travis build
-- [ ] Appeveyor win32 build
+- [ ] Appveyor win32 build
 
 ## Long/Mid term TODO
 

@@ -48,7 +48,7 @@ Three files are created :
 ```text
  - ABC Random Forest/Model parameter estimation command line options
 Usage:
-  ..\..\build\EstimParam.exe [OPTION...]
+  EstimParam [OPTION...]
 
   -h, --header arg        Header file (default: headerRF.txt)
   -r, --reftable arg      Reftable file (default: reftableRF.bin)

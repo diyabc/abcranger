@@ -97,7 +97,7 @@ if pls enabled :
 ### C++ standalone
 
 - [ ] Merge the two methodologies in a single executable with options
-- [ ] Mo ve to another options parser (CLI?)
+- [ ] Move to another options parser (CLI?)
 
 ### External interfaces
 
@@ -117,6 +117,10 @@ if pls enabled :
 
 ## Long/Mid term TODO
 
+- methodologies parameters auto-tuning
+  - auto-discovering the optimal number of trees by monitoring OOB error
+  - auto-limiting number of threads by available memory
+- Streamline the two methodologies (model choice and then parameters estimation)
 - Write our own tree/rf implementation with better storage efficiency than ranger
 - Make functional tests for the two methodologies
 

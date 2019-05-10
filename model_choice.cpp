@@ -9,9 +9,11 @@
 #include "DataDense.h"
 #include "cxxopts.hpp"
 #include <algorithm>
+#include "range/v3/all.hpp"
 
 using namespace ranger;
 using namespace Eigen;
+using namespace ranges;
 
 int main(int argc, char* argv[])
 {
@@ -129,9 +131,18 @@ int main(int argc, char* argv[])
     auto dataptr = forestclass.releaseData();
     auto& datareleased = static_cast<DataDense&>(*dataptr.get());
     size_t ycol = datareleased.getNumCols() - 1;
+    
     for(size_t i = 0; i < preds[0][0].size(); i++) {
-        datareleased.set(ycol,i,preds[0][0][i] == myread.scenarios[i] ? 1.0 : 0.0, machin);  
+        if (!std::isnan(preds[0][0][i]))
+            datareleased.set(ycol,i,preds[0][0][i] == myread.scenarios[i] ? 1.0 : 0.0, machin);
     }
+
+    std::vector<size_t> defined_preds = preds[0][0]
+        | view::enumerate
+        | view::filter([](auto d){ return !std::isnan(d.second); })
+        | view::keys;
+    datareleased.filterRows(defined_preds);
+
     auto statobsreleased = forestclass.releasePred();
     ForestOnlineRegression forestreg;
 

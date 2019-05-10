@@ -42,6 +42,11 @@ class DataDense : public Data
         data.coeffRef(row, col) = value;
     }
 
+    void filterRows(const std::vector<size_t>& f) {
+        data = std::move(data(f,Eigen::all)).eval();
+        num_rows = f.size();
+    }
+
   private:
     Eigen::MatrixXd data;
 };

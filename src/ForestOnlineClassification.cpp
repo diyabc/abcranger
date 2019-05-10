@@ -97,7 +97,7 @@ void ForestOnlineClassification::allocatePredictMemory()
   size_t num_prediction_samples = predict_data->getNumRows();
   class_count = std::vector<std::unordered_map<double, size_t>>(num_prediction_samples);
   predictions = std::vector<std::vector<std::vector<double>>>(3);
-  // Predictions on the training set 
+  // Predictions on the OOB set 
   predictions[0] = std::vector<std::vector<double>>(1,std::vector<double>(num_samples));
   // OOB Error classifications on n-trees (cumulative)
   predictions[2] = std::vector<std::vector<double>>(1,std::vector<double>(num_trees,0.0));

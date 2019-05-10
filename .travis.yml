@@ -69,7 +69,9 @@ deploy:
   provider: releases
   api_key: 
     secure: "PXoNWAKQXJt5kc6LTpf3VAgV10IpP0JiYvJ1b1gD6N2RZXqCuZcgkEnywoIshyuvrSzAqwDA8GI7PmfpzSDS6nq8WvrXIxFzmPNBeEHJX7h0CHc1O1wm7CJusj5JfvHKRokD9JohJ6JYojyy1+RridrxFiSgzoUOVTlje2Aidl3oSV0dC9LEic57e+u4hYDeEQeUsoTjj+ly9ZbL7iNVEHbFdq1VwoISddVgE7xZy+dl3wz/67ofEbpRj0v8gXeVj/ayLiy37puM755r8f0AwhWe0ZAbl8TEVAL2jd/MeqbejtyLPvb0FYsDoWTzALfzPKzyEeOT8N4x80d36JNhxB0I7//FlxhpVlZAJo0q3U6Q4D4phznDlcMlWUjfDw2LXqSc1g/Hnxs2LG4xbManKVSC8pUzH5XuV/r7dcF4opVD7g3QPoNTsHnzmYCeIOI/q9qggaC1i1jcztGn2sq42Kh2pD3Mafv5pqh2uXL9tzqHivbPvvo7+EXgse9bDZ+BhKJ2xDWfl7j6GimD5e8/I9HOcydpp+fZZBWyMa8WH3Rz2lHCMab8BzQgnGfqDyyD9l2gtq+1o7jX8kBGyOvp6MYb8eU6OJWjq/Vb8WLNU8NdY/Mw9kUeH/NPynLhgPLdO0+RwqGq4kjO2EogQKTgXdvt68Ia4syepSFkFKMSKnc="
-  file: "ModelChoice"
+  file: 
+    - "ModelChoice"
+    - "EstimParam"
   skip_cleanup: true
   on:
     repo: fradav/abcranger

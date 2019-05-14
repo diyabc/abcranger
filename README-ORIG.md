@@ -42,7 +42,7 @@ Exemple :
 
 Header, reftable and statobs files should be in the current directory.
 
-Three files are created :
+Four files are created :
 
 - `modelchoice_out.ooberror` : OOB Error rate vs number of trees (line number is the number of trees)
 - `modelchoice_out.importance` : variables importance (sorted)

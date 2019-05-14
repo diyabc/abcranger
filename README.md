@@ -41,7 +41,7 @@ Usage:
       --help              Print help
 ```
 
-Exemple :
+Example :
 
 `ModelChoice -t 10000 -j 8`
 

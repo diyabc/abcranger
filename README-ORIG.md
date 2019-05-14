@@ -9,10 +9,10 @@ Methodologies based on :
 
 Libraries we use :
 
-- [@wright2015ranger] We use our own fork and have tuned forests to do "online" computations (Growing trees AND making predictions at the same time, in order to avoid to store the whole forests in memory).
+- [@wright2015ranger] We use our own fork and have tuned forests to do "online" computations (Growing trees AND making predictions at the same time, in order to avoid to store the whole forest in memory).
 - [@eigenweb]
 
-As a mention, we use LDA and PLS from [@friedman2001elements].
+As a mention, we use our own implementation of LDA and PLS from [@friedman2001elements].
 
 ## Model Choice
 
@@ -35,6 +35,10 @@ Usage:
   -l, --lda               Enable LDA (default: true)
       --help              Print help
 ```
+
+Exemple :
+
+`ModelChoice -t 10000 -j 8`
 
 Header, reftable and statobs files should be in the current directory.
 
@@ -70,6 +74,10 @@ Usage:
       --parameter arg     name of the parameter of interest (mandatory)
       --help              Print help
 ```
+
+Example (working with the dataset in `test/data`) :
+
+`EstimParam -t 1000 -j 8 --parameter ra --chosenscen 1 --ntrain 1000 --ntest 50`
 
 Header, reftable and statobs files should be in the current directory.
 

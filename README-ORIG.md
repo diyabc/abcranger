@@ -98,9 +98,9 @@ if pls enabled :
 
 ### Input/Output
 
-- [ ] Integrate hdf5 routines to save/load reftables/observed stats with associated metadata
-  - [ ] Provide R code to save in hdf5
-  - [ ]  Provide Python code to save in hdf5
+- [ ] Integrate hdf5 (or msgpack?) routines to save/load reftables/observed stats with associated metadata
+  - [ ] Provide R code to save/load the data
+  - [ ]  Provide Python code to save/load the data
 
 ### C++ standalone
 

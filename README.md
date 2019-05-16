@@ -18,9 +18,9 @@ Libraries we use :
 
   - [Ranger](https://github.com/imbs-hl/ranger) (Wright and Ziegler
     [2015](#ref-wright2015ranger)) : we use our own fork and have tuned
-    forests to do “online” computations (Growing trees AND making
+    forests to do “online”\[1\] computations (Growing trees AND making
     predictions at the same time, in order to avoid to store the whole
-    forest in memory)\[1\].
+    forest in memory)\[2\].
   - [Eigen3](http://eigen.tuxfamily.org) (Guennebaud, Jacob, and others
     [2010](#ref-eigenweb))
 
@@ -231,6 +231,13 @@ R.” *arXiv Preprint arXiv:1508.04409*.
 
 </div>
 
-1.  We only use the C++ Core of ranger, which is under [MIT
+1.  The term “online” there and in the code has not the usual meaning it
+    has, as coined in “online machine learning”. We still need the
+    entire training data set at once. Our implementation is an “online”
+    one not by the sequential order of the input data, but by the
+    sequential order of computation of the trees in random forests,
+    which are discarded once computed.
+
+2.  We only use the C++ Core of ranger, which is under [MIT
     License](https://raw.githubusercontent.com/imbs-hl/ranger/master/cpp_version/COPYING),
     same as ours.

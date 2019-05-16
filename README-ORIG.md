@@ -14,7 +14,7 @@ Random forests methodologies for :
 
 Libraries we use :
 
-- [Ranger](https://github.com/imbs-hl/ranger) [@wright2015ranger] : we use our own fork and have tuned forests to do "online"^[The term "online" there and in the code has not the usual meaning it has, as coined in "online machine learning". We still need the entire training data set at once. Our implementation is an "online" one not by the sequential order of the input data, but by the sequential order of computation of the trees in random forests, which are discarded once computed.] computations (Growing trees AND making predictions at the same time, in order to avoid to store the whole forest in memory)^[We only use the C++ Core of ranger, which is under [MIT License](https://raw.githubusercontent.com/imbs-hl/ranger/master/cpp_version/COPYING), same as ours.].
+- [Ranger](https://github.com/imbs-hl/ranger) [@wright2015ranger] : we use our own fork and have tuned forests to do "online"^[The term "online" there and in the code has not the usual meaning it has, as coined in "online machine learning". We still need the entire training data set at once. Our implementation is an "online" one not by the sequential order of the input data, but by the sequential order of computation of the trees in random forests, sequentially computed and then discarded.] computations (Growing trees AND making predictions at the same time, in order to avoid to store the whole forest in memory)^[We only use the C++ Core of ranger, which is under [MIT License](https://raw.githubusercontent.com/imbs-hl/ranger/master/cpp_version/COPYING), same as ours.].
 - [Eigen3](http://eigen.tuxfamily.org) [@eigenweb]
 
 

@@ -236,7 +236,7 @@ R.” *arXiv Preprint arXiv:1508.04409*.
     entire training data set at once. Our implementation is an “online”
     one not by the sequential order of the input data, but by the
     sequential order of computation of the trees in random forests,
-    which are discarded once computed.
+    sequentially computed and then discarded.
 
 2.  We only use the C++ Core of ranger, which is under [MIT
     License](https://raw.githubusercontent.com/imbs-hl/ranger/master/cpp_version/COPYING),

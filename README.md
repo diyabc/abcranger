@@ -165,7 +165,7 @@ if pls enabled :
 ## Documentation
 
   - [ ] Code documentation
-  - [ ] Documentate the build
+  - [ ] Document the build
 
 ## Continuous integration
 

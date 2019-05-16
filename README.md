@@ -232,5 +232,5 @@ R.” *arXiv Preprint arXiv:1508.04409*.
 </div>
 
 1.  We only use the C++ Core of ranger, which is under [MIT
-    Licence](https://raw.githubusercontent.com/imbs-hl/ranger/master/cpp_version/COPYING),
+    License](https://raw.githubusercontent.com/imbs-hl/ranger/master/cpp_version/COPYING),
     same as ours.

@@ -374,12 +374,6 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
 
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
 *.ninja
 # See https://www.dartlang.org/guides/libraries/private-files
 
@@ -409,4 +403,4 @@ obj
 
 packages/
 paket-files/
-.vscode/*.json
+.vscode/

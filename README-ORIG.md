@@ -1,21 +1,23 @@
+<!-- pandoc -f markdown .\README-ORIG.md -t gfm -o .\README.md --bibliography=ref.bib -M link-citations=true -->
+
 # ABC random forests for model choice and parameters estimation
 
 [![Build Status](https://travis-ci.com/fradav/abcranger.svg)](https://travis-ci.com/fradav/abcranger)
 
-Methodologies based on :
+Random forests methodologies for :
 
-- [@pudlo2015reliable]
-- [@raynal2016abc]
+- ABC model choice [@pudlo2015reliable]
+- ABC Bayesian parameter inference [@raynal2016abc]
 
 Libraries we use :
 
-- [@wright2015ranger] We use our own fork and have tuned forests to do "online" computations (Growing trees AND making predictions at the same time, in order to avoid to store the whole forest in memory).
-- [@eigenweb]
+- Ranger [@wright2015ranger] We use our own fork and have tuned forests to do "online" computations (Growing trees AND making predictions at the same time, in order to avoid to store the whole forest in memory).
+- Eigen3 [@eigenweb]
 
 As a mention, we use our own implementation of LDA and PLS from [@friedman2001elements].
 
 There is two sets of binaries, one for model choice ```ModelChoice```, another for parameter estimation ```EstimParam```. Each set contains a Macos/Linux/Windows (x64 only) binary for each platform.
-There are available under the "Releases" tab, "Assets" section (unfold it to see the list).
+There are available within the "[Releases](https://github.com/fradav/abcranger/releases)" tab, under "Assets" section (unfold it to see the list).
 
 Those are pure command line binaries, and they are no prerequisites or library dependencies in order to run them. Just download them and launch them from your terminal software of choice. The usual caveats with command line executable apply there : if you're not proficient with the command line interface of your platform, please learn some basics or ask someone who might help you in those matters. 
 

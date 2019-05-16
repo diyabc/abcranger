@@ -1,6 +1,6 @@
 # ABC random forests for model choice and parameters estimation
 
-[![Build Status](https://travis-ci.com/fradav/abcranger.svg?branch=master)](https://travis-ci.com/fradav/abcranger)
+[![Build Status](https://travis-ci.com/fradav/abcranger.svg)](https://travis-ci.com/fradav/abcranger)
 
 Methodologies based on :
 
@@ -13,6 +13,13 @@ Libraries we use :
 - [@eigenweb]
 
 As a mention, we use our own implementation of LDA and PLS from [@friedman2001elements].
+
+There is two sets of binaries, one for model choice ```ModelChoice```, another for parameter estimation ```EstimParam```. Each set contains a Macos/Linux/Windows (x64 only) binary for each platform.
+There are available under the "Releases" tab, "Assets" section (unfold it to see the list).
+
+Those are pure command line binaries, and they are no prerequisites or library dependencies in order to run them. Just download them and launch them from your terminal software of choice. The usual caveats with command line executable apply there : if you're not proficient with the command line interface of your platform, please learn some basics or ask someone who might help you in those matters. 
+
+As a note, we may add a graphical interface in a near future.
 
 ## Model Choice
 

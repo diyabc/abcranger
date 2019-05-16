@@ -1,6 +1,9 @@
-<!-- pandoc -f markdown .\README-ORIG.md -t gfm -o .\README.md --bibliography=ref.bib -M link-citations=true -->
+---
+title: 'ABC random forests for model choice and parameters estimation'
+link-citations: true
+---
 
-# ABC random forests for model choice and parameters estimation
+<!-- pandoc -f markdown README-ORIG.md -t gfm -o README.md --bibliography=ref.bib -s --toc --toc-depth=1 -->
 
 [![Build Status](https://travis-ci.com/fradav/abcranger.svg)](https://travis-ci.com/fradav/abcranger)
 
@@ -11,8 +14,9 @@ Random forests methodologies for :
 
 Libraries we use :
 
-- Ranger [@wright2015ranger] We use our own fork and have tuned forests to do "online" computations (Growing trees AND making predictions at the same time, in order to avoid to store the whole forest in memory).
-- Eigen3 [@eigenweb]
+- [Ranger](https://github.com/imbs-hl/ranger) [@wright2015ranger] : we use our own fork and have tuned forests to do "online" computations (Growing trees AND making predictions at the same time, in order to avoid to store the whole forest in memory)^[We only use the C++ Core of ranger, which is under [MIT Licence](https://raw.githubusercontent.com/imbs-hl/ranger/master/cpp_version/COPYING), same as ours.].
+- [Eigen3](http://eigen.tuxfamily.org) [@eigenweb]
+
 
 As a mention, we use our own implementation of LDA and PLS from [@friedman2001elements].
 
@@ -23,8 +27,9 @@ Those are pure command line binaries, and they are no prerequisites or library d
 
 As a note, we may add a graphical interface in a near future.
 
-## Model Choice
+# Model Choice
 
+## Usage
 ```text
  - ABC Random Forest/Model choice command line options
 Usage:
@@ -45,12 +50,14 @@ Usage:
       --help              Print help
 ```
 
+## Example
 Example :
 
 `ModelChoice -t 10000 -j 8`
 
 Header, reftable and statobs files should be in the current directory.
 
+## Generated files
 Four files are created :
 
 - `modelchoice_out.ooberror` : OOB Error rate vs number of trees (line number is the number of trees)
@@ -58,8 +65,9 @@ Four files are created :
 - `modelchoice_out.predictions` : votes, prediction and posterior error rate
 - `modelchoice_out.confusion` : OOB Confusion matrix of the classifier
 
-## Parameter Estimation
+# Parameter Estimation
 
+## Usage
 ```text
  - ABC Random Forest/Model parameter estimation command line options
 Usage:
@@ -84,12 +92,14 @@ Usage:
       --help              Print help
 ```
 
+## Example
 Example (working with the dataset in `test/data`) :
 
 `EstimParam -t 1000 -j 8 --parameter ra --chosenscen 1 --ntrain 1000 --ntest 50`
 
 Header, reftable and statobs files should be in the current directory.
 
+## Generated files
 Five files (or seven if pls activated) are created :
 
 - `estimparam_out.ooberror` : OOB MSE rate vs number of trees (line number is the number of trees)
@@ -103,30 +113,30 @@ if pls enabled :
 - `estimparam_out.plsvar` : variance explained by number of components
 - `estimparam_out.plsweights` : variable weight in the first component (sorted by absolute value)
 
-## TODO
+# TODO
 
-### Input/Output
+## Input/Output
 
 - [ ] Integrate hdf5 (or msgpack?) routines to save/load reftables/observed stats with associated metadata
   - [ ] Provide R code to save/load the data
   - [ ]  Provide Python code to save/load the data
 
-### C++ standalone
+## C++ standalone
 
 - [ ] Merge the two methodologies in a single executable with options
 - [ ] Move to another options parser (CLI?)
 
-### External interfaces
+## External interfaces
 
 - [ ] R package
 - [ ] Python package
   
-### Documentation
+## Documentation
 
 - [ ] Code documentation
 - [ ] Documentate the build
 
-### Continuous integration
+## Continuous integration
 
 - [ ] Fix travis build. Currently the vcpkg download of eigen3 head is broken.
 - [ ] osX travis build
@@ -141,4 +151,4 @@ if pls enabled :
 - Write our own tree/rf implementation with better storage efficiency than ranger
 - Make functional tests for the two methodologies
 
-## References
+# References

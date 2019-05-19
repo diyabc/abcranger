@@ -1,6 +1,9 @@
 ---
 title: 'ABC random forests for model choice and parameters estimation'
 link-citations: true
+bibliography: [ref.bib]
+toc: true
+toc-depth: 1
 ---
 
 <!-- pandoc -f markdown README-ORIG.md -t gfm -o README.md --bibliography=ref.bib -s --toc --toc-depth=1 -->
@@ -14,13 +17,13 @@ Random forests methodologies for :
 
 Libraries we use :
 
-- [Ranger](https://github.com/imbs-hl/ranger) [@wright2015ranger] : we use our own fork and have tuned forests to do "online"^[The term "online" there and in the code has not the usual meaning it has, as coined in "online machine learning". We still need the entire training data set at once. Our implementation is an "online" one not by the sequential order of the input data, but by the sequential order of computation of the trees in random forests, sequentially computed and then discarded.] computations (Growing trees AND making predictions at the same time, in order to avoid to store the whole forest in memory)^[We only use the C++ Core of ranger, which is under [MIT License](https://raw.githubusercontent.com/imbs-hl/ranger/master/cpp_version/COPYING), same as ours.].
+- [Ranger](https://github.com/imbs-hl/ranger) [@wright2015ranger] : we use our own fork and have tuned forests to do "online"^[The term "online" there and in the code has not the usual meaning it has, as coined in "online machine learning". We still need the entire training data set at once. Our implementation is an "online" one not by the sequential order of the input data, but by the sequential order of computation of the trees in random forests, sequentially computed and then discarded.] computations (Growing trees AND making predictions in the same pass, which removes the need of in-memory storage of the whole forest)^[We only use the C++ Core of ranger, which is under [MIT License](https://raw.githubusercontent.com/imbs-hl/ranger/master/cpp_version/COPYING), same as ours.].
 - [Eigen3](http://eigen.tuxfamily.org) [@eigenweb]
 
 
-As a mention, we use our own implementation of LDA and PLS from [@friedman2001elements].
+As a mention, we use our own implementation of LDA and PLS from [@friedman2001elements{81, 114}].
 
-There is two sets of binaries, one for model choice ```ModelChoice```, another for parameter estimation ```EstimParam```. Each set contains a Macos/Linux/Windows (x64 only) binary for each platform.
+There is two sets of binaries, one for model choice [```ModelChoice```](#model-choice), another for parameter estimation [```EstimParam```](#parameter-estimation). Each set contains a Macos/Linux/Windows (x64 only) binary for each platform.
 There are available within the "[Releases](https://github.com/fradav/abcranger/releases)" tab, under "Assets" section (unfold it to see the list).
 
 Those are pure command line binaries, and they are no prerequisites or library dependencies in order to run them. Just download them and launch them from your terminal software of choice. The usual caveats with command line executable apply there : if you're not proficient with the command line interface of your platform, please learn some basics or ask someone who might help you in those matters. 
@@ -66,6 +69,8 @@ Four files are created :
 - `modelchoice_out.confusion` : OOB Confusion matrix of the classifier
 
 # Parameter Estimation
+
+Note : The Pls components are selected within 99% of the explained variance of the output.
 
 ## Usage
 ```text
@@ -117,14 +122,14 @@ if pls enabled :
 
 ## Input/Output
 
-- [ ] Integrate hdf5 (or msgpack?) routines to save/load reftables/observed stats with associated metadata
+- [ ] Integrate hdf5 (or exdir? msgpack?) routines to save/load reftables/observed stats with associated metadata
   - [ ] Provide R code to save/load the data
   - [ ]  Provide Python code to save/load the data
 
 ## C++ standalone
 
-- [ ] Merge the two methodologies in a single executable with options
-- [ ] Move to another options parser (CLI?)
+- [ ] Merge the two methodologies in a single executable with the (almost) the same options
+- [ ] \(Optional) Possibly move to another options parser (CLI?)
 
 ## External interfaces
 

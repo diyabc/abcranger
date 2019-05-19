@@ -93,7 +93,8 @@ Four files are created :
 Note : The Pls components are selected within 99% of the explained
 variance of the output. As in for the
 ![m](https://latex.codecogs.com/png.latex?m "m")th component and for
-![N](https://latex.codecogs.com/png.latex?N "N") samples:
+![N](https://latex.codecogs.com/png.latex?N "N") samples and
+![M](https://latex.codecogs.com/png.latex?M "M") features:
 
   
 ![Yvar^m =
@@ -104,14 +105,14 @@ where
 ![\\hat{y}^{m}](https://latex.codecogs.com/png.latex?%5Chat%7By%7D%5E%7Bm%7D
 "\\hat{y}^{m}") is the ![Y](https://latex.codecogs.com/png.latex?Y "Y")
 scored by the pls for the ![m](https://latex.codecogs.com/png.latex?m
-"m")th component. We take
+"m")th component. We take only the first
 ![n\_{comp}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D
-"n_{comp}") as in :
+"n_{comp}") components as in :
 
   
 ![n\_{comp} = \\underset{y
-\< 0.99\*Yvar\_N}{\\operatorname{argmax}}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D%20%3D%20%5Cunderset%7By%20%3C%200.99%2AYvar_N%7D%7B%5Coperatorname%7Bargmax%7D%7D
-"n_{comp} = \\underset{y \< 0.99*Yvar_N}{\\operatorname{argmax}}")  
+\< 0.99\*Yvar^M}{\\operatorname{argmax}}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D%20%3D%20%5Cunderset%7By%20%3C%200.99%2AYvar%5EM%7D%7B%5Coperatorname%7Bargmax%7D%7D
+"n_{comp} = \\underset{y \< 0.99*Yvar^M}{\\operatorname{argmax}}")  
 
 ## Usage
 

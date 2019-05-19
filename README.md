@@ -110,9 +110,10 @@ scored by the pls for the ![m](https://latex.codecogs.com/png.latex?m
 "n_{comp}") components as in :
 
   
-![n\_{comp} = \\underset{1\\leq{}m\\leq{}M, Yvar^m \\leq{} 0.99\*Yvar^M,
-}{\\operatorname{argmax}}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D%20%3D%20%5Cunderset%7B1%5Cleq%7B%7Dm%5Cleq%7B%7DM%2C%20Yvar%5Em%20%5Cleq%7B%7D%200.99%2AYvar%5EM%2C%20%7D%7B%5Coperatorname%7Bargmax%7D%7D
-"n_{comp} = \\underset{1\\leq{}m\\leq{}M, Yvar^m \\leq{} 0.99*Yvar^M, }{\\operatorname{argmax}}")  
+![n\_{comp} = \\underset{\\forall{m\\in{}\[1,M\]}|Yvar^m
+\\leq{} 0.99\*Yvar^M,
+}{\\operatorname{argmax}}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D%20%3D%20%5Cunderset%7B%5Cforall%7Bm%5Cin%7B%7D%5B1%2CM%5D%7D%7CYvar%5Em%20%5Cleq%7B%7D%200.99%2AYvar%5EM%2C%20%7D%7B%5Coperatorname%7Bargmax%7D%7D
+"n_{comp} = \\underset{\\forall{m\\in{}[1,M]}|Yvar^m \\leq{} 0.99*Yvar^M, }{\\operatorname{argmax}}")  
 
 ## Usage
 

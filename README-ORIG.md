@@ -78,7 +78,7 @@ $$Yvar^m = \frac{\sum_{i=1}^{N}{(\hat{y}^{m}_{i}-\bar{y})^2}}{\sum_{i=1}^{N}{(y_
 where $\hat{y}^{m}$ is the $Y$ scored by the pls for the $m$th component.
 We take only the first $n_{comp}$ components as in :
 
-$$n_{comp} = \underset{y < 0.99*Yvar^M}{\operatorname{argmax}}$$
+$$n_{comp} = \underset{1\leq{}m\leq{}M, Yvar^m \leq{} 0.99*Yvar^M, }{\operatorname{argmax}}$$
 
 ## Usage
 ```text

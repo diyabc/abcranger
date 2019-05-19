@@ -91,7 +91,27 @@ Four files are created :
 # Parameter Estimation
 
 Note : The Pls components are selected within 99% of the explained
-variance of the output.
+variance of the output. As in for the
+![m](https://latex.codecogs.com/png.latex?m "m")th component and for
+![N](https://latex.codecogs.com/png.latex?N "N") samples:
+
+  
+![Yvar^m =
+\\frac{\\sum\_{i=1}^{N}{(\\hat{y}^{m}\_{i}-\\bar{y})^2}}{\\sum\_{i=1}^{N}{(y\_{i}-\\hat{y})^2}}](https://latex.codecogs.com/png.latex?Yvar%5Em%20%3D%20%5Cfrac%7B%5Csum_%7Bi%3D1%7D%5E%7BN%7D%7B%28%5Chat%7By%7D%5E%7Bm%7D_%7Bi%7D-%5Cbar%7By%7D%29%5E2%7D%7D%7B%5Csum_%7Bi%3D1%7D%5E%7BN%7D%7B%28y_%7Bi%7D-%5Chat%7By%7D%29%5E2%7D%7D
+"Yvar^m = \\frac{\\sum_{i=1}^{N}{(\\hat{y}^{m}_{i}-\\bar{y})^2}}{\\sum_{i=1}^{N}{(y_{i}-\\hat{y})^2}}")  
+
+where
+![\\hat{y}^{m}](https://latex.codecogs.com/png.latex?%5Chat%7By%7D%5E%7Bm%7D
+"\\hat{y}^{m}") is the ![Y](https://latex.codecogs.com/png.latex?Y "Y")
+scored by the pls for the ![m](https://latex.codecogs.com/png.latex?m
+"m")th component. We take
+![n\_{comp}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D
+"n_{comp}") as in :
+
+  
+![n\_{comp} = \\underset{y
+\< 0.99\*Yvar\_N}{\\operatorname{argmax}}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D%20%3D%20%5Cunderset%7By%20%3C%200.99%2AYvar_N%7D%7B%5Coperatorname%7Bargmax%7D%7D
+"n_{comp} = \\underset{y \< 0.99*Yvar_N}{\\operatorname{argmax}}")  
 
 ## Usage
 

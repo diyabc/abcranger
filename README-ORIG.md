@@ -71,6 +71,14 @@ Four files are created :
 # Parameter Estimation
 
 Note : The Pls components are selected within 99% of the explained variance of the output.
+As in for the $m$th component and for $N$ samples:
+
+$$Yvar^m = \frac{\sum_{i=1}^{N}{(\hat{y}^{m}_{i}-\bar{y})^2}}{\sum_{i=1}^{N}{(y_{i}-\hat{y})^2}}$$
+
+where $\hat{y}^{m}$ is the $Y$ scored by the pls for the $m$th component.
+We take $n_{comp}$ as in :
+
+$$n_{comp} = \underset{y < 0.99*Yvar_N}{\operatorname{argmax}}$$
 
 ## Usage
 ```text

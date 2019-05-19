@@ -33,6 +33,7 @@ As a note, we may add a graphical interface in a near future.
 # Model Choice
 
 ## Usage
+
 ```text
  - ABC Random Forest/Model choice command line options
 Usage:
@@ -54,6 +55,7 @@ Usage:
 ```
 
 ## Example
+
 Example :
 
 `ModelChoice -t 10000 -j 8`
@@ -61,6 +63,7 @@ Example :
 Header, reftable and statobs files should be in the current directory.
 
 ## Generated files
+
 Four files are created :
 
 - `modelchoice_out.ooberror` : OOB Error rate vs number of trees (line number is the number of trees)
@@ -81,6 +84,7 @@ We take only the first $n_{comp}$ components as in :
 $$n_{comp} = \underset{1\leq{}m\leq{}M, Yvar^m \leq{} 0.99*Yvar^M, }{\operatorname{argmax}}$$
 
 ## Usage
+
 ```text
  - ABC Random Forest/Model parameter estimation command line options
 Usage:
@@ -106,6 +110,7 @@ Usage:
 ```
 
 ## Example
+
 Example (working with the dataset in `test/data`) :
 
 `EstimParam -t 1000 -j 8 --parameter ra --chosenscen 1 --ntrain 1000 --ntest 50`
@@ -113,6 +118,7 @@ Example (working with the dataset in `test/data`) :
 Header, reftable and statobs files should be in the current directory.
 
 ## Generated files
+
 Five files (or seven if pls activated) are created :
 
 - `estimparam_out.ooberror` : OOB MSE rate vs number of trees (line number is the number of trees)

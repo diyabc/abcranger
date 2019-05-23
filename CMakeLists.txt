@@ -54,6 +54,19 @@ endif()
 
 project(abcranger VERSION 0.2.0 LANGUAGES CXX)
 
+include(pmm.cmake)
+
+pmm(
+    # VERBOSE
+    # DEBUG
+    VCPKG
+        REVISION 14bfca23c51ca7bdeea44681677a93be1fbeb5fb
+        TRIPLET ${VCPKG_TARGET_TRIPLET}
+        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] highfive boost-accumulators boost-regex eigen3-head
+        PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
+)
+
+
 include(CTest)
 enable_testing()
 

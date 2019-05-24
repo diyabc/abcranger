@@ -51,7 +51,7 @@ project(abcranger VERSION 0.2.0 LANGUAGES CXX C)
 
 include(pmm.cmake)
 
-if(!USE_MKL)
+if(NOT USE_MKL)
   set(CLAPACK_PKG "clapack")
 endif()
 

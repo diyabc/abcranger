@@ -51,21 +51,15 @@ project(abcranger VERSION 0.2.0 LANGUAGES CXX C)
 
 include(pmm.cmake)
 
-### LAPACK
-if(LAPACK_ROOT)
-  link_directories(${LAPACK_ROOT})
-  include_directories(${LAPACK_ROOT}/../include)
-  include_directories(${LAPACK_ROOT}/../../include)
+if(!USE_MKL)
+  set(CLAPACK_PKG "clapack")
 endif()
-find_package(LAPACK)
+
 
 if(MSVC AND MAKE_STATIC_EXE)
   set(VCPKG_TARGET_TRIPLET "x64-windows-static")
 endif()
 
-if(!USE_MKL)
-  set(CLAPACK_PKG "clapack")
-endif()
 
 pmm(
     # VERBOSE
@@ -76,6 +70,14 @@ pmm(
         REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] highfive boost-accumulators boost-regex eigen3-head ${CLAPACK_PKG}
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
 )
+
+### LAPACK
+if(LAPACK_ROOT)
+  link_directories(${LAPACK_ROOT})
+  include_directories(${LAPACK_ROOT}/../include)
+  include_directories(${LAPACK_ROOT}/../../include)
+endif()
+find_package(LAPACK)
 
 if(MAKE_STATIC_EXE)
   if(MSVC)

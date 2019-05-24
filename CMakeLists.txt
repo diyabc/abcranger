@@ -51,15 +51,15 @@ project(abcranger VERSION 0.2.0 LANGUAGES CXX C)
 
 include(pmm.cmake)
 
-if(NOT USE_MKL)
-  set(LAPACK_PKG "openblas")
-endif()
-
-
 if(MSVC AND MAKE_STATIC_EXE)
   set(VCPKG_TARGET_TRIPLET "x64-windows-static")
 endif()
 
+### LAPACK
+if(LAPACK_ROOT)
+  find_package(LAPACK)
+  link_libraries(${LAPACK_LIBRARIES})
+endif()
 
 pmm(
     # VERBOSE
@@ -67,23 +67,12 @@ pmm(
     VCPKG
         REVISION e37cc662ee29852f45e85961124f62d91acb488a
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] highfive boost-accumulators boost-regex eigen3-head ${LAPACK_PKG}
+        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] highfive boost-accumulators boost-regex eigen3-head
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
 )
 
-### LAPACK
-if(LAPACK_ROOT)
-  link_directories(${LAPACK_ROOT})
-  include_directories(${LAPACK_ROOT}/../include)
-  include_directories(${LAPACK_ROOT}/../../include)
-endif()
-if(NOT USE_MKL)
-  find_package(OpenBLAS CONFIG REQUIRED)
-endif()
-
-find_package(LAPACK)
-
 if(MAKE_STATIC_EXE)
+  message("Static generation ACTIVATED")
   if(MSVC)
     set(CompilerFlags
     CMAKE_CXX_FLAGS
@@ -99,6 +88,19 @@ if(MAKE_STATIC_EXE)
     set(MAKE_STATIC_FLAG_EXE "")
   else()
     set(MAKE_STATIC_FLAG_EXE "-static")
+
+if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    message("USING Clang, checking libc++..")
+    include(CheckCXXSourceCompiles)
+    check_cxx_source_compiles("#include <iostream>
+                               int main() { return _LIBCPP_VERSION; }" USES_LIBCXX)
+	if(USES_LIBCXX)
+         message("USING libc++")
+	 link_libraries(c++ c++abi)
+	endif()
+endif()
+
+
   endif()
 endif()
 
@@ -116,8 +118,8 @@ find_package(Eigen3 CONFIG REQUIRED)
 link_libraries(Eigen3::Eigen)
 if(USE_MKL)
   add_compile_definitions(PRIVATE EIGEN_USE_MKL_ALL)
-else()
-  add_compile_definitions(PRIVATE EIGEN_USE_BLAS EIGEN_USE_LAPACKE)
+  include_directories(${LAPACK_ROOT}/../include)
+  include_directories(${LAPACK_ROOT}/../../include)
 endif()
 
 ### Range v3
@@ -136,7 +138,7 @@ endif()
 add_subdirectory(src)
 include_directories(src)
 
-link_libraries(${LAPACK_LIBRARIES} Threads::Threads)
+link_libraries(Threads::Threads)
 
 ## CXXOPTS
 find_package(cxxopts CONFIG REQUIRED)

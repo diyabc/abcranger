@@ -47,9 +47,19 @@ else()
 endif()
 
 
-project(abcranger VERSION 0.2.0 LANGUAGES CXX)
+project(abcranger VERSION 0.2.0 LANGUAGES CXX C)
 
 include(pmm.cmake)
+
+### LAPACK
+link_directories(${LAPACK_ROOT})
+find_package(LAPACK)
+include_directories(${LAPACK_ROOT}/../include)
+include_directories(${LAPACK_ROOT}/../../include)
+
+if(MSVC AND MAKE_STATIC_EXE)
+  set(VCPKG_TARGET_TRIPLET "x64-windows-static")
+endif()
 
 pmm(
     # VERBOSE
@@ -57,10 +67,24 @@ pmm(
     VCPKG
         REVISION e37cc662ee29852f45e85961124f62d91acb488a
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] highfive boost-accumulators boost-regex eigen3-head intel-mkl
+        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] highfive boost-accumulators boost-regex eigen3-head
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
 )
 
+if(MSVC AND MAKE_STATIC_EXE)
+  set(CompilerFlags
+  CMAKE_CXX_FLAGS
+  CMAKE_CXX_FLAGS_DEBUG
+  CMAKE_CXX_FLAGS_RELEASE
+  CMAKE_C_FLAGS
+  CMAKE_C_FLAGS_DEBUG
+  CMAKE_C_FLAGS_RELEASE
+  )
+  foreach(CompilerFlag ${CompilerFlags})
+  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+  endforeach()
+  set(MAKE_STATIC_EXE "")
+endif()
 
 include(CTest)
 enable_testing()
@@ -70,13 +94,6 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 ### C++ Threads (required by ranger)
 find_package(Threads REQUIRED)
-
-### LAPACK
-link_directories(${LAPACK_ROOT})
-find_package(LAPACK)
-include_directories(${LAPACK_ROOT}/../include)
-include_directories(${LAPACK_ROOT}/../../include)
-
 
 ### Eigen
 find_package(Eigen3 CONFIG REQUIRED)

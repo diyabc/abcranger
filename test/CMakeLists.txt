@@ -32,7 +32,13 @@ foreach(filename ${cxx_files})
 endforeach(filename)
 
 target_sources(readreftable-test PRIVATE ${ABCRANGER_SOURCE_DIR}/readreftable.cpp)
-target_link_libraries(readreftable-test HighFive hdf5::hdf5_cpp-static)
+
+if((NOT MAKE_STATIC_EXE) AND (NOT MSVC))
+    target_link_libraries(readreftable-test HighFive hdf5::hdf5_cpp-static)
+else()
+    target_link_libraries(readreftable-test ${MAKE_STATIC_FLAG_EXE} HighFive hdf5::hdf5_cpp-static)
+endif()
+
 if(MSVC)
     target_link_libraries(readreftable-test Boost::regex)
 endif()

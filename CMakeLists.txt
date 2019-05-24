@@ -36,11 +36,6 @@ IF(MSVC)
   add_compile_options(/permissive-)
   add_subdirectory (wingetopt)
   link_directories (${wingetopt_BINARY_DIR})
-  # https://stackoverflow.com/questions/14172856/compile-with-mt-instead-of-md-using-cmake
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
-else()
-  link_libraries(c++ c++abi)
 endif()
                   
 add_executable(ranger ${PROJECT_cppranger_SRCS})
@@ -60,7 +55,7 @@ pmm(
     # VERBOSE
     # DEBUG
     VCPKG
-        REVISION 14bfca23c51ca7bdeea44681677a93be1fbeb5fb
+        REVISION e37cc662ee29852f45e85961124f62d91acb488a
         TRIPLET ${VCPKG_TARGET_TRIPLET}
         REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] highfive boost-accumulators boost-regex eigen3-head
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
@@ -114,11 +109,27 @@ find_package(fmt CONFIG REQUIRED)
 
 add_subdirectory(test)
 
+
+if(MSVC)
+  # https://stackoverflow.com/questions/14172856/compile-with-mt-instead-of-md-using-cmake
+#  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+#  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+set(CompilerFlags
+        CMAKE_CXX_FLAGS
+        CMAKE_CXX_FLAGS_DEBUG
+        CMAKE_CXX_FLAGS_RELEASE
+        CMAKE_C_FLAGS
+        CMAKE_C_FLAGS_DEBUG
+        CMAKE_C_FLAGS_RELEASE
+        )
+foreach(CompilerFlag ${CompilerFlags})
+  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+endforeach()
+endif()
+
 add_executable(ModelChoice model_choice.cpp)
 add_executable(EstimParam estim_param.cpp)
-target_link_libraries(ModelChoice cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
-target_link_libraries(EstimParam cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
+target_link_libraries(ModelChoice -static cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
+target_link_libraries(EstimParam -static cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
 
-if (CLANG)
-  link_libraries(c++ c++abi)
-endif()
+

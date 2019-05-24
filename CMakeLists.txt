@@ -52,7 +52,7 @@ project(abcranger VERSION 0.2.0 LANGUAGES CXX C)
 include(pmm.cmake)
 
 if(NOT USE_MKL)
-  set(CLAPACK_PKG "clapack")
+  set(LAPACK_PKG "openblas")
 endif()
 
 
@@ -67,7 +67,7 @@ pmm(
     VCPKG
         REVISION e37cc662ee29852f45e85961124f62d91acb488a
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] highfive boost-accumulators boost-regex eigen3-head ${CLAPACK_PKG}
+        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] highfive boost-accumulators boost-regex eigen3-head ${LAPACK_PKG}
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
 )
 
@@ -77,6 +77,10 @@ if(LAPACK_ROOT)
   include_directories(${LAPACK_ROOT}/../include)
   include_directories(${LAPACK_ROOT}/../../include)
 endif()
+if(NOT USE_MKL)
+  find_package(OpenBLAS CONFIG REQUIRED)
+endif()
+
 find_package(LAPACK)
 
 if(MAKE_STATIC_EXE)

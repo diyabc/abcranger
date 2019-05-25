@@ -4,15 +4,6 @@
 // using namespace boost::accumulators;
 // // typedef accumulator_set<double, stats<tag::weighted_tail_quantile<right> >, double> accumulator_t;
 
-#include "ForestOnlineRegression.hpp"
-#include "readstatobs.hpp"
-#include "readreftable.hpp"
-#include "matutils.hpp"
-#include "various.hpp"
-#include "DataDense.h"
-#include "pls-eigen.hpp"
-#include <range/v3/all.hpp>
-
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics.hpp>
 #include <boost/accumulators/statistics/weighted_tail_quantile.hpp>
@@ -22,7 +13,17 @@
 #include <boost/accumulators/statistics/weighted_median.hpp>
 // #include <boost/accumulators/statistics/weighted_extended_p_square.hpp>
 
+#include "ForestOnlineRegression.hpp"
+#include "readstatobs.hpp"
+#include "readreftable.hpp"
+#include "matutils.hpp"
+#include "various.hpp"
+#include "DataDense.h"
+#include "pls-eigen.hpp"
+
+
 #include "cxxopts.hpp"
+#include <range/v3/all.hpp>
 
 namespace bacc = boost::accumulators;
 using namespace ranger;
@@ -183,14 +184,15 @@ int main(int argc, char* argv[])
         pls_file.open(pls_filename, std::ios::out);
         for(auto& v: percentYvar.array()) pls_file << v << std::endl;
         pls_file.close();
-        double p_var_PLS = percentYvar(percentYvar.rows()-1) * p_threshold_PLS;
+        size_t nComposante_sel = percentYvar.size();
+        // double p_var_PLS = percentYvar(percentYvar.rows()-1) * p_threshold_PLS;
 
-        const auto& enum_p_var_PLS = percentYvar
-                            | view::enumerate
-                            | to_vector;  
-        size_t nComposante_sel = 
-            ranges::find_if(enum_p_var_PLS,
-                            [&p_var_PLS](auto v) { return v.second > p_var_PLS; })->first;
+        // const auto& enum_p_var_PLS = percentYvar
+        //                     | view::enumerate
+        //                     | to_vector;  
+        // size_t nComposante_sel = 
+        //     ranges::find_if(enum_p_var_PLS,
+        //                     [&p_var_PLS](auto v) { return v.second > p_var_PLS; })->first;
 
         std::cout << "Selecting only " << nComposante_sel << " pls components." << std::endl;
 
@@ -292,8 +294,8 @@ int main(int argc, char* argv[])
                     return bacc::quantile(accleft, bacc::quantile_probability = prob);
                     }); 
         if (j == 0) {            
-            os << fmt::format("{:>13.3f}{:>13.3f}",expectation,variance);
-            for(auto quant : quants) os << fmt::format("{:>13.3f}",quant);
+            os << fmt::format("{:>13.6f}{:>13.6f}",expectation,variance);
+            for(auto quant : quants) os << fmt::format("{:>13.6f}",quant);
             os << std::endl;
         } else {
             auto reality = ytest(j-1);

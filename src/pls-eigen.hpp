@@ -19,7 +19,7 @@
 
 using namespace Eigen;
 using namespace std;
-
+using namespace ranges;
 
 template<class Derived, class OtherDerived>
 VectorXd pls(const MatrixBase<Derived>& x,
@@ -43,11 +43,14 @@ VectorXd pls(const MatrixBase<Derived>& x,
     VectorXd w(p);
     VectorXd r(p);
     VectorXd t(p);
+    VectorXd res(ncomp);
     // Y.col(0) = y.rowwise() - y.colwise().mean();
     double ymean = y.mean();
     Y.col(0).array() = ymean;
     double SSTO = (y.array() - ymean).array().square().sum();
-    for (auto m = 0; m < ncomp; m++)
+    int m = 0;
+    // for (auto m = 0; m < ncomp; m++)
+    while (m < ncomp)
     {
         XY = X.transpose() * y;
         SelfAdjointEigenSolver<MatrixXd> es( XY.transpose() * XY );
@@ -69,8 +72,26 @@ VectorXd pls(const MatrixBase<Derived>& x,
         double Thetam = Zm.dot(y) / Znorm;
         Y.col(m + 1) = Y.col(m) + Thetam * Zm;
         X -= Zm.rowwise().replicate(p) * ((Zm/Znorm).transpose() * X).asDiagonal();
+        res(m) = (Y.col(m + 1).array() - ymean).array().square().sum() / SSTO;
+        if (m >= 10) {
+            size_t remains = ncomp - m;
+            auto restmp = res(seq(m-10,m)).array();
+            auto lastdiff = restmp
+                | view::sliding(2)
+                | view::transform([remains](const auto& l) -> bool { 
+                    return (2.0 * std::abs(l[1]-l[0])/(l[1]+l[0]) ) > (0.01 / static_cast<double>(remains)) ; });
+            // std::cout << lastdiff << std::endl;
+            auto i = ranges::find(lastdiff,true);
+            if(i == ranges::end(lastdiff)) break;
+        }
+        m++;
+    }
+    if (m < ncomp) {
+        m -= 10;
+        // std::cout << "Stopped PLS at " << m << "th component (total : " << ncomp << ")" << std::endl;
+        res = res(seq(0,m)).eval();
     }
     Projection = R;
-    VectorXd res = (Y.block(0,1,n,ncomp).array() - ymean).array().square().colwise().sum() / SSTO;
+//    VectorXd res = (Y.block(0,1,n,ncomp).array() - ymean).array().square().colwise().sum() / SSTO;
     return res;
 }

@@ -58,6 +58,7 @@ endif()
 ### LAPACK
 if(LAPACK_ROOT)
   find_package(LAPACK)
+  link_directories(${LAPACK_ROOT})
   link_libraries(${LAPACK_LIBRARIES})
 endif()
 

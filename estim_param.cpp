@@ -30,7 +30,6 @@ using namespace ranger;
 using namespace Eigen;
 using namespace ranges;
 
-
 //auto print = [](int i) { std::cout << i << ' '; };
 
 int main(int argc, char* argv[])

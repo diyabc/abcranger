@@ -68,7 +68,7 @@ pmm(
     VCPKG
         REVISION e37cc662ee29852f45e85961124f62d91acb488a
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] highfive boost-accumulators boost-regex eigen3-head
+        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] highfive boost-accumulators boost-regex boost-spirit eigen3-head
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
 )
 

@@ -28,10 +28,14 @@ foreach(filename ${cxx_files})
     if(target MATCHES "^forest.*")
         target_link_libraries(${target} abcrangerlib)
     endif()
+    if(target MATCHES ".*eigen.*")
+	target_link_libraries(${target} ${TBBLIB})
+    endif()
     catch_discover_tests(${target} WORKING_DIRECTORY ${DATADIR})
 endforeach(filename)
 
 target_sources(readreftable-test PRIVATE ${ABCRANGER_SOURCE_DIR}/readreftable.cpp)
+target_sources(parse_parexpr-test PRIVATE ${ABCRANGER_SOURCE_DIR}/parse_parexpr.cpp)
 
 if((NOT MAKE_STATIC_EXE) AND (NOT MSVC))
     target_link_libraries(readreftable-test HighFive hdf5::hdf5_cpp-static)
@@ -41,6 +45,7 @@ endif()
 
 if(MSVC)
     target_link_libraries(readreftable-test Boost::regex)
+    target_link_libraries(parse_parexpr-test Boost::regex)
 endif()
 
 target_link_libraries(cxxopts-test cxxopts::cxxopts)

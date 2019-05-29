@@ -20,7 +20,7 @@
 #include "various.hpp"
 #include "DataDense.h"
 #include "pls-eigen.hpp"
-
+#include "parse_parexpr.hpp"
 
 #include "cxxopts.hpp"
 #include <range/v3/all.hpp>
@@ -114,14 +114,10 @@ int main(int argc, char* argv[])
     MatrixXd statobs(1, nstat);
     statobs = Map<MatrixXd>(readStatObs("statobsRF.txt").data(), 1, nstat);
 
-    auto param_enum = myread.params_names | view::enumerate | to_vector;
-    const auto& param_found = ranges::find_if(param_enum,
-        [&parameter_of_interest](const auto& s) { return s.second == parameter_of_interest; });
-    if (param_found == ranges::end(param_enum)) {
-        std::cout << "Error : cannot find parameter <" << parameter_of_interest << ">." << std::endl;
-        exit(1);
-    }
-    size_t param_num = param_found->first;
+    std::size_t p1,p2;
+    op_type op;
+    parse_paramexpression(myread.params_names,parameter_of_interest,op, p1, p2);
+
 
     size_t K = myread.nrecscen.size();
     auto nparam = myread.params_names.size();
@@ -138,7 +134,21 @@ int main(int argc, char* argv[])
     }
 
     myread.stats = std::move(myread.stats(indexesModel,all)).eval();
-    myread.params = std::move(myread.params(indexesModel,param_num)).eval();
+    VectorXd paramof(n);
+    switch(op) {
+        case op_type::none : 
+            paramof = myread.params(indexesModel,p1);
+            break;
+        case op_type::divide :
+            paramof = myread.params(indexesModel,p1).array() / myread.params(indexesModel,p2).array();
+            break;
+        case op_type::multiply :
+            paramof = myread.params(indexesModel,p1)*myread.params(indexesModel,p2);
+            break;
+    }
+
+    // myread.params = std::move(myread.params(indexesModel,param_num)).eval();
+    myread.params = paramof;
     if (myread.params.array().isNaN().any()) {
         std::cout << "Error : there is some nan in the parameter data." << std::endl;
         exit(1);

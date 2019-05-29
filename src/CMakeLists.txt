@@ -14,6 +14,7 @@ ${RANGER_SOURCE_DIR}/TreeRegression.cpp
 ${RANGER_SOURCE_DIR}/utility.cpp
 
 ${ABCRANGER_SOURCE_DIR}/readreftable.cpp
+${ABCRANGER_SOURCE_DIR}/parse_parexpr.cpp
 ${ABCRANGER_SOURCE_DIR}/DataDense.cpp
 ${ABCRANGER_SOURCE_DIR}/ForestOnline.cpp
 ${ABCRANGER_SOURCE_DIR}/ForestOnlineClassification.cpp

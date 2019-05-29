@@ -55,6 +55,10 @@ if(MSVC AND MAKE_STATIC_EXE)
   set(VCPKG_TARGET_TRIPLET "x64-windows-static")
 endif()
 
+if((NOT MSVC) AND MAKE_STATIC_EXE AND USE_MKL)
+  set(TBBPKG tbb)
+endif()
+
 ### LAPACK
 if(LAPACK_ROOT)
   find_package(LAPACK)
@@ -68,7 +72,7 @@ pmm(
     VCPKG
         REVISION e37cc662ee29852f45e85961124f62d91acb488a
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] highfive boost-accumulators boost-regex boost-spirit eigen3-head
+        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] highfive boost-accumulators boost-regex eigen3-head ${TBBPKG}
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
 )
 
@@ -147,13 +151,20 @@ find_package(cxxopts CONFIG REQUIRED)
 ## FMT
 find_package(fmt CONFIG REQUIRED)
 
+
+if((NOT MSVC) AND MAKE_STATIC_EXE AND USE_MKL)
+  find_package(TBB CONFIG REQUIRED)
+  set(TBBLIB TBB::tbb)
+endif()
+
 add_subdirectory(test)
+
 
 add_executable(ModelChoice model_choice.cpp)
 add_executable(EstimParam estim_param.cpp)
 
-target_link_libraries(ModelChoice ${MAKE_STATIC_FLAG_EXE} cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
-target_link_libraries(EstimParam ${MAKE_STATIC_FLAG_EXE} cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
+target_link_libraries(ModelChoice ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
+target_link_libraries(EstimParam ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
 
 
 

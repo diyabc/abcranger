@@ -29,22 +29,25 @@ void parse_paramexpression(const std::vector<std::string>& params_str,
     size_t& p2)
 {
     op = op_type::none;
-    const regex param_re(R"#(^(\s+)|(\s+)([/*])(\s+)$)#");
+    const regex param_re(R"#(([^\/\*]+)|((\w+)([\/\*])(\w+)))#");
     smatch base_match;
     if (regex_match(to_parse,base_match,param_re)) {
-        if (base_match.size() == 1) {
-            p1 = find_param(params_str,base_match[0].str());
-        } else if(base_match.size() == 3) {
-            if (base_match[1].str()[0] == '*') 
-                op = op_type::multiply;
-            else if(base_match[1].str()[0] == '/')
-                op = op_type::divide;
-            else {
-                std::cout << "Wrong parameter composition : " << base_match[1].str() << std::endl;
-                exit(1);
+        if (base_match.size() == 6) {
+            if(base_match[1].str().empty()) {
+                if (base_match[4].str()[0] == '*') 
+                    op = op_type::multiply;
+                else if(base_match[4].str()[0] == '/')
+                    op = op_type::divide;
+                else {
+                    std::cout << "Wrong parameter composition : " << base_match[4].str() << std::endl;
+                    exit(1);
+                }
+                p1 = find_param(params_str,base_match[3].str());
+                p2 = find_param(params_str,base_match[5].str());
+
+            } else {
+                p1 = find_param(params_str,base_match[1].str());
             }
-            p1 = find_param(params_str,base_match[0].str());
-            p2 = find_param(params_str,base_match[2].str());
         } else {
             std::cout << "Parser error : " << to_parse << std::endl;
             exit(1);

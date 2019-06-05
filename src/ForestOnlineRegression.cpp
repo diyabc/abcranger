@@ -10,12 +10,6 @@
 #include "TreeRegression.h"
 #include "Data.h"
 
-constexpr std::size_t operator "" _z ( unsigned long long n )
-    { return n; }
-
-auto sz = 5_z;
-static_assert( std::is_same< decltype( sz ), std::size_t >::value, "" );
-
 using namespace ranges;
 
 namespace ranger
@@ -67,20 +61,16 @@ void ForestOnlineRegression::allocatePredictMemory()
     // OOB square error on n-trees (cumulative)
   predictions[2] = std::vector<std::vector<double>>(1,std::vector<double>(num_trees,0.0));
   // tree predictions
-  predictions[3] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
+  samples_terminalnodes = std::vector<size_t>(num_samples);
+  // predictions[3] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
 
-  if (predict_all || prediction_type == TERMINALNODES)
-  {
-    /// predictions on data
-    predictions[1] = std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees));
-    // Weights
+  if (predict_all) 
     predictions[4] = std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_samples,0.0));
-  }
-  else
-  {
-    /// predictions on data
-    predictions[1] = std::vector<std::vector<double>>(1, std::vector<double>(num_prediction_samples));
-  }
+  if (prediction_type == TERMINALNODES)
+    predictions[1] = std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees));
+  else   /// predictions on data
+    predictions[1] = std::vector<std::vector<double>>(1, std::vector<double>(num_prediction_samples,0.0));
+  
 }
 
 void ForestOnlineRegression::predictInternal(size_t tree_idx)
@@ -106,34 +96,25 @@ void ForestOnlineRegression::predictInternal(size_t tree_idx)
 
   for (size_t sample_idx = 0; sample_idx < predict_data->getNumRows(); ++sample_idx)
   {
-    if (predict_all || prediction_type == TERMINALNODES)
-    {
-      if (prediction_type == TERMINALNODES)
-      {
+    if (prediction_type == TERMINALNODES)
         predictions[1][sample_idx][tree_idx] = static_cast<double>(getTreePredictionTerminalNodeID(tree_idx, sample_idx));
-      }
-      else
-      {
-        auto value = getTreePrediction(tree_idx, sample_idx);
-        predictions[1][sample_idx][tree_idx] = value;
+    else {
+      auto value = getTreePrediction(tree_idx, sample_idx);
+      predictions[1][0][sample_idx] += value;
+      if (predict_all) {
+        auto node = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
         size_t Lb = 0;
         for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx) {
-              auto nb = inbag_count[sample_internal_idx];              
-              if (nb > 0 && predictions[3][0][sample_internal_idx] == value) {
+              auto nb = inbag_count[sample_internal_idx];
+              if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) 
                 Lb += nb;
-              }
         }
         for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx) {
               auto nb = inbag_count[sample_internal_idx];
-              if (nb > 0 && predictions[3][0][sample_internal_idx] == value) {
+              if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) 
                 predictions[4][sample_idx][sample_internal_idx] += static_cast<double>(nb)/static_cast<double>(Lb);
-              }
         }
       }
-    }
-    else
-    {
-      predictions[1][0][sample_idx] += getTreePrediction(tree_idx, sample_idx);
     }
   }
 }
@@ -147,10 +128,11 @@ void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx, bool oob)
   const std::vector<size_t>& inbag_count = getInbagCounts(tree_idx);
   for (size_t sample_idx = 0; sample_idx < num_samples; sample_idx++) {
     double value = getTreePrediction(tree_idx, sample_idx);
+    size_t node = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
     auto nb = inbag_count[sample_idx];
-    if (nb > 0) { // INBAG
-      predictions[3][0][sample_idx] = value;
-    } else { // OOB
+    if (nb > 0) // INBAG
+      samples_terminalnodes[sample_idx] = node;
+    else { // OOB
       if(std::isnan(predictions[0][0][sample_idx]))
         predictions[0][0][sample_idx] = 0.0;
       predictions[0][0][sample_idx] += value;
@@ -202,11 +184,15 @@ void ForestOnlineRegression::computePredictionErrorInternal()
 
   overall_prediction_error /= (double)num_predictions;
 
-  if (!(predict_all || prediction_type == TERMINALNODES))
+  if (prediction_type != TERMINALNODES)
     for (auto sample_idx = 0; sample_idx < predict_data->getNumRows(); ++sample_idx)
-    {
       predictions[1][0][sample_idx] /= static_cast<double>(num_trees);
-    }
+
+  if (predict_all)
+    for (size_t sample_idx = 0; sample_idx < predict_data->getNumRows(); ++sample_idx) 
+      for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx)
+        predictions[4][sample_idx][sample_internal_idx] /= static_cast<double>(num_trees);
+          
 }
 
 // #nocov start

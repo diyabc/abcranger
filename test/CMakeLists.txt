@@ -36,6 +36,7 @@ endforeach(filename)
 
 target_sources(readreftable-test PRIVATE ${ABCRANGER_SOURCE_DIR}/readreftable.cpp)
 target_sources(parse_parexpr-test PRIVATE ${ABCRANGER_SOURCE_DIR}/parse_parexpr.cpp)
+target_sources(quantile-test PRIVATE ${ABCRANGER_SOURCE_DIR}/forestQuantiles.cpp)
 
 if((NOT MAKE_STATIC_EXE) AND (NOT MSVC))
     target_link_libraries(readreftable-test HighFive hdf5::hdf5_cpp-static)

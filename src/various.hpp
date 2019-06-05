@@ -2,6 +2,13 @@
 #include <vector>
 #include <memory>
 
+
+constexpr std::size_t operator "" _z ( unsigned long long n )
+    { return n; }
+
+auto sz = 5_z;
+static_assert( std::is_same< decltype( sz ), std::size_t >::value, "" );
+
 std::vector<double> DEFAULT_SAMPLE_FRACTION = std::vector<double>({1});
 
 template <class T_SRC, class T_DEST>

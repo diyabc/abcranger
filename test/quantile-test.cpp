@@ -6,10 +6,11 @@
 #include <boost/accumulators/statistics.hpp>
 #include <boost/accumulators/statistics/weighted_tail_quantile.hpp>
 
+#include "forestQuantiles.hpp"
 
 using namespace boost::accumulators;
 
-TEST_CASE("Quantiles from weighted params") {
+TEST_CASE("Boost quantiles from weighted params") {
     // tolerance in %
     double epsilon = 0.01;
 
@@ -41,4 +42,8 @@ TEST_CASE("Quantiles from weighted params") {
     CHECK( quantile(acc1, quantile_probability = 0.999) ==  Approx(3.090232).epsilon(epsilon));
     CHECK( quantile(acc2, quantile_probability  = 0.025) == Approx(-1.959963).epsilon(epsilon) );
     CHECK( quantile(acc2, quantile_probability  = 0.001) == Approx(-3.090232).epsilon(epsilon) );
+}
+
+TEST_CASE("Moosestein quantiles") {
+    CHECK(true);
 }

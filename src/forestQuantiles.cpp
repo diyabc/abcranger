@@ -1,7 +1,9 @@
 #include "forestQuantiles.hpp"
-#include "various.hpp"
 
 #include <range/v3/all.hpp>
+
+constexpr std::size_t operator "" _z ( unsigned long long n )
+    { return n; }
 
 using namespace ranges;
 

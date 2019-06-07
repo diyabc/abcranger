@@ -279,9 +279,8 @@ int main(int argc, char* argv[])
     std::ostringstream os;
     // os << fmt::format("   real value");
     os << fmt::format("  expectation");
-    os << fmt::format(" expectation2");
     os << fmt::format("     variance");
-    os << fmt::format(" variance.cdf");
+    // os << fmt::format(" variance.cdf");
     for(auto prob : probs) os << fmt::format("  quant. {:>0.2f}",prob);
     os << std::endl;
     bacc::accumulator_set<double, bacc::stats<bacc::tag::mean, 
@@ -296,7 +295,7 @@ int main(int argc, char* argv[])
         
         double expectation = 0.0;
         double variance = 0.0;
-        double variance2 = 0.0;
+        // double variance2 = 0.0;
         for(auto i = 0; i < ntrain; i++) {
             expectation += preds[4][j][i] * y(i);
             if (!std::isnan(preds[0][0][i])) {
@@ -304,11 +303,11 @@ int main(int argc, char* argv[])
                 variance += preds[4][j][i] * rest * rest;
             }
             double rest = y(i) - preds[1][0][j];
-            variance2 += preds[4][j][i] * rest * rest; 
+            // variance2 += preds[4][j][i] * rest * rest; 
         }
         std::vector<double> quants = forestQuantiles(obs,preds[4][j],probs);
         if (j == 0) {            
-            os << fmt::format("{:>13.6f}{:>13.6f}{:>13.6f}",expectation,preds[1][0][j],variance,variance2);
+            os << fmt::format("{:>13.6f}{:>13.6f}{:>13.6f}",expectation,variance);
             for(auto quant : quants) os << fmt::format("{:>13.6f}",quant);
             os << std::endl;
         } else {

@@ -38,8 +38,7 @@ std::vector<double> forestQuantiles(const std::vector<double> &origObs,
     double lastcum = cumweights[n-1];
     cumweights |= action::transform([&lastcum](const auto& d){ return d/lastcum; });
     for(auto qc = 0; qc < quantiles.size(); qc++) {
-        size_t wc = ranges::count_if(cumweights,[&quantiles,qc](auto v){ return v < quantiles[qc]; });
-        bool ind1  = wc <= 1;
+        auto wc = ranges::count_if(cumweights,[&quantiles,qc](auto v){ return v < quantiles[qc]; });
         if (wc <= 1) {
             quant[qc] = obs[0];
         }

@@ -7,8 +7,12 @@
 #include <boost/accumulators/statistics/weighted_tail_quantile.hpp>
 
 #include "forestQuantiles.hpp"
+#include "csv-eigen.hpp"
+#include "range/v3/all.hpp"
+#include "floatvectormatcher.hpp"
 
 using namespace boost::accumulators;
+// using namespace ranges;
 
 TEST_CASE("Boost quantiles from weighted params") {
     // tolerance in %
@@ -25,10 +29,10 @@ TEST_CASE("Boost quantiles from weighted params") {
     boost::variate_generator<boost::lagged_fibonacci607&, boost::normal_distribution<> > normal1(rng, mean_sigma1);
     boost::variate_generator<boost::lagged_fibonacci607&, boost::normal_distribution<> > normal2(rng, mean_sigma2);
 
-    accumulator_set<double, stats<tag::weighted_tail_quantile<right> >, double>
+    accumulator_set<double, stats<tag::weighted_tail_quantile<boost::accumulators::right> >, double>
         acc1(right_tail_cache_size = c);
 
-    accumulator_set<double, stats<tag::weighted_tail_quantile<left> >, double>
+    accumulator_set<double, stats<tag::weighted_tail_quantile<boost::accumulators::left> >, double>
         acc2(left_tail_cache_size = c);
 
     for (std::size_t i = 0; i < n; ++i)
@@ -45,5 +49,13 @@ TEST_CASE("Boost quantiles from weighted params") {
 }
 
 TEST_CASE("Moosestein quantiles") {
-    CHECK(true);
+    MatrixXd data = read_matrix_file("quantiles.csv",',');
+    auto n = data.rows();
+    std::vector<double> obs,weights;
+    std::copy(data.col(0).begin(),data.col(0).end(),std::back_inserter(obs));
+    std::copy(data.col(1).begin(),data.col(1).end(),std::back_inserter(weights));
+    std::vector<double> quants = forestQuantiles(obs,weights,std::vector<double>{0.05,0.5,0.95});
+    std::vector<double> values{0.06682934,0.1994667,0.8464229};
+    for(auto i = 0; i < values.size(); i++)
+        CHECK(quants[i] == Approx(values[i]).epsilon(1e-6));
 }

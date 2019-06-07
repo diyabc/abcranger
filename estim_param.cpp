@@ -18,6 +18,7 @@
 #include <cmath>
 
 #include "ForestOnlineRegression.hpp"
+#include "forestQuantiles.hpp"
 #include "readstatobs.hpp"
 #include "readreftable.hpp"
 #include "matutils.hpp"
@@ -288,15 +289,17 @@ int main(int argc, char* argv[])
             CIacc, CI_relatifacc;
     bacc::accumulator_set<double, bacc::stats<bacc::tag::mean>> 
         MSEacc,NMSEacc, NMAEacc;
+    std::vector<double> obs;
+    std::copy(y.begin(),y.end(),std::back_inserter(obs));
     for(auto j = 0; j < ntest+1; j++) {
         // os << fmt::format("{:>13.3f}",(j == 0? NAN : ytest(j-1)));
-        bacc::accumulator_set<double, bacc::stats<bacc::tag::weighted_tail_quantile<bacc::left> >, double> 
-            accleft(bacc::left_tail_cache_size = ntrain);
+        std::vector<double> obs,weights;
+        weights = preds[4][j];
+        
         double expectation = 0.0;
         double variance = 0.0;
         double variance2 = 0.0;
         for(auto i = 0; i < ntrain; i++) {
-            accleft(y(i), bacc::weight = preds[4][j][i]);
             expectation += preds[4][j][i] * y(i);
             if (!std::isnan(preds[0][0][i])) {
                 double rest = y(i) - preds[0][0][i];
@@ -305,10 +308,7 @@ int main(int argc, char* argv[])
             double rest = y(i) - preds[1][0][j];
             variance2 += preds[4][j][i] * rest * rest; 
         }
-        std::vector<double> quants = probs 
-            | view::transform([&accleft](auto& prob){ 
-                    return bacc::quantile(accleft, bacc::quantile_probability = prob);
-                    }); 
+        std::vector<double> quants = forestQuantiles(obs,weights,probs);
         if (j == 0) {            
             os << fmt::format("{:>13.6f}{:>13.6f}{:>13.6f}",expectation,preds[1][0][j],variance,variance2);
             for(auto quant : quants) os << fmt::format("{:>13.6f}",quant);

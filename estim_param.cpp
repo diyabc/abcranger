@@ -293,8 +293,6 @@ int main(int argc, char* argv[])
     std::copy(y.begin(),y.end(),std::back_inserter(obs));
     for(auto j = 0; j < ntest+1; j++) {
         // os << fmt::format("{:>13.3f}",(j == 0? NAN : ytest(j-1)));
-        std::vector<double> obs,weights;
-        weights = preds[4][j];
         
         double expectation = 0.0;
         double variance = 0.0;
@@ -308,7 +306,7 @@ int main(int argc, char* argv[])
             double rest = y(i) - preds[1][0][j];
             variance2 += preds[4][j][i] * rest * rest; 
         }
-        std::vector<double> quants = forestQuantiles(obs,weights,probs);
+        std::vector<double> quants = forestQuantiles(obs,preds[4][j],probs);
         if (j == 0) {            
             os << fmt::format("{:>13.6f}{:>13.6f}{:>13.6f}",expectation,preds[1][0][j],variance,variance2);
             for(auto quant : quants) os << fmt::format("{:>13.6f}",quant);

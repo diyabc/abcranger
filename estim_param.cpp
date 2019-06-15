@@ -307,7 +307,7 @@ int main(int argc, char* argv[])
         }
         std::vector<double> quants = forestQuantiles(obs,preds[4][j],probs);
         if (j == 0) {            
-            os << fmt::format("{:>13.6f}{:>13.6f}{:>13.6f}",expectation,variance);
+            os << fmt::format("{:>13.6f}{:>13.6f}",expectation,variance);
             for(auto quant : quants) os << fmt::format("{:>13.6f}",quant);
             os << std::endl;
         } else {

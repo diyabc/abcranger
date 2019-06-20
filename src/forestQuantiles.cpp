@@ -57,3 +57,13 @@ std::vector<double> forestQuantiles(const std::vector<double> &origObs,
     }
     return quant;
 }
+
+double median(std::vector<double> vec)
+{
+    size_t size = vec.size();
+    sort(vec.begin(), vec.end());
+
+    size_t mid = size/2;
+
+    return size % 2 == 0 ? (vec[mid] + vec[mid-1]) / 2 : vec[mid];
+}

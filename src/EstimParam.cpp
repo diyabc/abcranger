@@ -1,20 +1,5 @@
 #include <fmt/format.h>
 
-
-// using namespace boost::accumulators;
-// // typedef accumulator_set<double, stats<tag::weighted_tail_quantile<right> >, double> accumulator_t;
-
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics.hpp>
-#include <boost/accumulators/statistics/weighted_tail_quantile.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/weighted_mean.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
-#include <boost/accumulators/statistics/weighted_variance.hpp>
-#include <boost/accumulators/statistics/median.hpp>
-#include <boost/accumulators/statistics/weighted_median.hpp>
-// #include <boost/accumulators/statistics/weighted_extended_p_square.hpp>
-
 #include <cmath>
 
 #include "EstimParam.hpp"
@@ -31,9 +16,6 @@
 #include <fstream>
 #include "range/v3/all.hpp"
 
-
-
-namespace bacc = boost::accumulators;
 using namespace ranger;
 using namespace Eigen;
 using namespace ranges;
@@ -248,6 +230,11 @@ EstimParamResults EstimParam_fun(Reftable &myread,
 
     std::vector<double> probs{0.05,0.5,0.95};
 
+    double MSE = 0;
+    double NMSE = 0;
+    double NMAE = 0;
+    std::vector<double> rCI;
+    std::vector<double> relativeCI;
     std::ostringstream os;
     // os << fmt::format("   real value");
     os << fmt::format("  expectation");
@@ -255,11 +242,6 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     // os << fmt::format(" variance.cdf");
     for(auto prob : probs) os << fmt::format("  quant. {:>0.2f}",prob);
     os << std::endl;
-    bacc::accumulator_set<double, bacc::stats<bacc::tag::mean, 
-                                              bacc::tag::median(bacc::with_p_square_quantile)>>
-            CIacc, CI_relatifacc;
-    bacc::accumulator_set<double, bacc::stats<bacc::tag::mean>> 
-        MSEacc,NMSEacc, NMAEacc;
     std::vector<double> obs;
     std::copy(y.begin(),y.end(),std::back_inserter(obs));
     for(auto j = 0; j < ntest+1; j++) {
@@ -290,11 +272,11 @@ EstimParamResults EstimParam_fun(Reftable &myread,
             auto diff = expectation - reality;
             auto sqdiff = diff * diff;
             auto CI = quants[2] - quants[0];
-            MSEacc(sqdiff);
-            NMSEacc(sqdiff / reality);
-            NMAEacc(std::abs(diff / reality));
-            CIacc(CI);
-            CI_relatifacc(CI / reality);
+            MSE += sqdiff;
+            NMSE += sqdiff / reality;
+            NMAE += std::abs(diff / reality);
+            rCI.push_back(CI);
+            relativeCI.push_back(CI / reality);
         }
     }
     std::cout << os.str();
@@ -312,19 +294,19 @@ EstimParamResults EstimParam_fun(Reftable &myread,
 
     os.clear();
     os.str("");
-    res.MSE = bacc::mean(MSEacc);    
+    res.MSE = MSE/static_cast<double>(ntest); 
     os << fmt::format("{:>19} : {:<13}","MSE", res.MSE) << std::endl;
-    res.NMSE = bacc::mean(NMSEacc);
+    res.NMSE = NMSE/static_cast<double>(ntest);
     os << fmt::format("{:>19} : {:<13}","NMSE", res.NMSE) << std::endl;
-    res.NMAE = bacc::mean(NMAEacc);
+    res.NMAE = NMAE/static_cast<double>(ntest);
     os << fmt::format("{:>19} : {:<13}","NMAE", res.NMAE) << std::endl;
-    res.meanCI = bacc::mean(CIacc);
+    res.meanCI = ranges::accumulate(rCI,0.0)/static_cast<double>(ntest);
     os << fmt::format("{:>19} : {:<13}","mean CI", res.meanCI) << std::endl;
-    res.meanrelativeCI = bacc::mean(CI_relatifacc);
+    res.meanrelativeCI = ranges::accumulate(relativeCI,0.0)/static_cast<double>(ntest);
     os << fmt::format("{:>19} : {:<13}","mean relative CI", res.meanrelativeCI) << std::endl;
-    res.medianCI = bacc::median(CIacc);
+    res.medianCI = median(rCI);
     os << fmt::format("{:>19} : {:<13}","median CI",res.medianCI) << std::endl;
-    res.medianrelativeCI = bacc::median(CI_relatifacc);
+    res.medianrelativeCI = median(relativeCI);
     os << fmt::format("{:>19} : {:<13}","median relative CI", res.medianrelativeCI) << std::endl;
 
     std::cout << std::endl << "Test statistics" << std::endl;

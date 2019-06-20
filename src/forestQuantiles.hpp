@@ -4,3 +4,5 @@
 std::vector<double> forestQuantiles(const std::vector<double>& obs, 
     const std::vector<double>& weights,
     const std::vector<double>& asked);
+
+double median(std::vector<double> v);

@@ -29,6 +29,7 @@ public:
   // Manually set the outputstream for verbose out
   void setverboseOutput(std::ostream* verbose_output);
   void writeConfusionFile() override;
+  std::vector<std::vector<size_t>> getConfusion();
   void writeOOBErrorFile();   
 
 protected:

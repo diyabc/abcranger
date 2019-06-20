@@ -20,6 +20,7 @@ public:
   void writeOOBErrorFile();   
   void writeWeightsFile();
   void writeConfusionFile() override;
+  std::vector<std::pair<double,double>> getWeights();
 
 private:
   void initInternal(std::string status_variable_name) override;

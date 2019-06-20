@@ -261,6 +261,22 @@ void ForestOnlineClassification::writeOOBErrorFile() {
   }
 }
 
+std::vector<std::vector<size_t>> ForestOnlineClassification::getConfusion() {
+  std::vector<std::vector<size_t>> res(class_values.size(),std::vector<size_t>(class_values.size()));
+
+  std::sort(class_values.begin(),class_values.end());
+  double classtot;
+  double classok;
+  for(auto i = 0; i < class_values.size(); i++)
+    for(auto j = 0; j < class_values.size(); j++) {
+      size_t predicted_value = class_values[i];
+      size_t real_value = class_values[j];
+      res[i][real_value] = classification_table[std::make_pair(real_value, predicted_value)];
+    }
+
+  return res;
+}
+
 void ForestOnlineClassification::writeConfusionFile()
 {
 

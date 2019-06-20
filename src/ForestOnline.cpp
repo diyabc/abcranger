@@ -204,16 +204,8 @@ void ForestOnline::writeOutput() {
   }
 }
 
-void ForestOnline::writeImportanceFile() {
-  // Open importance file for writing
-  std::string filename = output_prefix + ".importance";
-  std::ofstream importance_file;
-  importance_file.open(filename, std::ios::out);
-  if (!importance_file.good()) {
-    throw std::runtime_error("Could not write to importance file: " + filename + ".");
-  }
-
-  std::vector<std::pair<std::string,double>> importanceTable(variable_importance.size());
+std::vector<std::pair<std::string, double>> ForestOnline::getImportance() {
+    std::vector<std::pair<std::string,double>> importanceTable(variable_importance.size());
   // Write importance to file
   for (size_t i = 0; i < variable_importance.size(); ++i) {
     size_t varID = i;
@@ -233,6 +225,19 @@ void ForestOnline::writeImportanceFile() {
                                                               }
     );
 
+  return importanceTable;
+}
+
+void ForestOnline::writeImportanceFile() {
+  // Open importance file for writing
+  std::string filename = output_prefix + ".importance";
+  std::ofstream importance_file;
+  importance_file.open(filename, std::ios::out);
+  if (!importance_file.good()) {
+    throw std::runtime_error("Could not write to importance file: " + filename + ".");
+  }
+
+  auto importanceTable = getImportance();
 
   for(auto& a : importanceTable) 
     importance_file << a.first << ": " << a.second << std::endl;

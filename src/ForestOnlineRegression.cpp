@@ -220,6 +220,13 @@ void ForestOnlineRegression::writeOOBErrorFile() {
   }
 }
 
+std::vector<std::pair<double,double>> ForestOnlineRegression::getWeights() {
+  std::vector<std::pair<double,double>> res;
+  for (auto sample_idx = 0; sample_idx < num_samples; sample_idx++) 
+    res.push_back(std::make_pair(data->get(sample_idx,dependent_varID),predictions[4][0][sample_idx]));
+  return res;
+}
+
 void ForestOnlineRegression::writeWeightsFile() {
   // Open confusion file for writing
   std::string filename = output_prefix + ".predweights";
@@ -230,9 +237,8 @@ void ForestOnlineRegression::writeWeightsFile() {
     throw std::runtime_error("Could not write to predweights file: " + filename + ".");
   }
   outfile << "value,weight" << std::endl;
-  for (auto sample_idx = 0; sample_idx < num_samples; sample_idx++) {
-    outfile << data->get(sample_idx,dependent_varID) << "," << predictions[4][0][sample_idx] << std::endl;
-  }
+  for(auto& kv: getWeights())
+    outfile << kv.first << "," << kv.second << std::endl;
 }
 
 void ForestOnlineRegression::writeConfusionFile()

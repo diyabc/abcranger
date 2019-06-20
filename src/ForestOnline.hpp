@@ -45,6 +45,7 @@ public:
   virtual void writeConfusionFile() = 0;
   virtual void writePredictionFile() = 0;
   void writeImportanceFile();
+  std::vector<std::pair<std::string,double>> getImportance();
 
   // Save ForestOnline to file
   void saveToFile();

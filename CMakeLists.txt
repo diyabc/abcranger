@@ -160,8 +160,8 @@ endif()
 add_subdirectory(test)
 
 
-add_executable(ModelChoice model_choice.cpp)
-add_executable(EstimParam estim_param.cpp)
+add_executable(ModelChoice ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp model_choice.cpp)
+add_executable(EstimParam ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp estim_param.cpp)
 
 target_link_libraries(ModelChoice ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
 target_link_libraries(EstimParam ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)

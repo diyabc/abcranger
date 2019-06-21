@@ -51,6 +51,10 @@ project(abcranger VERSION 0.2.0 LANGUAGES CXX C)
 
 include(pmm.cmake)
 
+if(MSVC)
+  set(BOOSTREGEX "boost-regex")
+endif()
+
 if(MSVC AND MAKE_STATIC_EXE)
   set(VCPKG_TARGET_TRIPLET "x64-windows-static")
 endif()
@@ -72,7 +76,7 @@ pmm(
     VCPKG
         REVISION e37cc662ee29852f45e85961124f62d91acb488a
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] highfive boost-accumulators boost-regex eigen3-head ${TBBPKG}
+        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] highfive eigen3-head ${TBBPKG} ${BOOSTREGEX}
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
 )
 

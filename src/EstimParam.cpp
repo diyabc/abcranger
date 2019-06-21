@@ -23,7 +23,7 @@ using namespace ranges;
 EstimParamResults EstimParam_fun(Reftable &myread,
                                  std::vector<double> origobs,
                                  const cxxopts::ParseResult &opts,
-                                 bool quie)
+                                 bool quiet)
 {
     size_t nref, ntree, nthreads, noisecols, seed, minnodesize, ntrain, ntest;
     std::string outfile, parameter_of_interest;
@@ -137,35 +137,27 @@ EstimParamResults EstimParam_fun(Reftable &myread,
 
         const std::string& pls_filename = outfile + ".plsvar";
         std::ofstream pls_file;
-        pls_file.open(pls_filename, std::ios::out);
+        if (!quiet) pls_file.open(pls_filename, std::ios::out);
         res.plsvar = std::vector<double>(percentYvar.size());
         for(auto i = 0; i < percentYvar.size(); i++) {
-            pls_file << percentYvar(i) << std::endl;
+            if (!quiet) pls_file << percentYvar(i) << std::endl;
             res.plsvar[i] = percentYvar(i);
         }
-        pls_file.close();
+        if (!quiet) pls_file.close();
         size_t nComposante_sel = percentYvar.size();
-        // double p_var_PLS = percentYvar(percentYvar.rows()-1) * p_threshold_PLS;
 
-        // const auto& enum_p_var_PLS = percentYvar
-        //                     | view::enumerate
-        //                     | to_vector;  
-        // size_t nComposante_sel = 
-        //     ranges::find_if(enum_p_var_PLS,
-        //                     [&p_var_PLS](auto v) { return v.second > p_var_PLS; })->first;
-
-        std::cout << "Selecting only " << nComposante_sel << " pls components." << std::endl;
+        if (!quiet) std::cout << "Selecting only " << nComposante_sel << " pls components." << std::endl;
 
         double sumPlsweights = Projection.col(0).array().abs().sum();
         auto weightedPlsfirst = Projection.col(0)/sumPlsweights;
 
         const std::string& plsweights_filename = outfile + ".plsweights";
         std::ofstream plsweights_file;
-        plsweights_file.open(plsweights_filename, std::ios::out);
+        if (!quiet) plsweights_file.open(plsweights_filename, std::ios::out);
         for(auto& p : view::zip(myread.stats_names, weightedPlsfirst)
             | to_vector
             | action::sort([](auto& a, auto& b){ return std::abs(a.second) > std::abs(b.second); })) {
-                plsweights_file << p.first << " " << p.second << std::endl;
+                if (!quiet) plsweights_file << p.first << " " << p.second << std::endl;
                 res.plsweights.push_back(p);
             }
 
@@ -220,13 +212,13 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     auto preds = forestreg.getPredictions();
     // Variable Importance
     res.variable_importance = forestreg.getImportance();
-    forestreg.writeImportanceFile();
+    if (!quiet) forestreg.writeImportanceFile();
     // OOB error by number of trees
     res.ntree_oob_error = preds[2][0];
-    forestreg.writeOOBErrorFile();
+    if (!quiet) forestreg.writeOOBErrorFile();
     // Values/weights
     res.values_weights = forestreg.getWeights();
-    forestreg.writeWeightsFile();
+    if (!quiet) forestreg.writeWeightsFile();
 
     std::vector<double> probs{0.05,0.5,0.95};
 
@@ -284,13 +276,15 @@ EstimParamResults EstimParam_fun(Reftable &myread,
 
     const std::string& predict_filename = outfile + ".predictions";
     std::ofstream predict_file;
-    predict_file.open(predict_filename, std::ios::out);
-    if (!predict_file.good()) {
-        throw std::runtime_error("Could not write to prediction file: " + predict_filename + ".");
+    if (!quiet)  {
+        predict_file.open(predict_filename, std::ios::out);
+            if (!predict_file.good()) {
+            throw std::runtime_error("Could not write to prediction file: " + predict_filename + ".");
+        }
+        predict_file << os.str();
+        predict_file.flush();
+        predict_file.close();
     }
-    predict_file << os.str();
-    predict_file.flush();
-    predict_file.close();
 
     os.clear();
     os.str("");
@@ -309,19 +303,23 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     res.medianrelativeCI = median(relativeCI);
     os << fmt::format("{:>19} : {:<13}","median relative CI", res.medianrelativeCI) << std::endl;
 
-    std::cout << std::endl << "Test statistics" << std::endl;
-    std::cout << os.str();
-    std::cout.flush();
+    if (!quiet) {
+        std::cout << std::endl << "Test statistics" << std::endl;
+        std::cout << os.str();
+        std::cout.flush();
+    }
 
     const std::string& teststats_filename = outfile + ".teststats";
     std::ofstream teststats_file;
-    teststats_file.open(teststats_filename, std::ios::out);
-    if (!teststats_file.good()) {
-        throw std::runtime_error("Could not write to teststats file " + teststats_filename + ".");        
+    if (!quiet) {
+        teststats_file.open(teststats_filename, std::ios::out);
+        if (!teststats_file.good()) {
+            throw std::runtime_error("Could not write to teststats file " + teststats_filename + ".");        
+        }
+        teststats_file << os.str();
+        teststats_file.flush();
+        teststats_file.close();
     }
-    teststats_file << os.str();
-    teststats_file.flush();
-    teststats_file.close();
 
     return res;
 }

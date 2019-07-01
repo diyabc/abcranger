@@ -23,9 +23,9 @@ B readAndCast(ifstream& f) {
 
 using namespace std;
 
-Reftable readreftable(string headerpath, string reftablepath, size_t N) {
+Reftable readreftable(string headerpath, string reftablepath, size_t N, bool quiet) {
     ///////////////////////////////////////// read headers
-    cout << "///////////////////////////////////////// read headers" << endl;
+    if (!quiet) cout << "///////////////////////////////////////// read headers" << endl;
     
     ifstream headerStream(headerpath,ios::in);
     headerStream >> noskipws;
@@ -100,10 +100,10 @@ Reftable readreftable(string headerpath, string reftablepath, size_t N) {
     for(sregex_token_iterator it(allstatsname.begin(),allstatsname.end(),splitre2,-1); it != endregexp; it++)
         allcolspre.push_back(*it);
 
-    cout << "read headers done." << endl;
+    if (!quiet) cout << "read headers done." << endl;
     headerStream.close();
      ///////////////////////////////////////// read reftable
-    cout << "///////////////////////////////////////// read reftable" << endl;
+    if (!quiet) cout << "///////////////////////////////////////// read reftable" << endl;
 
 
     ifstream reftableStream(reftablepath,ios::in|ios::binary);
@@ -148,7 +148,7 @@ Reftable readreftable(string headerpath, string reftablepath, size_t N) {
         }
     }
     reftableStream.close();
-    cout << "read reftable done." << endl;
+    if (!quiet) cout << "read reftable done." << endl;
     Reftable reftable = { 
         nrec,
         nrecscen,

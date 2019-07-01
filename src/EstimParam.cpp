@@ -192,7 +192,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
                      (seeded ? seed : r()),                    // seed rd()
                      nthreads,                  // number of threads
                      ImportanceMode::IMP_GINI,  // Default IMP_NONE
-                     0,                         // default min node size (classif = 1, regression 5)
+                     5,                         // default min node size (classif = 1, regression 5)
                      "",                        // status variable name, only for survival
                      false,                     // prediction mode (true = predict)
                      true,                      // replace
@@ -271,8 +271,10 @@ EstimParamResults EstimParam_fun(Reftable &myread,
             relativeCI.push_back(CI / reality);
         }
     }
-    std::cout << os.str();
-    std::cout.flush();
+    if (!quiet) {
+        std::cout << os.str();
+        std::cout.flush();
+    }
 
     const std::string& predict_filename = outfile + ".predictions";
     std::ofstream predict_file;

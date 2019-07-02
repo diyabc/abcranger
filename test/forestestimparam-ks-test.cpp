@@ -26,7 +26,7 @@ TEST_CASE("EstimParam KS distribution")
     std::vector<double> quantiles3R   = E.col(4) | to_vector;
 
     try {
-        std::vector<std::string> args{"EstimParam","--ntree","1000","--parameter","ra","--ntrain","1000","--ntest","50","--chosenscen","1" };
+        std::vector<std::string> args{"EstimParam","--ntree","1000","--parameter","ra","--ntrain","1000","--ntest","50","--chosenscen","1","--nopls" };
         std::vector<char *> argv;
         for(std::string &s: args) argv.push_back(&s[0]);
         argv.push_back(NULL);

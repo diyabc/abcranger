@@ -186,7 +186,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
                      MemoryMode::MEM_DOUBLE,    // memory mode double or float
                      std::move(datastats),    // data
                      std::move(datastatobs),  // predict
-                     static_cast<double>(myreadTrain.stats_names.size()-1)/3.0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
+                     std::max(std::floor(static_cast<double>(myreadTrain.stats_names.size()-1)/3.0),1.0),                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
                      outfile,              // output file name prefix
                      ntree,                     // number of trees
                      (seeded ? seed : r()),                    // seed rd()
@@ -248,7 +248,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
                 double rest = y(i) - preds[0][0][i];
                 variance += preds[4][j][i] * rest * rest;
             }
-            double rest = y(i) - preds[1][0][j];
+            // double rest = y(i) - preds[1][0][j];
             // variance2 += preds[4][j][i] * rest * rest; 
         }
         std::vector<double> quants = forestQuantiles(obs,preds[4][j],probs);

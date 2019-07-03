@@ -87,6 +87,8 @@ TEST_CASE("EstimParam KS distribution")
             quantiles2[i] = res.quantiles[1];
             quantiles3[i] = res.quantiles[2];
         }
+        std::cout << std::endl;
+
         double D,pvalue1,pvalue2,pvalue3,pvalue4,pvalue5;
 
         std::cout << "expectations" << std::endl;

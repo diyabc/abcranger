@@ -92,6 +92,12 @@ TEST_CASE("Check various components of a reftable") {
     test_random_lines(file,"params",myread.params);
 }
 
+TEST_CASE("Check selected scen read") {
+    auto myread = readreftable_scen("headerRF.txt","reftableRF.bin",1);
+    
+    CHECK( true );
+}
+
 TEST_CASE("Read statobs from txt") {
     const auto& readstatobs = readStatObs("statobsRF.txt");
     const auto expected = Catch::Matchers::Approx<std::vector<double>,decltype(readstatobs)>(statobs).epsilon(0.001);

@@ -51,7 +51,6 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
 
     auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(statobs, varwithouty, 1, varwithouty.size()));
     auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, myread.stats_names, myread.nrec, myread.stats_names.size()));
-
     ForestOnlineClassification forestclass;
     forestclass.init("Y",                       // dependant variable
                      MemoryMode::MEM_DOUBLE,    // memory mode double or float
@@ -88,13 +87,13 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
     res.oob_error = forestclass.getOverallPredictionError();
     // Confusion Matrix
     res.confusion_matrix = forestclass.getConfusion();
-    forestclass.writeConfusionFile();
+    if (!quiet) forestclass.writeConfusionFile();
     // Variable Importance
     res.variable_importance = forestclass.getImportance();
-    forestclass.writeImportanceFile();
+    if (!quiet) forestclass.writeImportanceFile();
     // OOB error by number of trees;
     res.ntree_oob_error =  preds[2][0];
-    forestclass.writeOOBErrorFile();
+    if (!quiet) forestclass.writeOOBErrorFile();
 
     vector<size_t> votes(K);
     for(auto& tree_pred : preds[1][0]) votes[static_cast<size_t>(tree_pred-1)]++;
@@ -150,7 +149,15 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
                      false,                     //order_snps
                      DEFAULT_MAXDEPTH);   
 
+
     forestreg.run(true,true);
+
+    // dataptr = forestclass.releaseData();
+    // auto& datareleased2 = static_cast<DataDense&>(*dataptr.get());
+    // datareleased2.data.conservativeResize(NoChange,nstat);
+    // myread.stats = std::move(datareleased2.data);
+
+
     auto predserr = forestreg.getPredictions();
     res.post_proba = predserr[1][0][0];
     const std::string& predict_filename = outfile + ".predictions";
@@ -166,17 +173,19 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
     }
     os << fmt::format("{:>15}", predicted_model + 1);
     os << fmt::format("{:11.3f}\n",predserr[1][0][0]);
-    std::cout << os.str();
+    if (!quiet) std::cout << os.str();
     std::cout.flush();
 
     std::ofstream predict_file;
-    predict_file.open(predict_filename, std::ios::out);
-    if (!predict_file.good()) {
-        throw std::runtime_error("Could not write to prediction file: " + predict_filename + ".");
+    if (!quiet) {
+        predict_file.open(predict_filename, std::ios::out);
+        if (!predict_file.good()) {
+            throw std::runtime_error("Could not write to prediction file: " + predict_filename + ".");
+        }
+        predict_file << os.str();
+        predict_file.flush();
+        predict_file.close();
     }
-    predict_file << os.str();
-    predict_file.flush();
-    predict_file.close();
-
+ 
     return res;
 }

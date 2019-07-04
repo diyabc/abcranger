@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
             ("j,threads","Number of threads, 0 means all",cxxopts::value<size_t>()->default_value("0"))
             ("s,seed","Seed, 0 means generated",cxxopts::value<size_t>()->default_value("0"))
             ("c,noisecolumns","Number of noise columns",cxxopts::value<size_t>()->default_value("5"))
-            ("l,lda","Enable LDA",cxxopts::value<bool>()->default_value("true"))
+            ("nolda","Disable LDA",cxxopts::value<bool>()->default_value("false"))
             ("help", "Print help")
             ;
         const auto opts = options.parse(argc,argv);

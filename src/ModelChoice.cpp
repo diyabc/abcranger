@@ -33,7 +33,7 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
         seed = opts["s"].as<size_t>();
     minnodesize = opts["m"].as<size_t>();
     outfile = opts["o"].as<std::string>();
-    lda = opts["l"].as<bool>();
+    lda =  opts.count("nolda") == 0;
 
     std::vector<double> samplefract{std::min(1e5,static_cast<double>(myread.nrec))/static_cast<double>(myread.nrec)};
     auto nstat = myread.stats_names.size();
@@ -132,7 +132,7 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
                      (seeded ? seed : r()),                    // seed rd()
                      nthreads,                  // number of threads
                      DEFAULT_IMPORTANCE_MODE,  // Default IMP_NONE
-                     0,                         // default min node size (classif = 1, regression 5)
+                     5,                         // default min node size (classif = 1, regression 5)
                      "",                        // status variable name, only for survival
                      false,                     // prediction mode (true = predict)
                      true,                      // replace

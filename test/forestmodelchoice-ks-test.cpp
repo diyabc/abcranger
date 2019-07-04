@@ -21,7 +21,7 @@ TEST_CASE("ModelChoice KS test")
     std::vector<double> postprobasR = E.col(0) | to_vector;
 
     try {
-        std::vector<std::string> args{"ModelChoice","-t","500","-n","3000","-j","8"};
+        std::vector<std::string> args{"ModelChoice","-t","500","-n","3000"};
         std::vector<char *> argv;
         for(std::string &s: args) argv.push_back(&s[0]);
         argv.push_back(NULL);
@@ -43,14 +43,14 @@ TEST_CASE("ModelChoice KS test")
             ("j,threads","Number of threads, 0 means all",cxxopts::value<size_t>()->default_value("0"))
             ("s,seed","Seed, 0 means generated",cxxopts::value<size_t>()->default_value("0"))
             ("c,noisecolumns","Number of noise columns",cxxopts::value<size_t>()->default_value("5"))
-            ("l,lda","Enable LDA",cxxopts::value<bool>()->default_value("true"))
+            ("nolda","Disable LDA",cxxopts::value<bool>()->default_value("false"))
             ("help", "Print help")
             ;
         int argc = argv.size()-1;
         char ** argvc = argv.data();
         const auto opts = options.parse(argc,argvc);
 
-        size_t nrun = E.rows();
+        size_t nrun = 100;
         std::vector<double> postprobas(nrun);
         headerfile = opts["h"].as<std::string>();
         reftablefile = opts["r"].as<std::string>();
@@ -73,7 +73,7 @@ TEST_CASE("ModelChoice KS test")
         std::cout << (postprobas | view::all) << std::endl;
 
         D = KSTest(postprobasR,postprobas);
-        pvalue = 1-psmirnov2x(D,nrun,nrun);
+        pvalue = 1-psmirnov2x(D,E.rows(),nrun);
 
         CHECK( pvalue >= 0.05);
 

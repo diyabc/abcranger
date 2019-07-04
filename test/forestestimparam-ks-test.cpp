@@ -19,6 +19,7 @@ TEST_CASE("EstimParam KS distribution")
     size_t nref;
     std::string headerfile,reftablefile,statobsfile;
     MatrixXd E = read_matrix_file("estimparam_runs.csv",',');
+
     std::vector<double> expectationsR = E.col(0) | to_vector;
     std::vector<double> variancesR    = E.col(1) | to_vector;
     std::vector<double> quantiles1R   = E.col(2) | to_vector;
@@ -64,7 +65,7 @@ TEST_CASE("EstimParam KS distribution")
             exit(0);
         }
 
-        size_t nrun = E.rows();
+        size_t nrun = 100;
         std::vector<double> expectations(nrun),
             variances(nrun),
             quantiles1(nrun),
@@ -107,23 +108,23 @@ TEST_CASE("EstimParam KS distribution")
         std::cout << (quantiles3 | view::all) << std::endl;
 
         D = KSTest(expectationsR,expectations);
-        pvalue1 = 1-psmirnov2x(D,nrun,nrun);
+        pvalue1 = 1-psmirnov2x(D,E.rows(),nrun);
         CHECK( pvalue1 >= 0.05 );
 
         D = KSTest(variancesR,variances);
-        pvalue2 = 1-psmirnov2x(D,nrun,nrun);
+        pvalue2 = 1-psmirnov2x(D,E.rows(),nrun);
         CHECK( pvalue2 >= 0.05 );
 
         D = KSTest(quantiles1R,quantiles1);
-        pvalue3 = 1-psmirnov2x(D,nrun,nrun);
+        pvalue3 = 1-psmirnov2x(D,E.rows(),nrun);
         CHECK( pvalue3 >= 0.05 );
 
         D = KSTest(quantiles2R,quantiles2);
-        pvalue4 = 1-psmirnov2x(D,nrun,nrun);
+        pvalue4 = 1-psmirnov2x(D,E.rows(),nrun);
         CHECK( pvalue4 >= 0.05 );
 
         D = KSTest(quantiles3R,quantiles3);
-        pvalue5 = 1-psmirnov2x(D,nrun,nrun);
+        pvalue5 = 1-psmirnov2x(D,E.rows(),nrun);
         CHECK( pvalue5 >= 0.05 );
     } catch (const cxxopts::OptionException& e)
       {

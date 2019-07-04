@@ -47,7 +47,7 @@ class DataDense : public Data
         num_rows = f.size();
     }
 
-  private:
+  public:
     Eigen::MatrixXd data;
 };
 

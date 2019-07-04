@@ -55,12 +55,11 @@ TEST_CASE("ModelChoice KS test")
         headerfile = opts["h"].as<std::string>();
         reftablefile = opts["r"].as<std::string>();
         statobsfile = opts["b"].as<std::string>();
-
+        auto myread = readreftable(headerfile, reftablefile, 3000,true);
+        const auto statobs = readStatObs(statobsfile);
 
         for(auto i = 0; i < nrun; i++) {
 
-            auto myread = readreftable(headerfile, reftablefile, 3000,true);
-            const auto statobs = readStatObs(statobsfile);
             auto res = ModelChoice_fun(myread,statobs,opts,true);
             std::cout << i << "...";
             std::cout.flush();

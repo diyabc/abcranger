@@ -21,7 +21,7 @@
 ## SOFTWARE.
 
 # Bump this version to change what PMM version is downloaded
-set(PMM_VERSION_INIT 1.3.1)
+set(PMM_VERSION_INIT 1.4.2)
 
 # Helpful macro to set a variable if it isn't already set
 macro(_pmm_set_if_undef varname)
@@ -34,10 +34,9 @@ endmacro()
 # The version:
 _pmm_set_if_undef(PMM_VERSION ${PMM_VERSION_INIT})
 # The base URL we download PMM from:
-_pmm_set_if_undef(PMM_URL_BASE "https://vector-of-bool.github.io/pmm")
+_pmm_set_if_undef(PMM_URL_BASE "http://anotherfoxguy.com/pmm/")
 # The real URL we download from (Based on the version)
-_pmm_set_if_undef(PMM_URL "https://raw.githubusercontent.com/AnotherFoxGuy/pmm/custom-ports/pmm")
-# _pmm_set_if_undef(PMM_URL "${PMM_URL_BASE}/${PMM_VERSION}")
+_pmm_set_if_undef(PMM_URL "${PMM_URL_BASE}/${PMM_VERSION}")
 # The directory where we store our downloaded files
 _pmm_set_if_undef(PMM_DIR_BASE "${CMAKE_BINARY_DIR}/_pmm")
 _pmm_set_if_undef(PMM_DIR "${PMM_DIR_BASE}/${PMM_VERSION}")

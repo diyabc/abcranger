@@ -93,8 +93,12 @@ TEST_CASE("Check various components of a reftable") {
 }
 
 TEST_CASE("Check selected scen read") {
-    auto myread = readreftable_scen("headerRF.txt","reftableRF.bin",1);
-    
+    // auto myread = readreftable_scen("headerRF.txt","reftableRF.bin",1);
+    // File file("reftable.h5", File::ReadOnly);
+    // DataSet statsds = file.getDataSet("stats");
+    // DataSet paramsds = file.getDataSet("params");
+    // std::vector<double> rawstats,rawparams;
+    // statsds.get
     CHECK( true );
 }
 

@@ -152,11 +152,11 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
 
     forestreg.run(true,true);
 
-    // dataptr = forestclass.releaseData();
-    // auto& datareleased2 = static_cast<DataDense&>(*dataptr.get());
-    // datareleased2.data.conservativeResize(NoChange,nstat);
-    // myread.stats = std::move(datareleased2.data);
-
+    auto dataptr2 = forestreg.releaseData();
+    auto& datareleased2 = static_cast<DataDense&>(*dataptr2.get());
+    datareleased2.data.conservativeResize(NoChange,nstat);
+    myread.stats = std::move(datareleased2.data);
+    myread.stats_names.resize(nstat);
 
     auto predserr = forestreg.getPredictions();
     res.post_proba = predserr[1][0][0];
@@ -186,6 +186,7 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
         predict_file.flush();
         predict_file.close();
     }
- 
+
+
     return res;
 }

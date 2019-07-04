@@ -72,10 +72,11 @@ TEST_CASE("EstimParam KS distribution")
             quantiles2(nrun),
             quantiles3(nrun);
 
+        headerfile = opts["h"].as<std::string>();
+        reftablefile = opts["r"].as<std::string>();
+        statobsfile = opts["b"].as<std::string>();
+
         for(auto i = 0; i < nrun; i++) {
-            headerfile = opts["h"].as<std::string>();
-            reftablefile = opts["r"].as<std::string>();
-            statobsfile = opts["b"].as<std::string>();
 
             auto myread = readreftable(headerfile, reftablefile, nref, true);
             const auto statobs = readStatObs(statobsfile);

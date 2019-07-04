@@ -220,6 +220,13 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     res.values_weights = forestreg.getWeights();
     if (!quiet) forestreg.writeWeightsFile();
 
+
+    auto dataptr2 = forestreg.releaseData();
+    auto& datareleased2 = static_cast<DataDense&>(*dataptr2.get());
+    datareleased2.data.conservativeResize(NoChange,nstat);
+    myread.stats = std::move(datareleased2.data);
+    myread.stats_names.resize(nstat);
+
     std::vector<double> probs{0.05,0.5,0.95};
 
     double MSE = 0;

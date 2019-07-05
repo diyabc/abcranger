@@ -272,7 +272,6 @@ Reftable readreftable_scen(string headerpath, string reftablepath, size_t sel_sc
 //        reftableStream.read(reinterpret_cast<char *>(&scen),4);
         bool matched = (scen == sel_scen);
         if (matched) {
-            ncount++;
             stats.conservativeResize(stats.rows() + 1,NoChange);
             params.conservativeResize(params.rows() + 1,NoChange);
         }
@@ -294,7 +293,7 @@ Reftable readreftable_scen(string headerpath, string reftablepath, size_t sel_sc
             if (matched) stats(ncount,j) = r;
             // data.set(j,i,r,hasError);
         }
-
+        if (matched) ncount++;
     }
     std::cout << std::endl << "ncount : " << ncount << std::endl;
 

@@ -78,7 +78,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         exit(1);
     }
 
-    myread.stats = std::move(myread.stats(indexesModel,all)).eval();
+    MatrixXd filteredstats = myread.stats(indexesModel,all);
     VectorXd paramof(n);
     switch(op) {
         case op_type::none : 
@@ -93,8 +93,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     }
 
     // myread.params = std::move(myread.params(indexesModel,param_num)).eval();
-    myread.params = paramof;
-    if (myread.params.array().isNaN().any()) {
+    if (paramof.array().isNaN().any()) {
         std::cout << "Error : there is some nan in the parameter data." << std::endl;
         exit(1);
     }
@@ -105,13 +104,13 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     std::vector<size_t> indicesTrain = tosplit | view::take(ntrain);
     std::vector<size_t> indicesTest  = tosplit | view::slice(ntrain,ntrain+ntest);
 
-    VectorXd y = myread.params(indicesTrain,0);
-    MatrixXd x = myread.stats(indicesTrain,all);
+    VectorXd y = paramof(indicesTrain,0);
+    MatrixXd x = filteredstats(indicesTrain,all);
 
     indicesTest = view::ints(static_cast<size_t>(0),n-ntrain)
         | view::sample(ntest,gen);
-    VectorXd ytest = myread.params(indicesTest,0);
-    MatrixXd xtest = myread.stats(indicesTest,all);
+    VectorXd ytest = paramof(indicesTest,0);
+    MatrixXd xtest = filteredstats(indicesTest,all);
     addRows(statobs,xtest);
 
     Reftable myreadTrain = {
@@ -221,11 +220,11 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     if (!quiet) forestreg.writeWeightsFile();
 
 
-    auto dataptr2 = forestreg.releaseData();
-    auto& datareleased2 = static_cast<DataDense&>(*dataptr2.get());
-    datareleased2.data.conservativeResize(NoChange,nstat);
-    myread.stats = std::move(datareleased2.data);
-    myread.stats_names.resize(nstat);
+    // auto dataptr2 = forestreg.releaseData();
+    // auto& datareleased2 = static_cast<DataDense&>(*dataptr2.get());
+    // datareleased2.data.conservativeResize(NoChange,nstat);
+    // myread.stats = std::move(datareleased2.data);
+    // myread.stats_names.resize(nstat);
 
     std::vector<double> probs{0.05,0.5,0.95};
 

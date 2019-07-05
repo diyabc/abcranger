@@ -8,6 +8,7 @@
 #include "floatvectormatcher.hpp"
 
 #include <highfive/H5File.hpp>
+#include <highfive/H5Easy.hpp>
 
 #include "H5Cpp.h"    
 #include <random>
@@ -16,6 +17,9 @@
 #include <vector>
 #include <algorithm>
 #include <numeric>
+
+#include <range/v3/all.hpp>
+using namespace ranges;
 
 std::vector<std::string> readcolnames(H5::DataSet& dataset, const std::string& attr_name) {
     H5::Attribute attr(dataset.openAttribute(attr_name.c_str()));
@@ -93,13 +97,27 @@ TEST_CASE("Check various components of a reftable") {
 }
 
 TEST_CASE("Check selected scen read") {
-    // auto myread = readreftable_scen("headerRF.txt","reftableRF.bin",1);
-    // File file("reftable.h5", File::ReadOnly);
+    auto myread = readreftable_scen("headerRF.txt","reftableRF.bin",1);
+    File file("reftable.h5", File::ReadOnly);
+    MatrixXd statsH5 = H5Easy::load<MatrixXd>(file,"stats");
+    MatrixXd paramsH5 = H5Easy::load<MatrixXd>(file,"params");
+    std::vector<double> scenarios = H5Easy::load<std::vector<double>>(file,"scenarios");
+    double chosenscen = 1.0;
+    std::vector<size_t> indexesModel = scenarios 
+    | view::enumerate
+    | view::filter([chosenscen](const auto& a){ return a.second == chosenscen; })
+    | view::keys;
+
+
+    statsH5 = statsH5(indexesModel,all);
+    for(auto i = 0; i < indexesModel.size(); i++) {
+        const auto& expected = Catch::Matchers::Approx<decltype(statsH5.row(i)),decltype(statsH5.row(i))>(myread.stats.row(i));
+        CHECK_THAT( statsH5.row(i), expected);
+    }
     // DataSet statsds = file.getDataSet("stats");
     // DataSet paramsds = file.getDataSet("params");
     // std::vector<double> rawstats,rawparams;
     // statsds.get
-    CHECK( true );
 }
 
 TEST_CASE("Read statobs from txt") {

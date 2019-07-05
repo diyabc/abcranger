@@ -33,7 +33,7 @@ public:
       uint min_node_size, std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
       const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
       bool predict_all, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
-      PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth);
+      PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth, size_t oob_weights = 0);
   virtual void initInternal(std::string status_variable_name) = 0;
 
   // Grow or predict
@@ -167,6 +167,7 @@ protected:
   uint seed;
   size_t dependent_varID;
   size_t num_samples;
+  size_t num_oob_weights;
   bool prediction_mode;
   MemoryMode memory_mode;
   bool sample_with_replacement;

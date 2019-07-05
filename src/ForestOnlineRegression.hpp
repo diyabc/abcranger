@@ -39,6 +39,9 @@ private:
   std::vector<size_t> samples_terminalnodes;
   // Storing prediction sum by tree
   std::vector<double> prediction_sum;
+  size_t noob_preds;
+  std::vector<size_t> index_oob;
+  std::map<size_t,size_t> oob_index;
   // inbag counts
 //  std::vector<size_t> global_inbag_counts;
 

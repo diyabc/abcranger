@@ -32,7 +32,7 @@ void ForestOnline::init(std::string dependent_variable_name, MemoryMode memory_m
     uint min_node_size, std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
     const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
     bool predict_all, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
-    PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth) {
+    PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth, size_t oob_samples_num) {
 
   // Initialize data with memmode
   this->data = std::move(input_data);
@@ -77,7 +77,8 @@ void ForestOnline::init(std::string dependent_variable_name, MemoryMode memory_m
   this->prediction_type = prediction_type;
   this->num_random_splits = num_random_splits;
   this->max_depth = max_depth;
-
+  this->num_oob_weights = oob_samples_num;
+  
   // Set number of samples and variables
   num_samples = data->getNumRows();
   num_variables = data->getNumCols();

@@ -71,6 +71,7 @@ void ForestOnlineRegression::allocatePredictMemory()
   else   /// predictions on data
     predictions[1] = std::vector<std::vector<double>>(1, std::vector<double>(num_prediction_samples,0.0));
   
+  if (num_oob_weights > 0) predictions.push_back(std::vector<std::vector<double>>(0, std::vector<double>(num_samples,0.0)));
 }
 
 void ForestOnlineRegression::predictInternal(size_t tree_idx)
@@ -137,6 +138,36 @@ void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx, bool oob)
         predictions[0][0][sample_idx] = 0.0;
       predictions[0][0][sample_idx] += value;
       ++samples_oob_count[sample_idx];
+      if (num_oob_weights > 0) {
+        auto tofind = oob_index.find(sample_idx);
+        if (tofind == oob_index.end()) {
+          size_t current_num_oobs = index_oob.size();
+          if (current_num_oobs < num_oob_weights) {
+            predictions[5].push_back(std::vector<double>(num_samples,0.0));
+            index_oob.push_back(sample_idx);
+            tofind = oob_index.emplace(std::make_pair(sample_idx,current_num_oobs)).first;
+          }
+        }
+      }
+    }
+    if (index_oob.size() > 0) {
+      auto tofind = oob_index.find(sample_idx);
+      if (tofind != oob_index.end()) {
+        auto sample_oob_idx = tofind->first;
+        auto node = getTreePredictionTerminalNodeID(tree_idx, sample_oob_idx);
+        size_t Lb = 0;
+        for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx) {
+              auto nb = inbag_count[sample_internal_idx];
+              if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) 
+                Lb += nb;
+        }
+        for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx) {
+              auto nb = inbag_count[sample_internal_idx];
+              if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) 
+                predictions[5][tofind->second][sample_internal_idx] += static_cast<double>(nb)/static_cast<double>(Lb);
+        }
+
+      }
     }
     if (samples_oob_count[sample_idx] > 0) {
       num_predictions++;

@@ -265,7 +265,6 @@ Reftable readreftable_scen(string headerpath, string reftablepath, size_t sel_sc
     MatrixXd stats = MatrixXd::Constant(0,nstat,NAN);
     // DataDouble data(stats,statsname,nrec,nstat + 1);
     // bool hasError;
-    std::cout << "N : " << N << std::endl;
     size_t ncount = 0;
     for(auto i = 0; (i < nrec) && (ncount < N); i++) {
         size_t scen = readAndCast<int,size_t>(reftableStream);
@@ -295,7 +294,6 @@ Reftable readreftable_scen(string headerpath, string reftablepath, size_t sel_sc
         }
         if (matched) ncount++;
     }
-    std::cout << std::endl << "ncount : " << ncount << std::endl;
 
     reftableStream.close();
     if (!quiet) cout << "read reftable done." << endl;

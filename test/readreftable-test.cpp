@@ -108,12 +108,7 @@ TEST_CASE("Check selected scen read") {
     | view::filter([chosenscen](const auto& a){ return a.second == chosenscen; })
     | view::keys;
 
-
-    statsH5 = statsH5(indexesModel,all);
-    for(auto i = 0; i < indexesModel.size(); i++) {
-        const auto& expected = Catch::Matchers::Approx<decltype(statsH5.row(i)),decltype(statsH5.row(i))>(myread.stats.row(i));
-        CHECK_THAT( statsH5.row(i), expected);
-    }
+    CHECK( myread.stats.isApprox(statsH5(indexesModel,all) ));
     // DataSet statsds = file.getDataSet("stats");
     // DataSet paramsds = file.getDataSet("params");
     // std::vector<double> rawstats,rawparams;

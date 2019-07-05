@@ -75,7 +75,7 @@ TEST_CASE("EstimParam KS distribution")
         headerfile = opts["h"].as<std::string>();
         reftablefile = opts["r"].as<std::string>();
         statobsfile = opts["b"].as<std::string>();
-        auto myread = readreftable(headerfile, reftablefile, nref, true);
+        auto myread = readreftable_scen(headerfile, reftablefile, 1, 0, true);
         const auto statobs = readStatObs(statobsfile);
 
         for(auto i = 0; i < nrun; i++) {

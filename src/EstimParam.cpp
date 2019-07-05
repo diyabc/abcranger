@@ -63,32 +63,24 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     op_type op;
     parse_paramexpression(myread.params_names,parameter_of_interest,op, p1, p2);
 
-
-    size_t K = myread.nrecscen.size();
     auto nparam = myread.params_names.size();
 
-    std::vector<size_t> indexesModel = myread.scenarios 
-        | view::enumerate
-        | view::filter([chosenscen](const auto& a){ return a.second == chosenscen; })
-        | view::keys;
-
-    size_t n = indexesModel.size();
+    size_t n = myread.nrec;
     if (n < ntest + ntrain) {
         std::cout << "Error : insufficient samples for the test/train requested sizes (" << n << " samples)." << std::endl;
         exit(1);
     }
 
-    MatrixXd filteredstats = myread.stats(indexesModel,all);
     VectorXd paramof(n);
     switch(op) {
         case op_type::none : 
-            paramof = myread.params(indexesModel,p1);
+            paramof = myread.params(all,p1);
             break;
         case op_type::divide :
-            paramof = myread.params(indexesModel,p1).array() / myread.params(indexesModel,p2).array();
+            paramof = myread.params(all,p1).array() / myread.params(all,p2).array();
             break;
         case op_type::multiply :
-            paramof = myread.params(indexesModel,p1)*myread.params(indexesModel,p2);
+            paramof = myread.params(all,p1)*myread.params(all,p2);
             break;
     }
 
@@ -105,12 +97,12 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     std::vector<size_t> indicesTest  = tosplit | view::slice(ntrain,ntrain+ntest);
 
     VectorXd y = paramof(indicesTrain,0);
-    MatrixXd x = filteredstats(indicesTrain,all);
+    MatrixXd x = myread.stats(indicesTrain,all);
 
     indicesTest = view::ints(static_cast<size_t>(0),n-ntrain)
         | view::sample(ntest,gen);
     VectorXd ytest = paramof(indicesTest,0);
-    MatrixXd xtest = filteredstats(indicesTest,all);
+    MatrixXd xtest = myread.stats(indicesTest,all);
     addRows(statobs,xtest);
 
     Reftable myreadTrain = {

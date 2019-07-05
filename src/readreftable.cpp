@@ -300,8 +300,8 @@ Reftable readreftable_scen(string headerpath, string reftablepath, size_t sel_sc
     reftableStream.close();
     if (!quiet) cout << "read reftable done." << endl;
     Reftable reftable = { 
-        nrec,
-        nrecscen,
+        ncount,
+        {nrecscen[sel_scen-1]},
         nparam,
         params_names,
         stats_names,

@@ -141,7 +141,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
 
     addNoise(myread, statobs, noisecols);
     std::vector<string> varwithouty = myread.stats_names;
-    auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(statobs,varwithouty, ntest + 1, varwithouty.size()));
+    auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(statobs,varwithouty, 1, varwithouty.size()));
     addCols(myread.stats,y);
     myread.stats_names.push_back("Y");
 
@@ -205,6 +205,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     // os << fmt::format("   real value");
     os << fmt::format("  expectation");
     os << fmt::format("     variance");
+    os << fmt::format("    local mae");
     // os << fmt::format(" variance.cdf");
     for(auto prob : probs) os << fmt::format("  quant. {:>0.2f}",prob);
     os << std::endl;
@@ -214,18 +215,20 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         
     double expectation = 0.0;
     double variance = 0.0;
+    double mae = 0.0;
     // double variance2 = 0.0;
     for(auto i = 0; i < ntrain; i++) {
         expectation += preds[4][0][i] * y(i);
         if (!std::isnan(preds[0][0][i])) {
             double rest = y(i) - preds[0][0][i];
             variance += preds[4][0][i] * rest * rest;
+            mae += preds[4][0][i] * std::abs(rest/y(i));
         }
         // double rest = y(i) - preds[1][0][j];
         // variance2 += preds[4][j][i] * rest * rest; 
     }
     std::vector<double> quants = forestQuantiles(obs,preds[4][0],probs);
-    os << fmt::format("{:>13.6f}{:>13.6f}",expectation,variance);
+    os << fmt::format("{:>13.6f}{:>13.6f}{:>13.6f}",expectation,variance,mae);
     res.expectation = expectation;
     res.variance = variance;
     res.quantiles = quants;
@@ -233,20 +236,6 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     os << std::endl;
 
     for(auto j = 0; j < ntest; j++) {
-        // os << fmt::format("{:>13.3f}",(j == 0? NAN : ytest(j-1)));
-        
-        double expectation = 0.0;
-        double variance = 0.0;
-        // double variance2 = 0.0;
-        for(auto i = 0; i < ntrain; i++) {
-            expectation += preds[5][j][i] * y(i);
-            if (!std::isnan(preds[0][0][i])) {
-                double rest = y(i) - preds[0][0][i];
-                variance += preds[5][j][i] * rest * rest;
-            }
-            // double rest = y(i) - preds[1][0][j];
-            // variance2 += preds[4][j][i] * rest * rest; 
-        }
         std::vector<double> quants = forestQuantiles(obs,preds[5][j],probs);
         auto reality = y(forestreg.index_oob[j]);
         auto diff = expectation - reality;

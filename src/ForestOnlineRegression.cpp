@@ -150,25 +150,6 @@ void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx, bool oob)
         }
       }
     }
-    if (index_oob.size() > 0) {
-      auto tofind = oob_index.find(sample_idx);
-      if (tofind != oob_index.end()) {
-        auto sample_oob_idx = tofind->first;
-        auto node = getTreePredictionTerminalNodeID(tree_idx, sample_oob_idx);
-        size_t Lb = 0;
-        for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx) {
-              auto nb = inbag_count[sample_internal_idx];
-              if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) 
-                Lb += nb;
-        }
-        for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx) {
-              auto nb = inbag_count[sample_internal_idx];
-              if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) 
-                predictions[5][tofind->second][sample_internal_idx] += static_cast<double>(nb)/static_cast<double>(Lb);
-        }
-
-      }
-    }
     if (samples_oob_count[sample_idx] > 0) {
       num_predictions++;
       auto real_value = data->get(sample_idx,dependent_varID);
@@ -177,6 +158,24 @@ void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx, bool oob)
 
     }
   }
+  if (index_oob.size() > 0) {
+    for(auto sample_oob_idx : index_oob) {
+      auto node = getTreePredictionTerminalNodeID(tree_idx, sample_oob_idx);
+      size_t Lb = 0;
+      for (size_t sample_internal_idx = 0; sample_internal_idx < num_samples; ++sample_internal_idx) {
+            auto nb = inbag_count[sample_internal_idx];
+            if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) 
+              Lb += nb;
+      }
+      for (size_t sample_internal_idx = 0; sample_internal_idx < num_samples; ++sample_internal_idx) {
+            auto nb = inbag_count[sample_internal_idx];
+            if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) 
+              predictions[5][oob_index[sample_oob_idx]][sample_internal_idx] += static_cast<double>(nb)/static_cast<double>(Lb);
+      }
+
+    }
+  }
+
   predictions[2][0][tree_idx] = se/static_cast<double>(num_predictions);
 }
 

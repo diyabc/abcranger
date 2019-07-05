@@ -7,10 +7,11 @@
 
 int main(int argc, char* argv[])
 {
-    size_t nref;
+    size_t nref, chosenscen;
     std::string headerfile,reftablefile,statobsfile;
  
     try {
+        size_t nref;
         cxxopts::Options options(argv[0], " - ABC Random Forest/Model parameter estimation command line options");
 
         options
@@ -42,11 +43,14 @@ int main(int argc, char* argv[])
             exit(0);
         }
 
+        nref = opts["n"].as<size_t>();
+
+        chosenscen = static_cast<double>(opts["chosenscen"].as<size_t>());
         headerfile = opts["h"].as<std::string>();
         reftablefile = opts["r"].as<std::string>();
         statobsfile = opts["b"].as<std::string>();
 
-        auto myread = readreftable(headerfile, reftablefile, nref);
+        auto myread = readreftable_scen(headerfile, reftablefile, chosenscen, nref);
         const auto statobs = readStatObs(statobsfile);
         auto res = EstimParam_fun(myread,statobs,opts);
 

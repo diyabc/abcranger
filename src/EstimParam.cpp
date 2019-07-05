@@ -66,55 +66,30 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     auto nparam = myread.params_names.size();
 
     size_t n = myread.nrec;
-    if (n < ntest + ntrain) {
-        std::cout << "Error : insufficient samples for the test/train requested sizes (" << n << " samples)." << std::endl;
-        exit(1);
-    }
+    // if (ntest < ntest + ntrain) {
+    //     std::cout << "Error : insufficient samples for the test/train requested sizes (" << n << " samples)." << std::endl;
+    //     exit(1);
+    // }
 
-    VectorXd paramof(n);
+    VectorXd y(n);
     switch(op) {
         case op_type::none : 
-            paramof = myread.params(all,p1);
+            y = myread.params(all,p1);
             break;
         case op_type::divide :
-            paramof = myread.params(all,p1).array() / myread.params(all,p2).array();
+            y = myread.params(all,p1).array() / myread.params(all,p2).array();
             break;
         case op_type::multiply :
-            paramof = myread.params(all,p1)*myread.params(all,p2);
+            y = myread.params(all,p1)*myread.params(all,p2);
             break;
     }
 
     // myread.params = std::move(myread.params(indexesModel,param_num)).eval();
-    if (paramof.array().isNaN().any()) {
+    if (y.array().isNaN().any()) {
         std::cout << "Error : there is some nan in the parameter data." << std::endl;
         exit(1);
     }
 
-    auto tosplit = view::ints(static_cast<size_t>(0),n)
-        | to_vector
-        | action::shuffle(gen);
-    std::vector<size_t> indicesTrain = tosplit | view::take(ntrain);
-    std::vector<size_t> indicesTest  = tosplit | view::slice(ntrain,ntrain+ntest);
-
-    VectorXd y = paramof(indicesTrain,0);
-    MatrixXd x = myread.stats(indicesTrain,all);
-
-    indicesTest = view::ints(static_cast<size_t>(0),n-ntrain)
-        | view::sample(ntest,gen);
-    VectorXd ytest = paramof(indicesTest,0);
-    MatrixXd xtest = myread.stats(indicesTest,all);
-    addRows(statobs,xtest);
-
-    Reftable myreadTrain = {
-        ntrain,
-        myread.nrecscen,
-        myread.nparam,
-        {parameter_of_interest},
-        myread.stats_names,
-        x,
-        y,
-        std::vector<double>{}
-    };
 
     EstimParamResults res;
 
@@ -122,7 +97,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         size_t ncomp_total = static_cast<size_t>(lround(1.0 * static_cast<double>(nstat)));
         MatrixXd Projection;
         RowVectorXd mean,std;
-        VectorXd percentYvar = pls(x,
+        VectorXd percentYvar = pls(myread.stats,
                                 y,
                                 ncomp_total,Projection, mean, std);
 
@@ -154,30 +129,30 @@ EstimParamResults EstimParam_fun(Reftable &myread,
 
         plsweights_file.close();
 
-        auto Xc = (x.array().rowwise()-mean.array()).rowwise()/std.array();
-        addCols(myreadTrain.stats,(Xc.matrix() * Projection).leftCols(nComposante_sel));
+        auto Xc = (myread.stats.array().rowwise()-mean.array()).rowwise()/std.array();
+        addCols(myread.stats,(Xc.matrix() * Projection).leftCols(nComposante_sel));
         auto Xcobs = (statobs.array().rowwise()-mean.array()).rowwise()/std.array();
         addCols(statobs,(Xcobs.matrix() * Projection).leftCols(nComposante_sel));
         for(auto i = 0; i < nComposante_sel; i++)
-            myreadTrain.stats_names.push_back("Comp " + std::to_string(i+1));
+            myread.stats_names.push_back("Comp " + std::to_string(i+1));
 
     }
 
 
-    addNoise(myreadTrain, statobs, noisecols);
-    std::vector<string> varwithouty = myreadTrain.stats_names;
+    addNoise(myread, statobs, noisecols);
+    std::vector<string> varwithouty = myread.stats_names;
     auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(statobs,varwithouty, ntest + 1, varwithouty.size()));
-    addCols(myreadTrain.stats,y);
-    myreadTrain.stats_names.push_back("Y");
+    addCols(myread.stats,y);
+    myread.stats_names.push_back("Y");
 
-    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myreadTrain.stats,myreadTrain.stats_names, ntrain, myreadTrain.stats_names.size()));
+    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats,myread.stats_names, ntrain, myread.stats_names.size()));
 
     ForestOnlineRegression forestreg;
     forestreg.init("Y",                       // dependant variable
                      MemoryMode::MEM_DOUBLE,    // memory mode double or float
                      std::move(datastats),    // data
                      std::move(datastatobs),  // predict
-                     std::max(std::floor(static_cast<double>(myreadTrain.stats_names.size()-1)/3.0),1.0),                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
+                     std::max(std::floor(static_cast<double>(myread.stats_names.size()-1)/3.0),1.0),                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
                      outfile,              // output file name prefix
                      ntree,                     // number of trees
                      (seeded ? seed : r()),                    // seed rd()
@@ -198,7 +173,8 @@ EstimParamResults EstimParam_fun(Reftable &myread,
                      DEFAULT_PREDICTIONTYPE,    // prediction type
                      DEFAULT_NUM_RANDOM_SPLITS, // num_random_splits
                      false,                     //order_snps
-                     DEFAULT_MAXDEPTH);         // max_depth
+                     DEFAULT_MAXDEPTH,
+                     ntest);         // max_depth
     forestreg.run(true,true);
     auto preds = forestreg.getPredictions();
     // Variable Importance
@@ -212,11 +188,11 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     if (!quiet) forestreg.writeWeightsFile();
 
 
-    // auto dataptr2 = forestreg.releaseData();
-    // auto& datareleased2 = static_cast<DataDense&>(*dataptr2.get());
-    // datareleased2.data.conservativeResize(NoChange,nstat);
-    // myread.stats = std::move(datareleased2.data);
-    // myread.stats_names.resize(nstat);
+    auto dataptr2 = forestreg.releaseData();
+    auto& datareleased2 = static_cast<DataDense&>(*dataptr2.get());
+    datareleased2.data.conservativeResize(NoChange,nstat);
+    myread.stats = std::move(datareleased2.data);
+    myread.stats_names.resize(nstat);
 
     std::vector<double> probs{0.05,0.5,0.95};
 
@@ -234,40 +210,53 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     os << std::endl;
     std::vector<double> obs;
     std::copy(y.begin(),y.end(),std::back_inserter(obs));
-    for(auto j = 0; j < ntest+1; j++) {
+
+        
+    double expectation = 0.0;
+    double variance = 0.0;
+    // double variance2 = 0.0;
+    for(auto i = 0; i < ntrain; i++) {
+        expectation += preds[4][0][i] * y(i);
+        if (!std::isnan(preds[0][0][i])) {
+            double rest = y(i) - preds[0][0][i];
+            variance += preds[4][0][i] * rest * rest;
+        }
+        // double rest = y(i) - preds[1][0][j];
+        // variance2 += preds[4][j][i] * rest * rest; 
+    }
+    std::vector<double> quants = forestQuantiles(obs,preds[4][0],probs);
+    os << fmt::format("{:>13.6f}{:>13.6f}",expectation,variance);
+    res.expectation = expectation;
+    res.variance = variance;
+    res.quantiles = quants;
+    for(auto quant : quants) os << fmt::format("{:>13.6f}",quant);
+    os << std::endl;
+
+    for(auto j = 0; j < ntest; j++) {
         // os << fmt::format("{:>13.3f}",(j == 0? NAN : ytest(j-1)));
         
         double expectation = 0.0;
         double variance = 0.0;
         // double variance2 = 0.0;
         for(auto i = 0; i < ntrain; i++) {
-            expectation += preds[4][j][i] * y(i);
+            expectation += preds[5][j][i] * y(i);
             if (!std::isnan(preds[0][0][i])) {
                 double rest = y(i) - preds[0][0][i];
-                variance += preds[4][j][i] * rest * rest;
+                variance += preds[5][j][i] * rest * rest;
             }
             // double rest = y(i) - preds[1][0][j];
             // variance2 += preds[4][j][i] * rest * rest; 
         }
-        std::vector<double> quants = forestQuantiles(obs,preds[4][j],probs);
-        if (j == 0) {            
-            os << fmt::format("{:>13.6f}{:>13.6f}",expectation,variance);
-            res.expectation = expectation;
-            res.variance = variance;
-            res.quantiles = quants;
-            for(auto quant : quants) os << fmt::format("{:>13.6f}",quant);
-            os << std::endl;
-        } else {
-            auto reality = ytest(j-1);
-            auto diff = expectation - reality;
-            auto sqdiff = diff * diff;
-            auto CI = quants[2] - quants[0];
-            MSE += sqdiff;
-            NMSE += sqdiff / reality;
-            NMAE += std::abs(diff / reality);
-            rCI.push_back(CI);
-            relativeCI.push_back(CI / reality);
-        }
+        std::vector<double> quants = forestQuantiles(obs,preds[5][j],probs);
+        auto reality = y(forestreg.index_oob[j]);
+        auto diff = expectation - reality;
+        auto sqdiff = diff * diff;
+        auto CI = quants[2] - quants[0];
+        MSE += sqdiff;
+        NMSE += sqdiff / reality;
+        NMAE += std::abs(diff / reality);
+        rCI.push_back(CI);
+        relativeCI.push_back(CI / reality);
     }
     if (!quiet) {
         std::cout << os.str();

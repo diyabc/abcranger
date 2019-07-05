@@ -27,7 +27,7 @@ TEST_CASE("EstimParam KS distribution")
     std::vector<double> quantiles3R   = E.col(4) | to_vector;
 
     try {
-        std::vector<std::string> args{"EstimParam","--ntree","1000","--parameter","ra","--ntrain","1000","--ntest","50","--chosenscen","1","--nopls" };
+        std::vector<std::string> args{"EstimParam","--ntree","1000","--nref","1000","--parameter","ra","--ntrain","1000","--ntest","50","--chosenscen","1","--nopls" };
         std::vector<char *> argv;
         for(std::string &s: args) argv.push_back(&s[0]);
         argv.push_back(NULL);
@@ -72,10 +72,11 @@ TEST_CASE("EstimParam KS distribution")
             quantiles2(nrun),
             quantiles3(nrun);
 
+        nref = opts["n"].as<size_t>();
         headerfile = opts["h"].as<std::string>();
         reftablefile = opts["r"].as<std::string>();
         statobsfile = opts["b"].as<std::string>();
-        auto myread = readreftable_scen(headerfile, reftablefile, 1, 0, true);
+        auto myread = readreftable_scen(headerfile, reftablefile, 1, nref, true);
         const auto statobs = readStatObs(statobsfile);
 
         for(auto i = 0; i < nrun; i++) {

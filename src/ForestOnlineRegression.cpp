@@ -218,10 +218,15 @@ void ForestOnlineRegression::computePredictionErrorInternal()
     for (auto sample_idx = 0; sample_idx < predict_data->getNumRows(); ++sample_idx)
       predictions[1][0][sample_idx] /= static_cast<double>(num_trees);
 
-  if (predict_all)
+  if (predict_all) {
     for (size_t sample_idx = 0; sample_idx < predict_data->getNumRows(); ++sample_idx) 
       for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx)
         predictions[4][sample_idx][sample_internal_idx] /= static_cast<double>(num_trees);
+
+    for (size_t sample_idx = 0; sample_idx < index_oob.size(); ++sample_idx) 
+      for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx)
+        predictions[5][sample_idx][sample_internal_idx] /= static_cast<double>(samples_oob_count[index_oob[sample_idx]]);
+  }
           
 }
 

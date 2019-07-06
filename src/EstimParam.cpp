@@ -99,7 +99,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         RowVectorXd mean,std;
         VectorXd percentYvar = pls(myread.stats,
                                 y,
-                                ncomp_total,Projection, mean, std);
+                                ncomp_total,Projection, mean, std,true);
 
         const std::string& pls_filename = outfile + ".plsvar";
         std::ofstream pls_file;

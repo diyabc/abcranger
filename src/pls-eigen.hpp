@@ -27,7 +27,8 @@ VectorXd pls(const MatrixBase<Derived>& x,
          size_t ncomp,
          MatrixXd& Projection,
          RowVectorXd& mean,
-         RowVectorXd& std)
+         RowVectorXd& std,
+         bool stopping = false)
 {
     auto n = x.rows();
     auto p = x.cols();
@@ -73,21 +74,15 @@ VectorXd pls(const MatrixBase<Derived>& x,
         Y.col(m + 1) = Y.col(m) + Thetam * Zm;
         X -= Zm.rowwise().replicate(p) * ((Zm/Znorm).transpose() * X).asDiagonal();
         res(m) = (Y.col(m + 1).array() - ymean).array().square().sum() / SSTO;
-        if (m >= 10) {
+        if ((m >= 2) && stopping) {
+            auto lastdiff = res(m) - res(m-1);
+            auto lastmean = (res(m) + res(m-1))/2.0;
             size_t remains = ncomp - m;
-            auto restmp = res(seq(m-10,m)).array();
-            auto lastdiff = restmp
-                | view::sliding(2)
-                | view::transform([remains](const auto& l) -> bool { 
-                    return (2.0 * std::abs(l[1]-l[0])/(l[1]+l[0]) ) > (0.01 / static_cast<double>(remains)) ; });
-            // std::cout << lastdiff << std::endl;
-            auto i = ranges::find(lastdiff,true);
-            if(i == ranges::end(lastdiff)) break;
+            if (lastmean >= 0.99 * remains * lastdiff) break;
         }
         m++;
     }
     if (m < ncomp) {
-        m -= 10;
         // std::cout << "Stopped PLS at " << m << "th component (total : " << ncomp << ")" << std::endl;
         res = res(seq(0,m)).eval();
     }

@@ -83,6 +83,7 @@ VectorXd pls(const MatrixBase<Derived>& x,
         m++;
     }
     if (m < ncomp) {
+        m--;
         // std::cout << "Stopped PLS at " << m << "th component (total : " << ncomp << ")" << std::endl;
         res = res(seq(0,m)).eval();
     }

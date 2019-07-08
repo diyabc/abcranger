@@ -40,10 +40,8 @@ private:
   std::vector<size_t> samples_terminalnodes;
   // Storing prediction sum by tree
   std::vector<double> prediction_sum;
-  size_t noob_preds;
-  std::map<size_t,size_t> oob_index;
-  // inbag counts
-//  std::vector<size_t> global_inbag_counts;
+  // subset of oob for predictions
+  std::map<size_t,size_t> oob_subset;
 
 private:
   double getTreePrediction(size_t tree_idx, size_t sample_idx) const;

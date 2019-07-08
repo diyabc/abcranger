@@ -63,6 +63,13 @@ void ForestOnlineRegression::allocatePredictMemory()
   // tree predictions
   samples_terminalnodes = std::vector<size_t>(num_samples);
   // predictions[3] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
+  if (num_oob_weights > 0) {
+    predictions[5] = std::vector<std::vector<double>>(num_oob_weights,std::vector<double>(num_samples,0));
+    oob_subset = view::ints(static_cast<size_t>(0),num_samples) 
+      | view::sample(num_oob_weights)
+      | view::enumerate
+      | view::transform([](auto p){ return std::make_pair(p.second,static_cast<size_t>(p.first)); });
+  }
 
   if (predict_all) 
     predictions[4] = std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_samples,0.0));
@@ -139,13 +146,19 @@ void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx, bool oob)
       predictions[0][0][sample_idx] += value;
       ++samples_oob_count[sample_idx];
       if (num_oob_weights > 0) {
-        auto tofind = oob_index.find(sample_idx);
-        if (tofind == oob_index.end()) {
-          size_t current_num_oobs = index_oob.size();
-          if (current_num_oobs < num_oob_weights) {
-            predictions[5].push_back(std::vector<double>(num_samples,0.0));
-            index_oob.push_back(sample_idx);
-            tofind = oob_index.emplace(std::make_pair(sample_idx,current_num_oobs)).first;
+        auto tofind = oob_subset.find(sample_idx);
+        if (tofind != oob_subset.end()) {
+          size_t oob_idx = tofind->second;
+          size_t Lb = 0;
+          for (size_t sample_internal_idx = 0; sample_internal_idx < num_samples; ++sample_internal_idx) {
+                auto nb = inbag_count[sample_internal_idx];
+                if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) 
+                  Lb += nb;
+          }
+          for (size_t sample_internal_idx = 0; sample_internal_idx < num_samples; ++sample_internal_idx) {
+                auto nb = inbag_count[sample_internal_idx];
+                if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) 
+                  predictions[5][oob_idx][sample_internal_idx] += static_cast<double>(nb)/static_cast<double>(Lb);
           }
         }
       }
@@ -155,23 +168,6 @@ void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx, bool oob)
       auto real_value = data->get(sample_idx,dependent_varID);
       auto oob_value = predictions[0][0][sample_idx]/static_cast<double>(samples_oob_count[sample_idx]) - real_value;
       se += oob_value * oob_value;
-
-    }
-  }
-  if (index_oob.size() > 0) {
-    for(auto sample_oob_idx : index_oob) {
-      auto node = getTreePredictionTerminalNodeID(tree_idx, sample_oob_idx);
-      size_t Lb = 0;
-      for (size_t sample_internal_idx = 0; sample_internal_idx < num_samples; ++sample_internal_idx) {
-            auto nb = inbag_count[sample_internal_idx];
-            if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) 
-              Lb += nb;
-      }
-      for (size_t sample_internal_idx = 0; sample_internal_idx < num_samples; ++sample_internal_idx) {
-            auto nb = inbag_count[sample_internal_idx];
-            if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) 
-              predictions[5][oob_index[sample_oob_idx]][sample_internal_idx] += static_cast<double>(nb)/static_cast<double>(Lb);
-      }
 
     }
   }
@@ -223,9 +219,9 @@ void ForestOnlineRegression::computePredictionErrorInternal()
       for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx)
         predictions[4][sample_idx][sample_internal_idx] /= static_cast<double>(num_trees);
 
-    for (size_t sample_idx = 0; sample_idx < index_oob.size(); ++sample_idx) 
+    for (auto sample_idx: oob_subset) 
       for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx)
-        predictions[5][sample_idx][sample_internal_idx] /= static_cast<double>(samples_oob_count[index_oob[sample_idx]]);
+        predictions[5][sample_idx.second][sample_internal_idx] /= static_cast<double>(samples_oob_count[sample_idx.first]);
   }
           
 }

@@ -235,9 +235,10 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     for(auto quant : quants) os << fmt::format("{:>13.6f}",quant);
     os << std::endl;
 
-    for(auto j = 0; j < ntest; j++) {
+    for(auto p : forestreg.oob_subset) {
+        size_t j = p.second;
         std::vector<double> quants = forestQuantiles(obs,preds[5][j],probs);
-        auto reality = y(forestreg.index_oob[j]);
+        auto reality = y(p.first);
         auto diff = expectation - reality;
         auto sqdiff = diff * diff;
         auto CI = quants[2] - quants[0];

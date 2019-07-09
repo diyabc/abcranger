@@ -21,7 +21,8 @@ public:
   void writeWeightsFile();
   void writeConfusionFile() override;
   std::vector<std::pair<double,double>> getWeights();
-  std::vector<size_t> index_oob;
+  // subset of oob for predictions
+  std::map<size_t,size_t> oob_subset;
 
 private:
   void initInternal(std::string status_variable_name) override;
@@ -40,8 +41,6 @@ private:
   std::vector<size_t> samples_terminalnodes;
   // Storing prediction sum by tree
   std::vector<double> prediction_sum;
-  // subset of oob for predictions
-  std::map<size_t,size_t> oob_subset;
 
 private:
   double getTreePrediction(size_t tree_idx, size_t sample_idx) const;

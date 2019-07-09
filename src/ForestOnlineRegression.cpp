@@ -55,7 +55,7 @@ void ForestOnlineRegression::growInternal()
 void ForestOnlineRegression::allocatePredictMemory()
 {
   size_t num_prediction_samples = predict_data->getNumRows();
-  predictions = std::vector<std::vector<std::vector<double>>>(5);
+  predictions = std::vector<std::vector<std::vector<double>>>(6);
   /// predictions oob
   predictions[0] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples,NAN));
     // OOB square error on n-trees (cumulative)

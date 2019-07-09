@@ -88,7 +88,7 @@ TEST_CASE("Online Ranger Regressor Distribution")
     //     error.erase(error.begin() + nref,error.end());
     addCols(myread.stats, error);
     colnames.push_back("Y");
-    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, myread.nrec, nstat + 1));
+    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, nref, nstat + 1));
     auto ntree = 50;
     auto nthreads = 8;
     auto ntest = 200;

@@ -33,10 +33,10 @@ static inline void loadbar(size_t x, size_t n, size_t w = 50)
         return;
     float ratio = x / (float)n;
     int c = ratio * w;
+    std::cout << " [";
     for (auto x = 0; x < c; x++)
         std::cout << "=";
     for (auto x = c; x < w; x++)
         std::cout << " ";
-    std::cout << "] " << std::flush;
-    std::cout << std::setw(5) << x << "/" << std::setw(5) << n << "\r";
+    std::cout << "] " << std::setw(5) << x << "/" << std::setw(5) << n << "\r" << std::flush;
 }

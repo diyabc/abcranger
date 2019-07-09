@@ -88,15 +88,15 @@ TEST_CASE("Online Ranger Regressor Distribution")
     //     error.erase(error.begin() + nref,error.end());
     addCols(myread.stats, error);
     colnames.push_back("Y");
-    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, nref, nstat + 1));
     auto ntree = 50;
     auto nthreads = 8;
-    auto ntest = 200;
+    auto ntest = 100;
     std::vector<double> mypredsR(ntest);
 
     for(auto i = 0; i < ntest; i++){
         loadbar(i,ntest);    
         ForestOnlineRegression forestreg;
+        auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, nref, nstat + 1));
         forestreg.init("Y",                       // dependant variable
                         MemoryMode::MEM_DOUBLE,    // memory mode double or float
                         std::move(datastats),    // data
@@ -127,6 +127,8 @@ TEST_CASE("Online Ranger Regressor Distribution")
         auto preds = forestreg.getPredictions();
         mypredsR[i] = preds[1][0][0]; 
         datastats = forestreg.releaseData();
+        auto& datareleased = static_cast<DataDense&>(*datastats.get());
+        myread.stats = std::move(datareleased.data);
         datastatobs = forestreg.releasePred();
     }
     std::cout << (mypredsR | view::all) << std::endl;

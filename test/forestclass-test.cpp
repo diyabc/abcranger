@@ -54,7 +54,7 @@ TEST_CASE( "Standard Ranger classifier" )
                      "originalranger_out",              // output file name prefix
                      ntree,                     // number of trees
                      123456,                    // seed rd()
-                     nthreads,                  // number of threads
+                     0,                  // number of threads
                      DEFAULT_IMPORTANCE_MODE,  // Default IMP_NONE
                      0,                         // default min node size (classif = 1, regression 5)
                      "",                        // status variable name, only for survival

@@ -118,6 +118,8 @@ public:
   const std::vector<std::vector<size_t>>& getSnpOrder() const {
     return data->getSnpOrder();
   }
+  // Verbose output stream, cout if verbose==true, logfile if not
+  std::ostream* verbose_out;
 
 protected:
   void grow();
@@ -156,8 +158,6 @@ protected:
   void showProgress(std::string operation, size_t max_progress);
 #endif
 
-  // Verbose output stream, cout if verbose==true, logfile if not
-  std::ostream* verbose_out;
 
   size_t num_trees;
   uint mtry;

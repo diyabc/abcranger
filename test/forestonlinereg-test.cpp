@@ -8,7 +8,7 @@
 #include "matutils.hpp"
 #include "DataDense.h"
 #include "test-error.hpp"
-#include "forestonlinereg-predsR.hpp"
+#include "csv-eigen.hpp"
 #include "ks.hpp"
 
 #include "various.hpp"
@@ -20,6 +20,7 @@ TEST_CASE("Online Ranger Regressor")
 {
     size_t nref = 0;
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", nref);
+    
     auto nstat = myread.stats_names.size();
     MatrixXd statobs(1,nstat);
     statobs = Map<MatrixXd>(readStatObs("statobsRF.txt").data(),1,nstat);
@@ -43,7 +44,7 @@ TEST_CASE("Online Ranger Regressor")
                      "originalranger_out",              // output file name prefix
                      ntree,                     // number of trees
                      123456,                    // seed rd()
-                     nthreads,                  // number of threads
+                     0,                  // number of threads
                      DEFAULT_IMPORTANCE_MODE,  // Default IMP_NONE
                      0,                         // default min node size (classif = 1, regression 5)
                      "",                        // status variable name, only for survival
@@ -70,23 +71,31 @@ TEST_CASE("Online Ranger Regressor")
 TEST_CASE("Online Ranger Regressor Distribution")
 {
     size_t nref = 1000;
+
+    MatrixXd E = read_matrix_file("regression.csv",',');
+    std::vector<double> predsR = E.col(0) | to_vector;
+
+    MatrixXd F = read_matrix_file("error.csv",',');
+    VectorXd error = F(seq(0,nref-1),0);
+
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", nref);
     auto nstat = myread.stats_names.size();
     MatrixXd statobs(1,nstat);
     statobs = Map<MatrixXd>(readStatObs("statobsRF.txt").data(),1,nstat);
     auto colnames = myread.stats_names;
     auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(statobs, colnames, 1, nstat));
-    if (nref != 0 && nref <= error.size()) 
-        error.erase(error.begin() + nref,error.end());
-    addCols(myread.stats, Map<VectorXd>(error.data(),nref));
+    // if (nref != 0 && nref <= error.size()) 
+    //     error.erase(error.begin() + nref,error.end());
+    addCols(myread.stats, error);
     colnames.push_back("Y");
     auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, myread.nrec, nstat + 1));
     auto ntree = 50;
     auto nthreads = 8;
-    auto ntest = predsR.size();
+    auto ntest = 200;
     std::vector<double> mypredsR(ntest);
 
-    for(auto i = 0; i < ntest; i++){    
+    for(auto i = 0; i < ntest; i++){
+        loadbar(i,ntest);    
         ForestOnlineRegression forestreg;
         forestreg.init("Y",                       // dependant variable
                         MemoryMode::MEM_DOUBLE,    // memory mode double or float
@@ -95,10 +104,10 @@ TEST_CASE("Online Ranger Regressor Distribution")
                         0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
                         "originalranger_out",              // output file name prefix
                         ntree,                     // number of trees
-                        0,                    // seed rd()
-                        nthreads,                  // number of threads
+                        r(),                    // seed rd()
+                        0,                  // number of threads
                         DEFAULT_IMPORTANCE_MODE,  // Default IMP_NONE
-                        0,                         // default min node size (classif = 1, regression 5)
+                        5,                         // default min node size (classif = 1, regression 5)
                         "",                        // status variable name, only for survival
                         false,                     // prediction mode (true = predict)
                         true,                      // replace
@@ -120,8 +129,9 @@ TEST_CASE("Online Ranger Regressor Distribution")
         datastats = forestreg.releaseData();
         datastatobs = forestreg.releasePred();
     }
+    std::cout << (mypredsR | view::all) << std::endl;
     auto D = KSTest(predsR,mypredsR);
-    auto pvalue = 1-psmirnov2x(D,ntest,ntest);
+    auto pvalue = 1-psmirnov2x(D,predsR.size(),ntest);
     CHECK( pvalue >= 0.05 );
 }
 

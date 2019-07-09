@@ -354,7 +354,7 @@ void ForestOnline::grow() {
     }
     threads.emplace_back(&ForestOnline::growTreesInThread, this, i, &(variable_importance_threads[i]),data.get(),predict_data.get());
   }
-  showProgress("Growing trees..", num_trees);
+  // showProgress("Growing trees..", num_trees);
   for (auto &thread : threads) {
     thread.join();
   }
@@ -498,7 +498,7 @@ void ForestOnline::computePermutationImportance() {
   for (size_t i = 0; i < num_trees; ++i) {
     trees[i]->computePermutationImportance(variable_importance, variance);
     progress++;
-    showProgress("Computing permutation importance..", start_time, lap_time);
+//    showProgress("Computing permutation importance..", start_time, lap_time);
   }
 #else
   progress = 0;
@@ -523,7 +523,7 @@ void ForestOnline::computePermutationImportance() {
     threads.emplace_back(&ForestOnline::computeTreePermutationImportanceInThread, this, i,
         std::ref(variable_importance_threads[i]), std::ref(variance_threads[i]));
   }
-  showProgress("Computing permutation importance..", num_trees);
+//  showProgress("Computing permutation importance..", num_trees);
   for (auto &thread : threads) {
     thread.join();
   }

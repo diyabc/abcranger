@@ -68,8 +68,8 @@ Usage:
                           estimation
       --chosenscen arg    Chosen scenario (mandatory for parameter
                           estimation)
-      --ntest arg         number of testing samples (mandatory for parameter
-                          estimation)
+      --ntest arg         number of oob testing samples (mandatory for
+                          parameter estimation)
       --parameter arg     name of the parameter of interest (mandatory for
                           parameter estimation)
       --help              Print help
@@ -82,6 +82,8 @@ Usage:
     estimation, “–nolinear” options disables them in both case.
 
 # Model Choice
+
+![](./model_choice.gif)
 
 ## Example
 
@@ -103,6 +105,8 @@ Four files are created :
   - `modelchoice_out.confusion` : OOB Confusion matrix of the classifier
 
 # Parameter Estimation
+
+![](./estim_param.gif)
 
 ## A note about PLS heuristic
 
@@ -131,19 +135,23 @@ We can easily prove than
 ![n\_{heur}](https://latex.codecogs.com/png.latex?n_%7Bheur%7D
 "n_{heur}") is superior or equal to
 ![n\_{comp}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D
-"n_{comp}") :   
+"n_{comp}") :
+
+  
 ![n\_{heur} \\ge n\_{comp} = \\underset{Yvar^m \\leq{} 0.99\*Yvar^M,
 }{\\operatorname{argmax}}](https://latex.codecogs.com/png.latex?n_%7Bheur%7D%20%5Cge%20n_%7Bcomp%7D%20%3D%20%5Cunderset%7BYvar%5Em%20%5Cleq%7B%7D%200.99%2AYvar%5EM%2C%20%7D%7B%5Coperatorname%7Bargmax%7D%7D
 "n_{heur} \\ge n_{comp} = \\underset{Yvar^m \\leq{} 0.99*Yvar^M, }{\\operatorname{argmax}}")  
 
 In practice, we find
 ![n\_{heur}](https://latex.codecogs.com/png.latex?n_%7Bheur%7D
-"n_{heur}") close enough to $n\_{comp}.
+"n_{heur}") close enough to
+![n\_{comp}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D
+"n_{comp}").
 
 ## The signification of the `ntest` parameter
 
-Computing the whole OOB set for weights predictions (see (Raynal et al.
-[2016](#ref-raynal2016abc))), is very costly, memory and cpu-wise, so we
+Computing the whole OOB set for weights predictions (Raynal et al.
+[2016](#ref-raynal2016abc)), is very costly, memory and cpu-wise, so we
 advise to compute them for only choose a subset of size `ntest`.
 
 ## Example

@@ -68,7 +68,7 @@ static inline void loadbar(size_t x, size_t n, size_t w = 50)
     for(auto& e : intervals) total += e.count();
     float mean = static_cast<float>(total)/static_cast<float>(intervals.size());
     
-    uint remaining_time = std::floor(mean * static_cast<float>(n-x)/1e6);
+    size_t remaining_time = std::floor(mean * static_cast<float>(n-x)/1e6);
     std::string eta = ranger::beautifyTime(remaining_time);
     size_t etalength = eta.length();
     if ((intervals.size() == 10) && (etalength > etamaxwidth)) etamaxwidth = etalength;

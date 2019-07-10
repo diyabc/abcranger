@@ -54,8 +54,8 @@ Usage:
                           estimation
       --chosenscen arg    Chosen scenario (mandatory for parameter
                           estimation)
-      --ntest arg         number of testing samples (mandatory for parameter
-                          estimation)
+      --ntest arg         number of oob testing samples (mandatory for
+                          parameter estimation)
       --parameter arg     name of the parameter of interest (mandatory for
                           parameter estimation)
       --help              Print help
@@ -66,6 +66,8 @@ Usage:
 - Linear additions are LDA for model choice and PLS for parameter estimation, "--nolinear" options disables them in both case.
 
 # Model Choice
+
+![](./model_choice.gif)
 
 ## Example
 
@@ -86,6 +88,8 @@ Four files are created :
 
 # Parameter Estimation
 
+![](./estim_param.gif)
+
 ## A note about PLS heuristic
 
 The Pls components are selected within _at least_ 99% of the maximum explained variance of the output.
@@ -98,13 +102,14 @@ We take only the first $n_{heur}$ components, we stop when :
 $$\frac{Yvar^{k+1}+Yvar^{k}}{2} \geq 0.99(N-k)\left(Yvar^{k+1}-Yvar^ {k}\right)$$
 
 We can easily prove than $n_{heur}$ is superior or equal to $n_{comp}$ :
+
 $$n_{heur} \ge n_{comp} = \underset{Yvar^m \leq{} 0.99*Yvar^M, }{\operatorname{argmax}}$$
 
-In practice, we find $n_{heur}$ close enough to $n_{comp}.
+In practice, we find $n_{heur}$ close enough to $n_{comp}$.
 
 ## The signification of the `ntest` parameter
 
-Computing the whole OOB set for weights predictions (see [@raynal2016abc]), is very costly, memory and cpu-wise, so we advise to compute them for only choose a subset of size `ntest`.
+Computing the whole OOB set for weights predictions [@raynal2016abc], is very costly, memory and cpu-wise, so we advise to compute them for only choose a subset of size `ntest`.
 
 ## Example
 

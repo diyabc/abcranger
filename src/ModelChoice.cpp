@@ -33,7 +33,7 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
         seed = opts["s"].as<size_t>();
     minnodesize = opts["m"].as<size_t>();
     outfile = opts["o"].as<std::string>();
-    lda =  opts.count("nolda") == 0;
+    lda =  opts.count("nolinear") == 0;
 
     std::vector<double> samplefract{std::min(1e5,static_cast<double>(myread.nrec))/static_cast<double>(myread.nrec)};
     auto nstat = myread.stats_names.size();

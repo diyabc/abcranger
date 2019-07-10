@@ -44,7 +44,7 @@ TEST_CASE("ModelChoice KS test")
             ("j,threads","Number of threads, 0 means all",cxxopts::value<size_t>()->default_value("0"))
             ("s,seed","Seed, 0 means generated",cxxopts::value<size_t>()->default_value("0"))
             ("c,noisecolumns","Number of noise columns",cxxopts::value<size_t>()->default_value("5"))
-            ("nolda","Disable LDA",cxxopts::value<bool>()->default_value("false"))
+            ("nolinear","Disable LDA",cxxopts::value<bool>()->default_value("false"))
             ("help", "Print help")
             ;
         int argc = argv.size()-1;

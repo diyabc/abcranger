@@ -25,7 +25,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
                                  const cxxopts::ParseResult &opts,
                                  bool quiet)
 {
-    size_t nref, ntree, nthreads, noisecols, seed, minnodesize, ntrain, ntest;
+    size_t nref, ntree, nthreads, noisecols, seed, minnodesize, ntest;
     std::string outfile, parameter_of_interest;
     double chosenscen;   
     bool plsok,seeded;
@@ -39,18 +39,10 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         seed = opts["s"].as<size_t>();
     minnodesize = opts["m"].as<size_t>();
     outfile = opts["o"].as<std::string>();
-    if (opts.count("ntrain") == 0 
-        || opts.count("ntest") == 0 
-        || opts.count("parameter") == 0
-        || opts.count("chosenscen") == 0) {
-        std::cout << "Error : please provide ntrain, ntest, parameter and chosenscen arguments." << std::endl;
-        exit(1);
-    }
-    ntrain = opts["ntrain"].as<size_t>();
     ntest = opts["ntest"].as<size_t>();
     chosenscen = static_cast<double>(opts["chosenscen"].as<size_t>());
     parameter_of_interest = opts["parameter"].as<std::string>();
-    plsok = opts.count("nopls") == 0;
+    plsok = opts.count("nolinear") == 0;
 
     double p_threshold_PLS = 0.99;
     std::vector<double> samplefract{std::min(1e5,static_cast<double>(myread.nrec))/static_cast<double>(myread.nrec)};
@@ -66,10 +58,6 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     auto nparam = myread.params_names.size();
 
     size_t n = myread.nrec;
-    // if (ntest < ntest + ntrain) {
-    //     std::cout << "Error : insufficient samples for the test/train requested sizes (" << n << " samples)." << std::endl;
-    //     exit(1);
-    // }
 
     VectorXd y(n);
     switch(op) {
@@ -145,7 +133,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     addCols(myread.stats,y);
     myread.stats_names.push_back("Y");
 
-    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats,myread.stats_names, ntrain, myread.stats_names.size()));
+    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats,myread.stats_names, nref, myread.stats_names.size()));
 
     ForestOnlineRegression forestreg;
     forestreg.init("Y",                       // dependant variable
@@ -218,7 +206,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     double variance = 0.0;
     double mae = 0.0;
     // double variance2 = 0.0;
-    for(auto i = 0; i < ntrain; i++) {
+    for(auto i = 0; i < nref; i++) {
         expectation += preds[4][0][i] * y(i);
         if (!std::isnan(preds[0][0][i])) {
             double rest = y(i) - preds[0][0][i];

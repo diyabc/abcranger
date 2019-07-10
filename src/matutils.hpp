@@ -81,7 +81,7 @@ void addLda(Reftable& rf, MatrixBase<Derived> const &statobs) {
     }
 }
 
-void addScen(Reftable& rf) {
+static void addScen(Reftable& rf) {
     addCols(rf.stats, Map<VectorXd>(rf.scenarios.data(),rf.nrec));
     rf.stats_names.push_back("Y");
 }

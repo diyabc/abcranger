@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
             ("h,header","Header file",cxxopts::value<std::string>()->default_value("headerRF.txt"))
             ("r,reftable","Reftable file",cxxopts::value<std::string>()->default_value("reftableRF.bin"))
             ("b,statobs","Statobs file",cxxopts::value<std::string>()->default_value("statobsRF.txt"))
-            ("o,output","Prefix output",cxxopts::value<std::string>()->default_value("estimparam_out"))
+            ("o,output","Prefix output (modelchoice_out or estimparam_out by default)",cxxopts::value<std::string>())
             ("n,nref","Number of samples, 0 means all",cxxopts::value<size_t>()->default_value("0"))
             ("m,minnodesize","Minimal node size. 0 means 1 for classification or 5 for regression",cxxopts::value<size_t>()->default_value("0"))
             ("t,ntree","Number of trees",cxxopts::value<size_t>()->default_value("500"))

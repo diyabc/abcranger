@@ -38,11 +38,13 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     if (seeded)
         seed = opts["s"].as<size_t>();
     minnodesize = opts["m"].as<size_t>();
-    outfile = opts["o"].as<std::string>();
     ntest = opts["ntest"].as<size_t>();
     chosenscen = static_cast<double>(opts["chosenscen"].as<size_t>());
     parameter_of_interest = opts["parameter"].as<std::string>();
     plsok = opts.count("nolinear") == 0;
+
+    outfile = (opts.count("output") == 0) ? "estimparam_out" : opts["o"].as<std::string>();
+
 
     double p_threshold_PLS = 0.99;
     std::vector<double> samplefract{std::min(1e5,static_cast<double>(myread.nrec))/static_cast<double>(myread.nrec)};

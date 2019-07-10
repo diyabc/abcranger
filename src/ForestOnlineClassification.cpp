@@ -338,8 +338,8 @@ void ForestOnlineClassification::writeConfusionFile()
   }
 
   outfile.close();
-  if (verbose_out)
-    *verbose_out << "Saved confusion matrix to file " << filename << "." << std::endl;
+  // if (verbose_out)
+  //   *verbose_out << "Saved confusion matrix to file " << filename << "." << std::endl;
 }
 
 void ForestOnlineClassification::writePredictionFile()

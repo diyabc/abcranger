@@ -175,7 +175,8 @@ EstimParamResults EstimParam_fun(Reftable &myread,
                      false,                     //order_snps
                      DEFAULT_MAXDEPTH,
                      ntest);         // max_depth
-    forestreg.run(true,true);
+    if (!quiet) forestreg.verbose_out = &std::cout;
+    forestreg.run(!quiet,true);
     auto preds = forestreg.getPredictions();
     // Variable Importance
     res.variable_importance = forestreg.getImportance();

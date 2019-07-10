@@ -7,6 +7,7 @@
 #include "cxxopts.hpp"
 #include "ModelChoice.hpp"
 #include "ks.hpp"
+#include "various.hpp"
 
 #include "range/v3/all.hpp"
 
@@ -59,10 +60,9 @@ TEST_CASE("ModelChoice KS test")
         const auto statobs = readStatObs(statobsfile);
 
         for(auto i = 0; i < nrun; i++) {
+            loadbar(i,nrun);    
 
             auto res = ModelChoice_fun(myread,statobs,opts,true);
-            std::cout << i << "...";
-            std::cout.flush();
             postprobas[i] = res.post_proba;
         }
         std::cout << std::endl;

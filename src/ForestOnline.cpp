@@ -14,6 +14,7 @@
 #include "DataChar.h"
 #include "DataDouble.h"
 #include "DataFloat.h"
+#include "various.hpp"
 
 namespace ranger {
 
@@ -128,7 +129,7 @@ void ForestOnline::init(std::string dependent_variable_name, MemoryMode memory_m
 }
 
 void ForestOnline::run(bool verbose, bool compute_oob_error) {
-
+  
   if (prediction_mode) {
     if (verbose && verbose_out) {
       *verbose_out << "Predicting .." << std::endl;
@@ -142,7 +143,7 @@ void ForestOnline::run(bool verbose, bool compute_oob_error) {
     grow();
 
     if (verbose && verbose_out) {
-      *verbose_out << "Computing prediction error .." << std::endl;
+      *verbose_out << "\nComputing prediction error .." << std::endl;
     }
 
     if (compute_oob_error) {
@@ -151,7 +152,7 @@ void ForestOnline::run(bool verbose, bool compute_oob_error) {
 
     if (importance_mode == IMP_PERM_BREIMAN || importance_mode == IMP_PERM_LIAW || importance_mode == IMP_PERM_RAW) {
       if (verbose && verbose_out) {
-        *verbose_out << "Computing permutation variable importance .." << std::endl;
+        *verbose_out << "\nComputing permutation variable importance .." << std::endl;
       }
       computePermutationImportance();
     }
@@ -243,8 +244,8 @@ void ForestOnline::writeImportanceFile() {
   for(auto& a : importanceTable) 
     importance_file << a.first << ": " << a.second << std::endl;
   importance_file.close();
-  if (verbose_out)
-    *verbose_out << "Saved variable importance to file " << filename << "." << std::endl;
+  // if (verbose_out)
+  //   *verbose_out << "Saved variable importance to file " << filename << "." << std::endl;
 }
 
 void ForestOnline::saveToFile() {
@@ -355,6 +356,8 @@ void ForestOnline::grow() {
     threads.emplace_back(&ForestOnline::growTreesInThread, this, i, &(variable_importance_threads[i]),data.get(),predict_data.get());
   }
   // showProgress("Growing trees..", num_trees);
+  if (verbose_out) initbar();
+
   for (auto &thread : threads) {
     thread.join();
   }
@@ -591,6 +594,7 @@ void ForestOnline::growTreesInThread(uint thread_idx, std::vector<double>* varia
       // calculateAfterGrow(i,false);
       trees[i]->predict(predict_data,false);
       ++progress;
+      if (verbose_out) loadbar(progress,num_trees);
       predictInternal(i);
       trees[i].reset(nullptr);
       condition_variable.notify_one();

@@ -80,7 +80,12 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
                      DEFAULT_MAXDEPTH);         // max_depth
 
     ModelChoiceResults res;
-    forestclass.run(true, true);
+    if (!quiet) {
+        forestclass.verbose_out = &std::cout;
+        std::cout << "///////////////////////////////////////// First forest (training on ABC output)" << std::endl;
+    }
+
+    forestclass.run(!quiet, true);
     
     auto preds = forestclass.getPredictions();
     // Overall oob error
@@ -149,8 +154,13 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
                      false,                     //order_snps
                      DEFAULT_MAXDEPTH);   
 
+    if (!quiet) forestreg.verbose_out = &std::cout;
+    if (!quiet) {
+        forestclass.verbose_out = &std::cout;
+        std::cout << "///////////////////////////////////////// Second forest (training on error)" << std::endl;
+    }
 
-    forestreg.run(true,true);
+    forestreg.run(!quiet,true);
 
     auto dataptr2 = forestreg.releaseData();
     auto& datareleased2 = static_cast<DataDense&>(*dataptr2.get());

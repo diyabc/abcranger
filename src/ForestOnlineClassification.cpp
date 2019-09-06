@@ -271,7 +271,7 @@ std::vector<std::vector<size_t>> ForestOnlineClassification::getConfusion() {
     for(auto j = 0; j < class_values.size(); j++) {
       size_t predicted_value = class_values[i];
       size_t real_value = class_values[j];
-      res[i][real_value] = classification_table[std::make_pair(real_value, predicted_value)];
+      res[i][j] = classification_table[std::make_pair(real_value, predicted_value)];
     }
 
   return res;

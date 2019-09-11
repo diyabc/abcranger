@@ -1,16 +1,6 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
-#include "readreftable.hpp"
-#include "statobsTest.hpp"
-#include "readstatobs.hpp"
-#include "threadpool.hpp"
-#include "floatvectormatcher.hpp"
-
-#include <highfive/H5File.hpp>
-#include <highfive/H5Easy.hpp>
-
-#include "H5Cpp.h"    
 #include <random>
 #include <iostream>
 #include <string>
@@ -18,22 +8,40 @@
 #include <algorithm>
 #include <numeric>
 
+#define H5_USE_EIGEN
+#include <highfive/H5Easy.hpp>
+// #include <highfive/H5Attribute.hpp>
+// #include <highfive/H5File.hpp>
+// #include <highfive/H5DataSet.hpp>
+// #include <highfive/H5DataSpace.hpp>
+// #include <highfive/H5DataType.hpp>
+// #include <highfive/H5Object.hpp>
+
+#include "readreftable.hpp"
+#include "statobsTest.hpp"
+#include "readstatobs.hpp"
+#include "threadpool.hpp"
+#include "floatvectormatcher.hpp"
+
+#include "H5Cpp.h"    
+
+
 #include <range/v3/all.hpp>
 using namespace ranges;
+using namespace HighFive;
 
 std::vector<std::string> readcolnames(H5::DataSet& dataset, const std::string& attr_name) {
     H5::Attribute attr(dataset.openAttribute(attr_name.c_str()));
     hsize_t dim = 0;
     attr.getSpace().getSimpleExtentDims(&dim);
     vector<string> res(dim);
-    char **rdata = new char*[dim];
+    char *rdata[dim];
     H5::StrType str_type(H5::PredType::C_S1, H5T_VARIABLE);
     attr.read(str_type,(void*)rdata);
     for (auto iStr = 0; iStr < dim; iStr++) {
         res[iStr] = rdata[iStr];
-        // delete[] rdata[iStr];
+        free(rdata[iStr]);
     }
-    delete[] rdata;
     return res;
 }
 
@@ -45,7 +53,6 @@ TEST_CASE("Read Column Names from h5 file") {
     auto dataset_params = file.openDataSet("/params");
     CHECK_THAT(myread.params_names, Catch::Equals(readcolnames(dataset_params,"params_names")));
 }
-
 
 template<typename T>
 void test_against_field(HighFive::File& file, std::string field, T& p)

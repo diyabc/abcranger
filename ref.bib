@@ -9,13 +9,22 @@
   publisher={Oxford University Press}
 }
 
-
 @article{raynal2016abc,
-  title={ABC random forests for Bayesian parameter inference},
-  author={Raynal, Louis and Marin, Jean-Michel and Pudlo, Pierre and Ribatet, Mathieu and Robert, Christian P and Estoup, Arnaud},
-  journal={arXiv preprint arXiv:1605.05537},
-  year={2016}
+    author = {Raynal, Louis and Marin, Jean-Michel and Pudlo, Pierre and Ribatet, Mathieu and Robert, Christian P and Estoup, Arnaud},
+    title = "{ABC random forests for Bayesian parameter inference}",
+    journal = {Bioinformatics},
+    volume = {35},
+    number = {10},
+    pages = {1720-1728},
+    year = {2018},
+    month = {10},
+    abstract = "{Approximate Bayesian computation (ABC) has grown into a standard methodology that manages Bayesian inference for models associated with intractable likelihood functions. Most ABC implementations require the preliminary selection of a vector of informative statistics summarizing raw data. Furthermore, in almost all existing implementations, the tolerance level that separates acceptance from rejection of simulated parameter values needs to be calibrated.We propose to conduct likelihood-free Bayesian inferences about parameters with no prior selection of the relevant components of the summary statistics and bypassing the derivation of the associated tolerance level. The approach relies on the random forest (RF) methodology of Breiman (2001) applied in a (non-parametric) regression setting. We advocate the derivation of a new RF for each component of the parameter vector of interest. When compared with earlier ABC solutions, this method offers significant gains in terms of robustness to the choice of the summary statistics, does not depend on any type of tolerance level, and is a good trade-off in term of quality of point estimator precision and credible interval estimations for a given computing time. We illustrate the performance of our methodological proposal and compare it with earlier ABC methods on a Normal toy example and a population genetics example dealing with human population evolution.All methods designed here have been incorporated in the R package abcrf (version 1.7.1) available on CRAN.Supplementary data are available at Bioinformatics online.}",
+    issn = {1367-4803},
+    doi = {10.1093/bioinformatics/bty867},
+    url = {https://doi.org/10.1093/bioinformatics/bty867},
+    eprint = {http://oup.prod.sis.lan/bioinformatics/article-pdf/35/10/1720/28639964/bty867.pdf},
 }
+
 
 @article{wright2015ranger,
   title={Ranger: a fast implementation of random forests for high dimensional data in C++ and R},

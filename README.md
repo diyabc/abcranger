@@ -15,7 +15,7 @@ Random forests methodologies for :
 
   - ABC model choice (Pudlo et al. [2015](#ref-pudlo2015reliable))
   - ABC Bayesian parameter inference (Raynal et al.
-    [2016](#ref-raynal2016abc))
+    [2018](#ref-raynal2016abc))
 
 Libraries we use :
 
@@ -151,7 +151,7 @@ In practice, we find
 ## The signification of the `ntest` parameter
 
 Computing the whole OOB set for weights predictions (Raynal et al.
-[2016](#ref-raynal2016abc)), is very costly, memory and cpu-wise, so we
+[2018](#ref-raynal2016abc)), is very costly, memory and cpu-wise, so we
 advise to compute them for only choose a subset of size `ntest`.
 
 ## Example
@@ -256,8 +256,9 @@ Choice via Random Forests.” *Bioinformatics* 32 (6): 859–66.
 <div id="ref-raynal2016abc">
 
 Raynal, Louis, Jean-Michel Marin, Pierre Pudlo, Mathieu Ribatet,
-Christian P Robert, and Arnaud Estoup. 2016. “ABC Random Forests for
-Bayesian Parameter Inference.” *arXiv Preprint arXiv:1605.05537*.
+Christian P Robert, and Arnaud Estoup. 2018. “ABC random forests for
+Bayesian parameter inference.” *Bioinformatics* 35 (10): 1720–8.
+<https://doi.org/10.1093/bioinformatics/bty867>.
 
 </div>
 

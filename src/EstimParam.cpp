@@ -110,9 +110,9 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         const std::string& plsweights_filename = outfile + ".plsweights";
         std::ofstream plsweights_file;
         if (!quiet) plsweights_file.open(plsweights_filename, std::ios::out);
-        for(auto& p : view::zip(myread.stats_names, weightedPlsfirst)
+        for(auto& p : views::zip(myread.stats_names, weightedPlsfirst)
             | to_vector
-            | action::sort([](auto& a, auto& b){ return std::abs(a.second) > std::abs(b.second); })) {
+            | actions::sort([](auto& a, auto& b){ return std::abs(a.second) > std::abs(b.second); })) {
                 if (!quiet) plsweights_file << p.first << " " << p.second << std::endl;
                 res.plsweights.push_back(p);
             }

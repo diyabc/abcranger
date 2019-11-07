@@ -131,7 +131,7 @@ TEST_CASE("Online Ranger Regressor Distribution")
         myread.stats = std::move(datareleased.data);
         datastatobs = forestreg.releasePred();
     }
-    std::cout << (mypredsR | view::all) << std::endl;
+    std::cout << (mypredsR | views::all) << std::endl;
     auto D = KSTest(predsR,mypredsR);
     auto pvalue = 1-psmirnov2x(D,predsR.size(),ntest);
     CHECK( pvalue >= 0.05 );

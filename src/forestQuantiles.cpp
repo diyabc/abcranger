@@ -7,7 +7,7 @@ constexpr std::size_t operator "" _z ( unsigned long long n )
 
 using namespace ranges;
 
-template<class Rng, CONCEPT_REQUIRES_(Range<Rng>())>
+CPP_template(class Rng) (requires range<Rng>)
 auto indirect_lambda(const Rng& v) {
     return [&v](const auto& i){ return v[i]; };
 }
@@ -15,7 +15,7 @@ auto indirect_lambda(const Rng& v) {
 template<class Rng>
 auto less_rng = std::less<range_value_type_t<Rng>>();
 
-template<class Rng, class F = decltype(less_rng<Rng>), CONCEPT_REQUIRES_(Range<Rng>())>
+CPP_template(class Rng, class F = decltype(less_rng<Rng>)) (requires range<Rng>)
 auto indirect_comparison_lambda (const Rng& v, const F& f = less_rng<Rng>) {
     return [&v,&f](const auto& a, const auto& b) { return f(v[a],v[b]); };
 }
@@ -27,16 +27,16 @@ std::vector<double> forestQuantiles(const std::vector<double> &origObs,
 {
     size_t n = origObs.size();
     std::vector<double> quant(quantiles.size());
-    const auto& ord = view::iota(0_z,n) 
+    const auto& ord = views::iota(0_z,n) 
         | to_vector 
-        | action::sort(indirect_comparison_lambda(origObs));
+        | actions::sort(indirect_comparison_lambda(origObs));
 
-    const auto& obs = ord | view::transform(indirect_lambda(origObs));
-    const auto& weights = ord | view::transform(indirect_lambda(origWeights));
+    const auto& obs = ord | views::transform(indirect_lambda(origObs));
+    const auto& weights = ord | views::transform(indirect_lambda(origWeights));
 
-    std::vector<double> cumweights = weights | view::partial_sum;
+    std::vector<double> cumweights = weights | views::partial_sum | to<std::vector>;
     double lastcum = cumweights[n-1];
-    cumweights |= action::transform([&lastcum](const auto& d){ return d/lastcum; });
+    cumweights |= actions::transform([&lastcum](const auto& d){ return d/lastcum; });
     for(auto qc = 0; qc < quantiles.size(); qc++) {
         auto wc = ranges::count_if(cumweights,[&quantiles,qc](auto v){ return v < quantiles[qc]; });
         if (wc <= 1) {

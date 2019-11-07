@@ -65,10 +65,11 @@ void ForestOnlineRegression::allocatePredictMemory()
   // predictions[3] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
   if (num_oob_weights > 0) {
     predictions[5] = std::vector<std::vector<double>>(num_oob_weights,std::vector<double>(num_samples,0));
-    oob_subset = view::ints(static_cast<size_t>(0),num_samples) 
-      | view::sample(num_oob_weights)
-      | view::enumerate
-      | view::transform([](auto p){ return std::make_pair(p.second,static_cast<size_t>(p.first)); });
+    oob_subset = views::ints(static_cast<size_t>(0),num_samples) 
+      | views::sample(num_oob_weights)
+      | views::enumerate
+      | views::transform([](auto p){ return std::make_pair(p.second,static_cast<size_t>(p.first)); })
+      | to<std::map>;
   }
 
   if (predict_all) 

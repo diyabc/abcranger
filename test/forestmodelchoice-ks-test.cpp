@@ -69,7 +69,7 @@ TEST_CASE("ModelChoice KS test")
         double D, pvalue;
 
         std::cout << "postprobas" << std::endl;
-        std::cout << (postprobas | view::all) << std::endl;
+        std::cout << (postprobas | views::all) << std::endl;
 
         D = KSTest(postprobasR,postprobas);
         pvalue = 1-psmirnov2x(D,E.rows(),nrun);

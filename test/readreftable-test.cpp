@@ -111,9 +111,10 @@ TEST_CASE("Check selected scen read") {
     std::vector<double> scenarios = H5Easy::load<std::vector<double>>(file,"scenarios");
     double chosenscen = 1.0;
     std::vector<size_t> indexesModel = scenarios 
-    | view::enumerate
-    | view::filter([chosenscen](const auto& a){ return a.second == chosenscen; })
-    | view::keys;
+        | views::enumerate
+        | views::filter([chosenscen](const auto& a){ return a.second == chosenscen; })
+        | views::keys
+        | to<std::vector>;
 
     CHECK( myread.stats.isApprox(statsH5(indexesModel,all) ));
     // DataSet statsds = file.getDataSet("stats");

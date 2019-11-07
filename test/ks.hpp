@@ -50,13 +50,14 @@ template<class T>
 double KSTest(std::vector<T> x, std::vector<T> y) {
     double xn = 1.0/static_cast<double>(x.size());
     double yn = 1.0/static_cast<double>(y.size());
-    std::vector<std::pair<size_t,T>> w = view::concat(x,y) 
-        | view::enumerate;
-    w |= action::sort([](auto a, auto b){ return a.second < b.second; });
+    std::vector<std::pair<size_t,T>> w = views::concat(x,y) 
+        | views::enumerate
+        | to<std::vector>;
+    w |= actions::sort([](auto a, auto b){ return a.second < b.second; });
     auto D = w
-        | view::transform([xs=x.size(),xn,yn](auto wii){ return wii.first < xs? xn : -yn; })
-        | view::partial_sum
-        | view::transform([](auto d){ return std::abs(d); });
+        | views::transform([xs=x.size(),xn,yn](auto wii){ return wii.first < xs? xn : -yn; })
+        | views::partial_sum
+        | views::transform([](auto d){ return std::abs(d); });
     return ranges::max(D);
 }
 

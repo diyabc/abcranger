@@ -21,7 +21,7 @@ TEST_CASE("Extract indices rows from a matrix")
 TEST_CASE("Enumerate and find")
 {
       std::vector<std::string> v{"blah", "blih", "blouh", "machin", "truc"};
-      auto venum = v | view::enumerate | to_vector;
+      auto venum = v | views::enumerate | to<std::vector>;
       auto i = find_if(venum, [](auto &s) { return s.second == "machin"; });
       CHECK(i->first == 3);
 }
@@ -31,9 +31,9 @@ TEST_CASE("Shuffle and split")
       std::default_random_engine gen;
       size_t n = 10;
       size_t s = 3;
-      auto tosplit = view::ints(static_cast<size_t>(0), n) | to_vector | action::shuffle(gen);
-      auto a = tosplit | view::take(s);
-      auto b = tosplit | view::slice(s, n);
+      auto tosplit = views::ints(static_cast<size_t>(0), n) | to_vector | actions::shuffle(gen);
+      auto a = tosplit | views::take(s);
+      auto b = tosplit | views::slice(s, n);
       CHECK(distance(a) == 3);
       CHECK(distance(b) == 7);
 }
@@ -85,10 +85,10 @@ TEST_CASE("Eigen with ranges")
  // https://stackoverflow.com/questions/36820639/how-do-i-write-a-range-pipeline-that-uses-temporary-containers     
     auto restmp = res(seq(3,7)).array(); 
       auto diff = restmp
-            | view::sliding(2)
-            | view::transform([](const auto& l) -> double { 
+            | views::sliding(2)
+            | views::transform([](const auto& l) -> double { 
                     return (2.0 * std::abs(l[1]-l[0])/(l[1]+l[0]) ) ; })
-            | to_vector;
+            | to<std::vector>;
 
 
 }

@@ -94,19 +94,19 @@ TEST_CASE("EstimParam KS distribution")
         double D,pvalue1,pvalue2,pvalue3,pvalue4,pvalue5;
 
         std::cout << "expectations" << std::endl;
-        std::cout << (expectations | view::all) << std::endl;
+        std::cout << (expectations | views::all) << std::endl;
 
         std::cout << "variances" << std::endl;
-        std::cout << (variances | view::all) << std::endl;
+        std::cout << (variances | views::all) << std::endl;
 
         std::cout << "quantiles1" << std::endl;
-        std::cout << (quantiles1 | view::all) << std::endl;
+        std::cout << (quantiles1 | views::all) << std::endl;
 
         std::cout << "quantiles2" << std::endl;
-        std::cout << (quantiles2 | view::all) << std::endl;
+        std::cout << (quantiles2 | views::all) << std::endl;
 
         std::cout << "quantiles3" << std::endl;
-        std::cout << (quantiles3 | view::all) << std::endl;
+        std::cout << (quantiles3 | views::all) << std::endl;
 
         D = KSTest(expectationsR,expectations);
         pvalue1 = 1-psmirnov2x(D,E.rows(),nrun);

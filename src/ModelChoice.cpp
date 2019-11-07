@@ -118,9 +118,10 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
     }
 
     std::vector<size_t> defined_preds = preds[0][0]
-        | view::enumerate
-        | view::filter([](auto d){ return !std::isnan(d.second); })
-        | view::keys;
+        | views::enumerate
+        | views::filter([](auto d){ return !std::isnan(d.second); })
+        | views::keys
+        | to<std::vector>;
     datareleased.filterRows(defined_preds);
 
     auto statobsreleased = forestclass.releasePred();

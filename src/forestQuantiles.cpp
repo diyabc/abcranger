@@ -13,7 +13,7 @@ auto indirect_lambda(const Rng& v) {
 }
 
 template<class Rng>
-auto less_rng = std::less<range_value_type_t<Rng>>();
+auto less_rng = std::less<range_value_t<Rng>>();
 
 CPP_template(class Rng, class F = decltype(less_rng<Rng>)) (requires range<Rng>)
 auto indirect_comparison_lambda (const Rng& v, const F& f = less_rng<Rng>) {

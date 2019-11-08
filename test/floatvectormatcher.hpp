@@ -54,7 +54,7 @@ namespace Matchers {
     namespace Range {
         template<typename Rng1, typename Rng2>
         struct ApproxMatcher : MatcherBase<Rng2> {
-            typedef ranges::range_value_type_t<Rng1> T;
+            typedef ranges::range_value_t<Rng1> T;
 
             ApproxMatcher(Rng1 const &comparator) : m_comparator( comparator ), approx{0.} {}
 
@@ -101,7 +101,7 @@ namespace Matchers {
 
         template<typename Rng1, typename Rng2>
         struct EqualsMatcher : MatcherBase<Rng2> {
-            typedef ranges::range_value_type_t<Rng1> T;
+            typedef ranges::range_value_t<Rng1> T;
             
             EqualsMatcher(const Rng1& comparator) : m_comparator( comparator ) {}
 

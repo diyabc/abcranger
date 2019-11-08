@@ -33,7 +33,7 @@ include_directories("${CPPRANGER_SOURCE_DIR}"
                     "${RANGER_SOURCE_DIR}")
 
 IF(MSVC)
-  add_compile_options(/permissive-)
+  add_compile_options(/permissive- /experimental:preprocessor /wd5105)
   add_subdirectory (wingetopt)
   link_directories (${wingetopt_BINARY_DIR})
 endif()
@@ -77,8 +77,8 @@ pmm(
         # REVISION e37cc662ee29852f45e85961124f62d91acb488a
         REVISION d3eca94a23b0ece90a84420f5ed3d6c814a60d54
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] eigen3-head highfive-head ${TBBPKG} ${BOOSTREGEX}
-        PORTS "${PROJECT_SOURCE_DIR}/eigen3-head" "${PROJECT_SOURCE_DIR}/highfive-head"
+        REQUIRES range-v3-head catch2 cxxopts fmt hdf5[cpp] eigen3-head highfive-head ${TBBPKG} ${BOOSTREGEX}
+        PORTS "${PROJECT_SOURCE_DIR}/eigen3-head" "${PROJECT_SOURCE_DIR}/highfive-head" "${PROJECT_SOURCE_DIR}/range-v3-head"
 )
 
 if(MAKE_STATIC_EXE)

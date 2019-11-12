@@ -52,7 +52,7 @@ double KSTest(std::vector<T> x, std::vector<T> y) {
     double yn = 1.0/static_cast<double>(y.size());
     std::vector<std::pair<size_t,T>> w = views::concat(x,y) 
         | views::enumerate
-        | to<std::vector>;
+        | to<std::vector>();
     w |= actions::sort([](auto a, auto b){ return a.second < b.second; });
     auto D = w
         | views::transform([xs=x.size(),xn,yn](auto wii){ return wii.first < xs? xn : -yn; })

@@ -35,13 +35,14 @@ std::vector<std::string> readcolnames(H5::DataSet& dataset, const std::string& a
     hsize_t dim = 0;
     attr.getSpace().getSimpleExtentDims(&dim);
     vector<string> res(dim);
-    char *rdata[dim];
+    char** rdata = new char*[dim];
     H5::StrType str_type(H5::PredType::C_S1, H5T_VARIABLE);
     attr.read(str_type,(void*)rdata);
     for (auto iStr = 0; iStr < dim; iStr++) {
         res[iStr] = rdata[iStr];
         free(rdata[iStr]);
     }
+    free(rdata);
     return res;
 }
 
@@ -114,7 +115,7 @@ TEST_CASE("Check selected scen read") {
         | views::enumerate
         | views::filter([chosenscen](const auto& a){ return a.second == chosenscen; })
         | views::keys
-        | to<std::vector>;
+        | to<std::vector>();
 
     CHECK( myread.stats.isApprox(statsH5(indexesModel,all) ));
     // DataSet statsds = file.getDataSet("stats");

@@ -24,9 +24,9 @@ ${ABCRANGER_SOURCE_DIR}/ForestOnlineRegression.cpp
 
 add_library(abcrangerlib STATIC ${PROJECT_abcranger_SRCS})
 
-if(MSVC)
-    target_link_libraries(abcrangerlib PRIVATE Boost::regex)
-endif()
+# if(MSVC)
+#     target_link_libraries(abcrangerlib PRIVATE Boost::regex)
+# endif()
 
 # if (WIN32)
 #     set(WINDOWS_EXPORT_ALL_SYMBOLS True)

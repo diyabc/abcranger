@@ -21,7 +21,7 @@ TEST_CASE("Extract indices rows from a matrix")
 TEST_CASE("Enumerate and find")
 {
       std::vector<std::string> v{"blah", "blih", "blouh", "machin", "truc"};
-      auto venum = v | views::enumerate | to<std::vector>;
+      auto venum = v | views::enumerate | to<std::vector>();
       auto i = find_if(venum, [](auto &s) { return s.second == "machin"; });
       CHECK(i->first == 3);
 }
@@ -88,7 +88,7 @@ TEST_CASE("Eigen with ranges")
             | views::sliding(2)
             | views::transform([](const auto& l) -> double { 
                     return (2.0 * std::abs(l[1]-l[0])/(l[1]+l[0]) ) ; })
-            | to<std::vector>;
+            | to<std::vector>();
 
 
 }

@@ -34,7 +34,7 @@ std::vector<double> forestQuantiles(const std::vector<double> &origObs,
     const auto& obs = ord | views::transform(indirect_lambda(origObs));
     const auto& weights = ord | views::transform(indirect_lambda(origWeights));
 
-    std::vector<double> cumweights = weights | views::partial_sum | to<std::vector>;
+    std::vector<double> cumweights = weights | views::partial_sum | to<std::vector>();
     double lastcum = cumweights[n-1];
     cumweights |= actions::transform([&lastcum](const auto& d){ return d/lastcum; });
     for(auto qc = 0; qc < quantiles.size(); qc++) {

@@ -3,6 +3,7 @@
 #include <string>
 #include <cmath>
 #include <map>
+#include <random>
 #include <range/v3/all.hpp>
 
 #include "utility.h"
@@ -65,11 +66,16 @@ void ForestOnlineRegression::allocatePredictMemory()
   // predictions[3] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
   if (num_oob_weights > 0) {
     predictions[5] = std::vector<std::vector<double>>(num_oob_weights,std::vector<double>(num_samples,0));
-    oob_subset = views::ints(static_cast<size_t>(0),num_samples) 
-      | views::sample(num_oob_weights)
+
+    auto oob_subsetpreview = views::ints(static_cast<size_t>(0),num_samples) | to<std::vector>();
+    shuffle(oob_subsetpreview);
+
+    oob_subset = oob_subsetpreview 
+      | views::slice(static_cast<size_t>(0),num_oob_weights)
+      // | views::sample(num_oob_weights)
       | views::enumerate
       | views::transform([](auto p){ return std::make_pair(p.second,static_cast<size_t>(p.first)); })
-      | to<std::map<size_t,size_t>>;
+      | to<std::map>();
   }
 
   if (predict_all) 

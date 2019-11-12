@@ -1,10 +1,10 @@
 #define _REGEX_MAX_STACK_COUNT 5000
-#if defined(_MSC_VER)
-#include <boost/regex.hpp>
-using namespace boost;
-#else
+// #if defined(_MSC_VER)
+// #include <boost/regex.hpp>
+// using namespace boost;
+// #else
 #include <regex>
-#endif
+// #endif
 #include <string>
 #include <map>
 #include <algorithm>

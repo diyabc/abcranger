@@ -32,8 +32,13 @@ include_directories("${CPPRANGER_SOURCE_DIR}"
                     "${CPPRANGER_SOURCE_DIR}/utility"
                     "${RANGER_SOURCE_DIR}")
 
+message("Compiler ID : ${CMAKE_CXX_COMPILER_ID}")
 IF(MSVC)
-  add_compile_options(/permissive- /experimental:preprocessor /wd5105)
+  if("${CMAKE_CXX_COMPILER_ID}" MATCHES "[Cc]lang")
+    add_compile_options(/permissive-)
+  else()
+    add_compile_options(/permissive- /experimental:preprocessor /wd5105)
+  endif()
   add_subdirectory (wingetopt)
   link_directories (${wingetopt_BINARY_DIR})
 endif()
@@ -51,9 +56,9 @@ project(abcranger VERSION 0.2.0 LANGUAGES CXX C)
 
 include(pmm.cmake)
 
-if(MSVC)
-  set(BOOSTREGEX "boost-regex")
-endif()
+# if(MSVC)
+#   set(BOOSTREGEX "boost-regex")
+# endif()
 
 if(MSVC AND MAKE_STATIC_EXE)
   set(VCPKG_TARGET_TRIPLET "x64-windows-static")
@@ -77,8 +82,8 @@ pmm(
         # REVISION e37cc662ee29852f45e85961124f62d91acb488a
         REVISION d3eca94a23b0ece90a84420f5ed3d6c814a60d54
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3-head catch2 cxxopts fmt hdf5[cpp] eigen3-head highfive-head ${TBBPKG} ${BOOSTREGEX}
-        PORTS "${PROJECT_SOURCE_DIR}/eigen3-head" "${PROJECT_SOURCE_DIR}/highfive-head" "${PROJECT_SOURCE_DIR}/range-v3-head"
+        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] eigen3-head highfive-head ${TBBPKG} ${BOOSTREGEX}
+        PORTS "${PROJECT_SOURCE_DIR}/eigen3-head" "${PROJECT_SOURCE_DIR}/highfive-head"
 )
 
 if(MAKE_STATIC_EXE)
@@ -137,9 +142,9 @@ find_package(range-v3 CONFIG REQUIRED)
 link_libraries(meta range-v3)
 
 ### Boost::regex with MSVC
-if(MSVC)
-    find_package(Boost REQUIRED COMPONENTS regex)
-endif()
+# if(MSVC)
+#     find_package(Boost REQUIRED COMPONENTS regex)
+# endif()
 
 # if (WIN32)
 #      set(WINDOWS_EXPORT_ALL_SYMBOLS True)

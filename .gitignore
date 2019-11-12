@@ -404,3 +404,4 @@ obj
 packages/
 paket-files/
 .vscode/
+*_out.*

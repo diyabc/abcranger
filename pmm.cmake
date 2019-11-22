@@ -37,7 +37,7 @@ _pmm_set_if_undef(PMM_VERSION ${PMM_VERSION_INIT})
 # The base URL we download PMM from:
 _pmm_set_if_undef(PMM_URL_BASE "http://anotherfoxguy.com/pmm/")
 # The real URL we download from (Based on the version)
-_pmm_set_if_undef(PMM_URL "https://raw.githubusercontent.com/fradav/pmm/master/pmm/")
+_pmm_set_if_undef(PMM_URL "${PMM_URL_BASE}/${PMM_VERSION}")
 # The directory where we store our downloaded files
 _pmm_set_if_undef(PMM_DIR_BASE "${CMAKE_BINARY_DIR}/_pmm")
 _pmm_set_if_undef(PMM_DIR "${PMM_DIR_BASE}/${PMM_VERSION}")

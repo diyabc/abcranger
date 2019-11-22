@@ -80,7 +80,7 @@ pmm(
     # DEBUG
     VCPKG
         # REVISION e37cc662ee29852f45e85961124f62d91acb488a
-        REVISION d3eca94a23b0ece90a84420f5ed3d6c814a60d54
+        REVISION cccd1ed932c20daa9aa61d47aacd8bcc342c4e48
         TRIPLET ${VCPKG_TARGET_TRIPLET}
         REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] eigen3-head highfive-head ${TBBPKG} ${BOOSTREGEX}
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head" "${PROJECT_SOURCE_DIR}/highfive-head"
@@ -169,13 +169,8 @@ endif()
 
 add_subdirectory(test)
 
-
-add_executable(ModelChoice ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp model_choice.cpp)
-add_executable(EstimParam ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp estim_param.cpp)
 add_executable(abcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp abcranger.cpp)
 
-target_link_libraries(ModelChoice ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
-target_link_libraries(EstimParam ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
 target_link_libraries(abcranger ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
 
 

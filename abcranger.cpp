@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
             ("c,noisecolumns","Number of noise columns",cxxopts::value<size_t>()->default_value("5"))
             ("nolinear","Disable LDA for model choice or PLS for parameter estimation")
             ("chosenscen","Chosen scenario (mandatory for parameter estimation)", cxxopts::value<size_t>())
-            ("ntest","number of oob testing samples (mandatory for parameter estimation)",cxxopts::value<size_t>())
+            ("noob","number of oob testing samples (mandatory for parameter estimation)",cxxopts::value<size_t>())
             ("parameter","name of the parameter of interest (mandatory for parameter estimation)",cxxopts::value<std::string>())
             ("help", "Print help")
             ;
@@ -48,14 +48,14 @@ int main(int argc, char* argv[]) {
 
         if (opts.count("chosenscen") != 0 ||
             opts.count("parameter") != 0 ||
-            opts.count("ntest") != 0)
+            opts.count("noob") != 0)
         {
             std::cout << "> Parameter Estimation <" << std::endl;
             if (opts.count("chosenscen") == 0 ||
                 opts.count("parameter") == 0 ||
-                opts.count("ntest") == 0)
+                opts.count("noob") == 0)
             {
-                std::cout << "Error : please provide ntest, parameter AND chosenscen arguments for parameter estimation." << std::endl;
+                std::cout << "Error : please provide noob, parameter AND chosenscen arguments for parameter estimation." << std::endl;
                 exit(1);
             }
 

@@ -38,7 +38,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     if (seeded)
         seed = opts["s"].as<size_t>();
     minnodesize = opts["m"].as<size_t>();
-    ntest = opts["ntest"].as<size_t>();
+    ntest = opts["noob"].as<size_t>();
     chosenscen = static_cast<double>(opts["chosenscen"].as<size_t>());
     parameter_of_interest = opts["parameter"].as<std::string>();
     plsok = opts.count("nolinear") == 0;

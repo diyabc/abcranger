@@ -27,7 +27,7 @@ TEST_CASE("EstimParam KS distribution")
     std::vector<double> quantiles3R   = E.col(4) | to_vector;
 
     try {
-        std::vector<std::string> args{"EstimParam","--ntree","1000","--nref","1000","--parameter","ra","--ntest","50","--chosenscen","1","--nolinear" };
+        std::vector<std::string> args{"EstimParam","--ntree","1000","--nref","1000","--parameter","ra","--noob","50","--chosenscen","1","--nolinear" };
         std::vector<char *> argv;
         for(std::string &s: args) argv.push_back(&s[0]);
         argv.push_back(NULL);
@@ -51,7 +51,7 @@ TEST_CASE("EstimParam KS distribution")
             ("c,noisecolumns","Number of noise columns",cxxopts::value<size_t>()->default_value("5"))
             ("nolinear","Disable PLS")
             ("chosenscen","Chosen scenario (mandatory)", cxxopts::value<size_t>())
-            ("ntest","number of testing samples (mandatory)",cxxopts::value<size_t>())
+            ("noob","number of testing samples (mandatory)",cxxopts::value<size_t>())
             ("parameter","name of the parameter of interest (mandatory)",cxxopts::value<std::string>())
             ("help", "Print help")
             ;

@@ -21,17 +21,16 @@ Libraries we use :
 - [Ranger](https://github.com/imbs-hl/ranger) [@wright2015ranger] : we use our own fork and have tuned forests to do "online"^[The term "online" there and in the code has not the usual meaning it has, as coined in "online machine learning". We still need the entire training data set at once. Our implementation is an "online" one not by the sequential order of the input data, but by the sequential order of computation of the trees in random forests, sequentially computed and then discarded.] computations (Growing trees AND making predictions in the same pass, which removes the need of in-memory storage of the whole forest)^[We only use the C++ Core of ranger, which is under [MIT License](https://raw.githubusercontent.com/imbs-hl/ranger/master/cpp_version/COPYING), same as ours.].
 - [Eigen3](http://eigen.tuxfamily.org) [@eigenweb]
 
-
 As a mention, we use our own implementation of LDA and PLS from [@friedman2001elements{81, 114}].
 
 There is one set of binaries, which contains a Macos/Linux/Windows (x64 only) binary for each platform.
 There are available within the "[Releases](https://github.com/fradav/abcranger/releases)" tab, under "Assets" section (unfold it to see the list).
 
-This is pure command line binary, and they are no prerequisites or library dependencies in order to run it. Just download them and launch them from your terminal software of choice. The usual caveats with command line executable apply there : if you're not proficient with the command line interface of your platform, please learn some basics or ask someone who might help you in those matters. 
+This is pure command line binary, and they are no prerequisites or library dependencies in order to run it. Just download them and launch them from your terminal software of choice. The usual caveats with command line executable apply there : if you're not proficient with the command line interface of your platform, please learn some basics or ask someone who might help you in those matters.
 
 As a note, we may add a graphical interface in a near future.
 
-# Usage 
+# Usage
 
 ```text
  - ABC Random Forest - Model choice or parameter estimation command line options
@@ -54,20 +53,20 @@ Usage:
                           estimation
       --chosenscen arg    Chosen scenario (mandatory for parameter
                           estimation)
-      --ntest arg         number of oob testing samples (mandatory for
+      --noob arg         number of oob testing samples (mandatory for
                           parameter estimation)
       --parameter arg     name of the parameter of interest (mandatory for
                           parameter estimation)
       --help              Print help
 ```
 
-- If you provide `--chosenscen`, `--parameter` and `--ntest`, parameter estimation mode is selected.
+- If you provide `--chosenscen`, `--parameter` and `--noob`, parameter estimation mode is selected.
 - Otherwise by default it's model choice mode.
 - Linear additions are LDA for model choice and PLS for parameter estimation, "--nolinear" options disables them in both case.
 
 # Model Choice
 
-![](./model_choice.gif)
+![Terminal model choice](./model_choice.gif)
 
 ## Example
 
@@ -88,7 +87,11 @@ Four files are created :
 
 # Parameter Estimation
 
-![](./estim_param.gif)
+![Terminal estim param](./estim_param.gif)
+
+## Composite parameters
+
+User may specify simple composite parameters as division, addition or multiplication of two existing parameters. Like :
 
 ## A note about PLS heuristic
 
@@ -107,19 +110,19 @@ $$n_{heur} \ge n_{comp} = \underset{Yvar^m \leq{} 0.99*Yvar^M, }{\operatorname{a
 
 In practice, we find $n_{heur}$ close enough to $n_{comp}$.
 
-## The signification of the `ntest` parameter
+## The signification of the `noob` parameter
 
-Computing the whole OOB set for weights predictions [@raynal2016abc], is very costly, memory and cpu-wise, so we advise to compute them for only choose a subset of size `ntest`.
+Computing the whole OOB set for weights predictions [@raynal2016abc], is very costly, memory and cpu-wise, so we advise to compute them for only choose a subset of size `noob`.
 
-## Example
+## Example (parameter estimation)
 
 Example (working with the dataset in `test/data`) :
 
-`abcranger -t 1000 -j 8 --parameter ra --chosenscen 1 --ntest 50`
+`abcranger -t 1000 -j 8 --parameter ra --chosenscen 1 --noob 50`
 
 Header, reftable and statobs files should be in the current directory.
 
-## Generated files
+## Generated files (parameter estimation)
 
 Five files (or seven if pls activated) are created :
 

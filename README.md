@@ -68,22 +68,22 @@ Usage:
                           estimation
       --chosenscen arg    Chosen scenario (mandatory for parameter
                           estimation)
-      --ntest arg         number of oob testing samples (mandatory for
+      --noob arg         number of oob testing samples (mandatory for
                           parameter estimation)
       --parameter arg     name of the parameter of interest (mandatory for
                           parameter estimation)
       --help              Print help
 ```
 
-  - If you provide `--chosenscen`, `--parameter` and `--ntest`,
-    parameter estimation mode is selected.
+  - If you provide `--chosenscen`, `--parameter` and `--noob`, parameter
+    estimation mode is selected.
   - Otherwise by default it’s model choice mode.
   - Linear additions are LDA for model choice and PLS for parameter
     estimation, “–nolinear” options disables them in both case.
 
 # Model Choice
 
-![](./model_choice.gif)
+![Terminal model choice](./model_choice.gif)
 
 ## Example
 
@@ -106,7 +106,12 @@ Four files are created :
 
 # Parameter Estimation
 
-![](./estim_param.gif)
+![Terminal estim param](./estim_param.gif)
+
+## Composite parameters
+
+User may specify simple composite parameters as division, addition or
+multiplication of two existing parameters. Like :
 
 ## A note about PLS heuristic
 
@@ -148,21 +153,21 @@ In practice, we find
 ![n\_{comp}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D
 "n_{comp}").
 
-## The signification of the `ntest` parameter
+## The signification of the `noob` parameter
 
 Computing the whole OOB set for weights predictions (Raynal et al.
 [2018](#ref-raynal2016abc)), is very costly, memory and cpu-wise, so we
-advise to compute them for only choose a subset of size `ntest`.
+advise to compute them for only choose a subset of size `noob`.
 
-## Example
+## Example (parameter estimation)
 
 Example (working with the dataset in `test/data`) :
 
-`abcranger -t 1000 -j 8 --parameter ra --chosenscen 1 --ntest 50`
+`abcranger -t 1000 -j 8 --parameter ra --chosenscen 1 --noob 50`
 
 Header, reftable and statobs files should be in the current directory.
 
-## Generated files
+## Generated files (parameter estimation)
 
 Five files (or seven if pls activated) are created :
 

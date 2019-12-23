@@ -117,8 +117,9 @@ Four files are created :
 
 ## Composite parameters
 
-User may specify simple composite parameters as division, addition or
-multiplication of two existing parameters. like `t/N` or `T1+T2`.
+When specifying the parameter (option `--parameter`), one may specify
+simple composite parameters as division, addition or multiplication of
+two existing parameters. like `t/N` or `T1+T2`.
 
 ## A note about PLS heuristic
 

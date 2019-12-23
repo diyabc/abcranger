@@ -31,6 +31,7 @@ int main(int argc, char* argv[]) {
             ("chosenscen","Chosen scenario (mandatory for parameter estimation)", cxxopts::value<size_t>())
             ("noob","number of oob testing samples (mandatory for parameter estimation)",cxxopts::value<size_t>())
             ("parameter","name of the parameter of interest (mandatory for parameter estimation)",cxxopts::value<std::string>())
+            ("g,groups","Groups of models",cxxopts::value<std::string>())
             ("help", "Print help")
             ;
         auto opts = options.parse(argc,argv);

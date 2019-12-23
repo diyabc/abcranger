@@ -21,7 +21,7 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
                                    bool quiet)
 {
     size_t nref, ntree, nthreads, noisecols, seed, minnodesize;
-    std::string outfile;   
+    std::string outfile;
     bool lda,seeded;
 
     nref = opts["n"].as<size_t>();
@@ -34,6 +34,26 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
     minnodesize = opts["m"].as<size_t>();
     lda =  opts.count("nolinear") == 0;
     outfile = (opts.count("output") == 0) ? "modelchoice_out" : opts["o"].as<std::string>();
+
+
+    if (opts.count("groups") != 0) {
+        std::vector<double> groups(myread.nrecscen.size());
+        auto groupstr = opts["g"].as<std::string>() 
+            | views::split(';')
+            | views::transform([](auto&& s) { return s 
+                | views::split(',') 
+                | views::transform([](auto&& si){ return si | to<std::string>; }); 
+                    }
+                )
+            | views::enumerate
+            | to<std::vector>;
+        for(auto&& s: groupstr) 
+            for(auto&& si: s.second)
+                groups[std::stoi(si)-1] = static_cast<double>(s.first + 1);
+        
+        myread.nrecscen = std::vector<size_t>(groupstr.size());
+        myread.scenarios |= actions::transform([&groups](auto&& si){ return groups[si-1]; });
+    }
 
     std::vector<double> samplefract{std::min(1e5,static_cast<double>(myread.nrec))/static_cast<double>(myread.nrec)};
     auto nstat = myread.stats_names.size();

@@ -68,10 +68,11 @@ Usage:
                           estimation
       --chosenscen arg    Chosen scenario (mandatory for parameter
                           estimation)
-      --noob arg         number of oob testing samples (mandatory for
+      --noob arg          number of oob testing samples (mandatory for
                           parameter estimation)
       --parameter arg     name of the parameter of interest (mandatory for
                           parameter estimation)
+  -g, --groups arg        Groups of models
       --help              Print help
 ```
 
@@ -92,6 +93,12 @@ Example :
 `abcranger -t 10000 -j 8`
 
 Header, reftable and statobs files should be in the current directory.
+
+## Groups
+
+With the option `-g` (or `--groups`), you may “group” your models in
+several groups splitted . For example if you have six models, labeled
+from 1 to 6 \`-g “1,2,3;4,5,6”
 
 ## Generated files
 

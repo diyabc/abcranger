@@ -80,9 +80,9 @@ pmm(
     # DEBUG
     VCPKG
         # REVISION e37cc662ee29852f45e85961124f62d91acb488a
-        REVISION cccd1ed932c20daa9aa61d47aacd8bcc342c4e48
+        REVISION af5f57c248d997d015f4b28a6cd390cbeef00396
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] eigen3-head highfive-head ${TBBPKG} ${BOOSTREGEX}
+        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] eigen3-head highfive-head pybind11 ${TBBPKG} ${BOOSTREGEX}
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head" "${PROJECT_SOURCE_DIR}/highfive-head"
 )
 
@@ -161,6 +161,10 @@ find_package(cxxopts CONFIG REQUIRED)
 ## FMT
 find_package(fmt CONFIG REQUIRED)
 
+## Pybind11
+#set(pybind11_DIR "${vcpkg_inst_dir}/installed/share/cmake/pybind11")
+#message(Pybind11_DIR " ${pybind11_DIR}")
+#find_package(pybind11 CONFIG REQUIRED)
 
 if((NOT MSVC) AND MAKE_STATIC_EXE AND USE_MKL)
   find_package(TBB CONFIG REQUIRED)
@@ -174,4 +178,6 @@ add_executable(abcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOU
 target_link_libraries(abcranger ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
 
 
+# pybind11_add_module(testpybind11 test_pybind11.cpp)
 
+# target_link_libraries(abcranger PRIVATE mylib ${target_name} pybind11::embed pybind11::module)

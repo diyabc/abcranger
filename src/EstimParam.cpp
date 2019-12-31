@@ -230,7 +230,8 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         size_t j = p.second;
         std::vector<double> quants = forestQuantiles(obs,preds[5][j],probs);
         auto reality = y(p.first);
-        auto diff = expectation - reality;
+        auto diff = preds[0][0][p.first] - reality;
+        // auto diff = expectation - reality;
         auto sqdiff = diff * diff;
         auto CI = quants[2] - quants[0];
         MSE += sqdiff;

@@ -173,7 +173,7 @@ endif()
 
 add_subdirectory(test)
 
-add_subdirectory(pytest)
+add_subdirectory(testpy)
 
 add_executable(abcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp abcranger.cpp)
 

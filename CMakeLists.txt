@@ -164,7 +164,7 @@ find_package(fmt CONFIG REQUIRED)
 ## Pybind11
 #set(pybind11_DIR "${vcpkg_inst_dir}/installed/share/cmake/pybind11")
 #message(Pybind11_DIR " ${pybind11_DIR}")
-#find_package(pybind11 CONFIG REQUIRED)
+find_package(pybind11 CONFIG REQUIRED)
 
 if((NOT MSVC) AND MAKE_STATIC_EXE AND USE_MKL)
   find_package(TBB CONFIG REQUIRED)
@@ -173,11 +173,10 @@ endif()
 
 add_subdirectory(test)
 
+add_subdirectory(pytest)
+
 add_executable(abcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp abcranger.cpp)
 
 target_link_libraries(abcranger ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
 
 
-# pybind11_add_module(testpybind11 test_pybind11.cpp)
-
-# target_link_libraries(abcranger PRIVATE mylib ${target_name} pybind11::embed pybind11::module)

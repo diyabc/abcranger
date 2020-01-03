@@ -5,7 +5,7 @@
 #include "readstatobs.hpp"
 #include "readreftable.hpp"
 #include "matutils.hpp"
-#include "DataDense.h"
+#include "DataDense.hpp"
 #include "test-error.hpp"
 
 #include "various.hpp"

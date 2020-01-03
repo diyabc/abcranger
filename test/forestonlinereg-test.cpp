@@ -6,7 +6,7 @@
 #include "ForestOnlineRegression.hpp"
 #include "readstatobs.hpp"
 #include "matutils.hpp"
-#include "DataDense.h"
+#include "DataDense.hpp"
 #include "test-error.hpp"
 #include "csv-eigen.hpp"
 #include "ks.hpp"

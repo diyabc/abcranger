@@ -5,7 +5,7 @@
 #include "matutils.hpp"
 #include "various.hpp"
 
-#include "DataDense.h"
+#include "DataDense.hpp"
 #include "cxxopts.hpp"
 #include <algorithm>
 #include <fstream>

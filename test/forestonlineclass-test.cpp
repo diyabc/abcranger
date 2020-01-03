@@ -5,7 +5,7 @@
 #include "readstatobs.hpp"
 #include "readreftable.hpp"
 #include "matutils.hpp"
-#include "DataDense.h"
+#include "DataDense.hpp"
 using namespace ranger;
 using namespace Eigen;
 

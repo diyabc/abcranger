@@ -11,6 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include "readreftable.hpp"
+#include "tqdm.hpp"
 
 // using namespace boost;
 
@@ -125,7 +126,9 @@ Reftable readreftable(string headerpath, string reftablepath, size_t N, bool qui
     MatrixXd stats = MatrixXd::Constant(nrec,nstat,NAN);
     // DataDouble data(stats,statsname,nrec,nstat + 1);
     // bool hasError;
+    tqdm bar;
     for(auto i = 0; i < nrec; i++) {
+        if (!quiet) bar.progress(i,nrec);
         size_t scen = readAndCast<int,size_t>(reftableStream);
 //        reftableStream.read(reinterpret_cast<char *>(&scen),4);
         scenarios[i] = static_cast<double>(scen);
@@ -148,7 +151,7 @@ Reftable readreftable(string headerpath, string reftablepath, size_t N, bool qui
         }
     }
     reftableStream.close();
-    if (!quiet) cout << "read reftable done." << endl;
+    if (!quiet) cout << endl << "read reftable done." << endl;
     Reftable reftable = { 
         nrec,
         nrecscen,
@@ -266,7 +269,9 @@ Reftable readreftable_scen(string headerpath, string reftablepath, size_t sel_sc
     // DataDouble data(stats,statsname,nrec,nstat + 1);
     // bool hasError;
     size_t ncount = 0;
+    tqdm bar;
     for(auto i = 0; (i < nrec) && (ncount < N); i++) {
+        if (!quiet) bar.progress(ncount,N);
         size_t scen = readAndCast<int,size_t>(reftableStream);
 //        reftableStream.read(reinterpret_cast<char *>(&scen),4);
         bool matched = (scen == sel_scen);
@@ -296,7 +301,7 @@ Reftable readreftable_scen(string headerpath, string reftablepath, size_t sel_sc
     }
 
     reftableStream.close();
-    if (!quiet) cout << "read reftable done." << endl;
+    if (!quiet) cout << endl << "read reftable done." << endl;
     Reftable reftable = { 
         ncount,
         {nrecscen[sel_scen-1]},

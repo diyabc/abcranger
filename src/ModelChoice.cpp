@@ -17,7 +17,7 @@ using namespace ranges;
 
 ModelChoiceResults ModelChoice_fun(Reftable &myread,
                                    std::vector<double> obs,
-                                   const cxxopts::ParseResult& opts,
+                                   const cxxopts::ParseResult opts,
                                    bool quiet)
 {
     size_t nref, ntree, nthreads, noisecols, seed, minnodesize;

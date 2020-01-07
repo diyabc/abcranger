@@ -15,6 +15,7 @@
 #include "globals.h"
 #include "Tree.h"
 #include "Data.h"
+#include "tqdm.hpp"
 
 namespace ranger {
 
@@ -223,6 +224,7 @@ protected:
 
   // Computation progress (finished trees)
   size_t progress;
+  tqdm bar;
 #ifdef R_BUILD
   size_t aborted_threads;
   bool aborted;

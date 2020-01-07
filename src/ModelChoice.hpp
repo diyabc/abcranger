@@ -17,5 +17,5 @@ struct ModelChoiceResults
 
 ModelChoiceResults ModelChoice_fun(Reftable &reftable,
                                    std::vector<double> statobs,
-                                   const cxxopts::ParseResult& opts,
+                                   const cxxopts::ParseResult opts,
                                    bool quiet = false);

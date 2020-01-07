@@ -5,10 +5,15 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/eigen.h>
+#include <pybind11/iostream.h>
 #include <list>
 
-const cxxopts::ParseResult & parseopt(std::string stropts) {
-    std::istringstream ss(stropts);
+namespace py = pybind11;
+
+py::scoped_ostream_redirect output;
+
+const cxxopts::ParseResult parseopt(std::string stropts) {
+    std::istringstream ss("abcranger " + stropts);
     std::string arg;
     std::list<std::string> ls;
     std::vector<char*> v;
@@ -41,10 +46,11 @@ const cxxopts::ParseResult & parseopt(std::string stropts) {
         ("g,groups","Groups of models",cxxopts::value<std::string>())
         ("help", "Print help")
         ;
-    int argc = (int)v.size();
+    int argc = (int)v.size()-1;
     char **argv = v.data();
 
-    return options.parse(argc,argv);
+    auto res = options.parse(argc,argv);
+    return res;
 }
 
 ModelChoiceResults ModelChoice_fun_py(Reftable &reftable,
@@ -61,7 +67,6 @@ EstimParamResults EstimParam_fun_py(Reftable &reftable,
     return EstimParam_fun(reftable,statobs,parseopt(options),quiet);
 }
 
-namespace py = pybind11;
 using namespace Eigen;
 
 PYBIND11_MODULE(pyabcranger, m) {
@@ -74,8 +79,21 @@ PYBIND11_MODULE(pyabcranger, m) {
                        MatrixXd,
                        MatrixXd,
                        std::vector<double>>());
-    py::class_<ModelChoiceResults>(m,"modelchoice_results");
-    py::class_<EstimParamResults>(m,"estimparam_results");
+    py::class_<ModelChoiceResults>(m,"modelchoice_results")
+        .def_readwrite("confusion_matrixc",&ModelChoiceResults::confusion_matrix)
+        .def_readwrite("variable_importance",&ModelChoiceResults::variable_importance)
+        .def_readwrite("ntree_oob_error",&ModelChoiceResults::ntree_oob_error)
+        .def_readwrite("predicted_model",&ModelChoiceResults::predicted_model)
+        .def_readwrite("votes",&ModelChoiceResults::votes)
+        .def_readwrite("post_proba",&ModelChoiceResults::post_proba);
+    py::class_<EstimParamResults>(m,"estimparam_results")
+        .def_readwrite("plsvar",&EstimParamResults::plsvar)
+        .def_readwrite("plsweights",&EstimParamResults::plsweights)
+        .def_readwrite("variable_importance",&EstimParamResults::variable_importance)
+        .def_readwrite("ntree_oob_error",&EstimParamResults::ntree_oob_error)
+        .def_readwrite("values_weights",&EstimParamResults::values_weights)
+        .def_readwrite("point_estimates",&EstimParamResults::point_estimates)
+        .def_readwrite("errors",&EstimParamResults::errors);
 
     m.def("modelchoice", &ModelChoice_fun_py);
     m.def("estimparam", &EstimParam_fun_py);

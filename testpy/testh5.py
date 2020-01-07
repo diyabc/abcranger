@@ -19,5 +19,5 @@ rf = pyabcranger.reftable(
     )
 
 statobs = np.loadtxt('./test/data/statobsRF.txt',skiprows=2)
-pyabcranger.modelchoice(rf, statobs,"bleuargh",True)
+pyabcranger.modelchoice(rf, statobs,"",False)
 

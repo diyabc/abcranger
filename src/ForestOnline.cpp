@@ -356,7 +356,7 @@ void ForestOnline::grow() {
     threads.emplace_back(&ForestOnline::growTreesInThread, this, i, &(variable_importance_threads[i]),data.get(),predict_data.get());
   }
   // showProgress("Growing trees..", num_trees);
-  if (verbose_out) initbar();
+  // if (verbose_out) initbar();
 
   for (auto &thread : threads) {
     thread.join();
@@ -594,7 +594,7 @@ void ForestOnline::growTreesInThread(uint thread_idx, std::vector<double>* varia
       // calculateAfterGrow(i,false);
       trees[i]->predict(predict_data,false);
       ++progress;
-      if (verbose_out) loadbar(progress,num_trees);
+      if (verbose_out) bar.progress(progress,num_trees);
       predictInternal(i);
       trees[i].reset(nullptr);
       condition_variable.notify_one();

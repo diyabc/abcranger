@@ -83,11 +83,11 @@ TEST_CASE("EstimParam KS distribution")
             auto res = EstimParam_fun(myread,statobs,opts,true);
             std::cout << i << "...";
             std::cout.flush();
-            expectations[i] = res.expectation;
-            variances[i] = res.variance;
-            quantiles1[i] = res.quantiles[0];
-            quantiles2[i] = res.quantiles[1];
-            quantiles3[i] = res.quantiles[2];
+            expectations[i] = res.point_estimates["Expectation"];
+            variances[i] = res.point_estimates["Variance"];
+            quantiles1[i] = res.point_estimates["Quantile_0.05"];
+            quantiles2[i] = res.point_estimates["Median"];
+            quantiles3[i] = res.point_estimates["Quantile_0.95"];
         }
         std::cout << std::endl;
 

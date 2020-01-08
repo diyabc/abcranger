@@ -15,11 +15,14 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include <list>
 #include <range/v3/all.hpp>
 
 using namespace Eigen;
 using namespace std;
 using namespace ranges;
+
+size_t window_size = 15;
 
 template<class Derived, class OtherDerived>
 VectorXd pls(const MatrixBase<Derived>& x,
@@ -45,6 +48,7 @@ VectorXd pls(const MatrixBase<Derived>& x,
     VectorXd r(p);
     VectorXd t(p);
     VectorXd res(ncomp);
+    std::list<unsigned char> stopping_criterium(window_size,0);
     // Y.col(0) = y.rowwise() - y.colwise().mean();
     double ymean = y.mean();
     Y.col(0).array() = ymean;
@@ -78,13 +82,15 @@ VectorXd pls(const MatrixBase<Derived>& x,
             auto lastdiff = res(m) - res(m-1);
             auto lastmean = (res(m) + res(m-1))/2.0;
             size_t remains = ncomp - m;
-            if (lastmean >= 0.99 * remains * lastdiff) break;
+            stopping_criterium.pop_front();
+            stopping_criterium.push_back(lastmean >= 0.99 * remains * lastdiff);
+            auto wcrit = ranges::accumulate(stopping_criterium,0);
+            if (wcrit == window_size) break;
         }
         m++;
     }
     if (m < ncomp) {
         m--;
-        // std::cout << "Stopped PLS at " << m << "th component (total : " << ncomp << ")" << std::endl;
         res = res(seq(0,m)).eval();
     }
     Projection = R;

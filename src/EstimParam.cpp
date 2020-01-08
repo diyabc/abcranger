@@ -173,7 +173,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     if (!quiet) forestreg.writeImportanceFile();
     // OOB error by number of trees
     res.ntree_oob_error = preds[2][0];
-    res.oob_error = preds[2][0][ntree-1];
+    // res.oob_error = preds[2][0][ntree-1];
     if (!quiet) forestreg.writeOOBErrorFile();
     // Values/weights
     res.values_weights = forestreg.getWeights();
@@ -204,7 +204,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         if (!std::isnan(preds[0][0][i])) {
             double rest = y(i) - preds[0][0][i];
             variance += preds[4][0][i] * rest * rest;
-            mae += preds[4][0][i] * std::abs(rest/y(i));
+            // mae += preds[4][0][i] * std::abs(rest/y(i));
         }
         // double rest = y(i) - preds[1][0][j];
         // variance2 += preds[4][j][i] * rest * rest; 
@@ -217,11 +217,13 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         { "Quantile_0.95", quants[2] },
         { "Variance", variance }
     };
-    res.results.
+
     os << "Parameter estimation (point estimates)" << std::endl;
-    for(auto p: point_estimates) os << fmt::format("{:>13}",p.first);
-    for(auto p: point_estimates) os << fmt::format("{:>13.6f}",p.second);
-    for(auto p: point_estimates) res.results.insert(p);
+    for(auto p: point_estimates) os << fmt::format("{:>14}",p.first);
+    os << std::endl;
+    for(auto p: point_estimates) os << fmt::format("{:>14.6f}",p.second);
+    os << std::endl;
+    for(auto p: point_estimates) res.point_estimates.insert(p);
     os << std::endl;
 
     std::map<std::string,std::string> global_local{
@@ -235,6 +237,8 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         { "ci", "Confidence interval measures"}
     };
 
+    std::vector<std::string> mean_median_ci_l{"mean","median","ci"};
+
     std::vector<std::string> computed{"NMAE","MSE","NMSE"};
 
     std::map<std::string,std::string> ci{
@@ -247,45 +251,47 @@ EstimParamResults EstimParam_fun(Reftable &myread,
 
     for(auto g_l : global_local) {
         for(auto c: computed) {
-            res.errors[g_l.first]['mean'][c] = 0.0;
-            res.errors[g_l.first]['median'][c] = 0.0;
+            res.errors[g_l.first]["mean"][c] = 0.0;
+            res.errors[g_l.first]["median"][c] = 0.0;
         }
-        for(auto c: ci) res.errors[g_l.first]['ci'][c.first] = 0.0;
+        for(auto c: ci) res.errors[g_l.first]["ci"][c.first] = 0.0;
     }
 
     std::vector<double> ones(nref,1.0);
     
     for(auto p : forestreg.oob_subset) {
-        size_t j = p.second;
-        std::vector<double> quants = forestQuantiles(obs,preds[5][j],probs);
+        std::vector<double> quants = forestQuantiles(obs,preds[5][p.second],probs);
         auto reality = y(p.first);
-        auto w = preds[5][j][p.first]
+        auto w = preds[4][0][p.first] * nref;
         auto diff = preds[0][0][p.first] - reality;
         auto diff2 = quants[1] - reality;
         // auto diff = expectation - reality;
         auto sqdiff = diff * diff;
         auto sqdiff2 = diff2 * diff2;
         auto CI = quants[2] - quants[0];
-        res.errors['global']['mean']['NMAE'] += std::abs(diff / reality);
-        res.errors['global']['mean']['MSE'] += sqdiff;
-        res.errors['global']['mean']['NMSE'] += sqdiff / reality;
-        res.errors['global']['median']['NMAE'] += std::abs(diff2 / reality);
-        res.errors['global']['median']['MSE'] += sqdiff2;
-        res.errors['global']['median']['NMSE'] += sqdiff2 / reality;
-        res.errors['local']['mean']['NMAE'] += w * std::abs(diff / reality);
-        res.errors['local']['mean']['MSE'] += w * sqdiff;
-        res.errors['local']['mean']['NMSE'] += w * sqdiff / reality;
-        res.errors['local']['median']['NMAE'] += w * std::abs(diff2 / reality);
-        res.errors['local']['median']['MSE'] += w * sqdiff2;
-        res.errors['local']['median']['NMSE'] += w * sqdiff2 / reality;
-        res.errors['global']['ci']['cov'] += ((reality <= quants[2]) && (reality >= quants[0])) ? 1.0 : 0.0;
-        res.errors['local']['ci']['cov'] += w * ((reality <= quants[2]) && (reality >= quants[0])) ? 1.0 : 0.0;
+        // std::cout << "CI : " << p.first << " " << CI << std::endl;
+        res.errors["global"]["mean"]["NMAE"] += std::abs(diff / reality);
+        res.errors["global"]["mean"]["MSE"] += sqdiff;
+        res.errors["global"]["mean"]["NMSE"] += sqdiff / reality;
+        res.errors["global"]["median"]["NMAE"] += std::abs(diff2 / reality);
+        res.errors["global"]["median"]["MSE"] += sqdiff2;
+        res.errors["global"]["median"]["NMSE"] += sqdiff2 / reality;
+        res.errors["local"]["mean"]["NMAE"] += w * std::abs(diff / reality);
+        res.errors["local"]["mean"]["MSE"] += w * sqdiff;
+        res.errors["local"]["mean"]["NMSE"] += w * sqdiff / reality;
+        res.errors["local"]["median"]["NMAE"] += w * std::abs(diff2 / reality);
+        res.errors["local"]["median"]["MSE"] += w * sqdiff2;
+        res.errors["local"]["median"]["NMSE"] += w * sqdiff2 / reality;
+        double inside = ((reality <= quants[2]) && (reality >= quants[0])) ? 1.0 : 0.0;
+        res.errors["global"]["ci"]["cov"] += inside;
+        res.errors["local"]["ci"]["cov"] += w * inside;
         rCI.push_back(CI);
-        lrCI.push_back(w * CI)
         relativeCI.push_back(CI / reality);
+        lrCI.push_back(w * CI);
         lrelativeCI.push_back(w * CI / reality);
     }
     if (!quiet) {
+        std::cout << std::endl;
         std::cout << os.str();
         std::cout.flush();
     }
@@ -304,69 +310,44 @@ EstimParamResults EstimParam_fun(Reftable &myread,
 
     os.clear();
     os.str("");
+    double acc;
     for(auto g_l : global_local) {
         os << g_l.second << std::endl;
-        for(auto m: mean_median_ci) {
-            os << m.second << std::endl;
-            if (m.first != "ci") {
+        for(auto m: mean_median_ci_l) {
+            os << mean_median_ci[m] << std::endl;
+            if (m != "ci") {
                 for (auto n : computed) {
-                    res.errors[g_l.first][m.first][n] /= static_cast<double>(ntest);
-                    os << fmt::format("{:>19} : {:<13}",computed, res.errors[g_l.first][m.first][n]) << std::endl;
+                    res.errors[g_l.first][m][n] /= static_cast<double>(ntest);
+                    os << fmt::format("{:>25} : {:<13}",n, res.errors[g_l.first][m][n]) << std::endl;
                 }
             }
             else {
                 for(auto c : ci) {
-                    switch(c.first) {
-                        case "cov" :
-                            res.errors[g_l.first][m.first][c.first] /= static_cast<double>(ntest);
-                            os << fmt::format("{:>19} : {:<13}",c.second, res.errors[g_l.first][m.first][c.first]) << std::endl;
-                            break;
-                        
+                    if (c.first == "cov") 
+                        acc = res.errors[g_l.first][m][c.first]/static_cast<double>(ntest);
+                    else {
+                        auto& v  = (g_l.first == "global") ? rCI : lrCI;
+                        auto& rv = (g_l.first == "global") ? relativeCI : lrelativeCI;
+                        if(c.first == "meanCI") 
+                            acc = ranges::accumulate(v,0.0)/static_cast<double>(ntest);
+                        else if (c.first == "meanRCI")
+                            acc = ranges::accumulate(rv,0.0)/static_cast<double>(ntest);
+                        else if (c.first == "medianCI")
+                            acc = median(v);
+                        else if (c.first == "medianRCI")
+                            acc = median(rv);
                     }
-
-                }
-                if (g_l.first == "local") {
+                    res.errors[g_l.first][m][c.first] = acc;
+                    os << fmt::format("{:>25} : {:<13}",c.second, acc) << std::endl;
 
                 }
 
             }
         }
-        for(auto c: computed) {
-            res.errors[g_l]['mean'][c] = 0.0;
-            res.errors[g_l]['median'][c] = 0.0;
-        }
-        for(auto c: ci) res.errors[g_l]['ci'][c.first] = 0.0;
         os << std::endl;
     }
 
-    os << "Computed from the mean taken as point estimate" << std::endl;
-    res.NMAE = NMAE/static_cast<double>(ntest);
-    os << fmt::format("{:>19} : {:<13}","NMAE", res.NMAE) << std::endl;
-    res.MSE = MSE/static_cast<double>(ntest); 
-    os << fmt::format("{:>19} : {:<13}","MSE", res.MSE) << std::endl;
-    res.NMSE = NMSE/static_cast<double>(ntest);
-    os << fmt::format("{:>19} : {:<13}","NMSE", res.NMSE) << std::endl;
-    os << "Computed from the median taken as point estimate" << std::endl;
-    res.NMAE2 = NMAE2/static_cast<double>(ntest);
-    os << fmt::format("{:>19} : {:<13}","NMAE", res.NMAE2) << std::endl;
-    res.MSE2 = MSE2/static_cast<double>(ntest); 
-    os << fmt::format("{:>19} : {:<13}","MSE", res.MSE) << std::endl;
-    res.NMSE2 = NMSE2/static_cast<double>(ntest);
-    os << fmt::format("{:>19} : {:<13}","NMSE", res.NMSE2) << std::endl;
-    os << "Confidence interval measures" << std::endl;
-    res.COV = COV/static_cast<double>(ntest);
-    os << fmt::format("{:>19} : {:<13}","90% Coverage", res.COV) << std::endl;
-    res.meanCI = ranges::accumulate(rCI,0.0)/static_cast<double>(ntest);
-    os << fmt::format("{:>19} : {:<13}","mean CI", res.meanCI) << std::endl;
-    res.meanrelativeCI = ranges::accumulate(relativeCI,0.0)/static_cast<double>(ntest);
-    os << fmt::format("{:>19} : {:<13}","mean relative CI", res.meanrelativeCI) << std::endl;
-    res.medianCI = median(rCI);
-    os << fmt::format("{:>19} : {:<13}","median CI",res.medianCI) << std::endl;
-    res.medianrelativeCI = median(relativeCI);
-    os << fmt::format("{:>19} : {:<13}","median relative CI", res.medianrelativeCI) << std::endl;
-
     if (!quiet) {
-        std::cout << std::endl << "Global (prior) errors" << std::endl;
         std::cout << os.str();
         std::cout.flush();
     }

@@ -38,6 +38,7 @@ private:
 
   // OOb counts for regression
   std::vector<size_t> samples_oob_count;
+  std::vector<size_t> samples_boob_count;
   std::vector<size_t> samples_terminalnodes;
   // Storing prediction sum by tree
   std::vector<double> prediction_sum;

@@ -254,21 +254,31 @@ EstimParamResults EstimParam_fun(Reftable &myread,
             res.errors[g_l.first]["mean"][c] = 0.0;
             res.errors[g_l.first]["median"][c] = 0.0;
         }
-        for(auto c: ci) res.errors[g_l.first]["ci"][c.first] = 0.0;
+        for(auto c: ci) {
+            if (g_l.first == "global")
+                res.errors[g_l.first]["ci"][c.first] = 0.0;
+        }
     }
 
     std::vector<double> ones(nref,1.0);
-    
+    double postmed = quants[1];
+
+    double sumw = 0.0;
     for(auto p : forestreg.oob_subset) {
+        // auto oobsumw = 0.0;
+        // for (auto w : preds[5][p.second]) oobsumw += w; 
+        // // std::cout << "oob : " << p.first << " " << oobsumw << std::endl;
+        // for(auto i = 0; i < nref; i++)  preds[5][p.second][i] /= oobsumw;
         std::vector<double> quants = forestQuantiles(obs,preds[5][p.second],probs);
         auto reality = y(p.first);
-        auto w = preds[4][0][p.first] * nref;
+        auto w = preds[4][0][p.first];
+        sumw += w;
+        // auto w = preds[5][p.second][p.first] * nref;
         auto diff = preds[0][0][p.first] - reality;
-        auto diff2 = quants[1] - reality;
-        // auto diff = expectation - reality;
+        auto diff2 = (quants[1] - reality) ;
         auto sqdiff = diff * diff;
         auto sqdiff2 = diff2 * diff2;
-        auto CI = quants[2] - quants[0];
+        auto CI = (quants[2] - quants[0]);
         // std::cout << "CI : " << p.first << " " << CI << std::endl;
         res.errors["global"]["mean"]["NMAE"] += std::abs(diff / reality);
         res.errors["global"]["mean"]["MSE"] += sqdiff;
@@ -284,11 +294,10 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         res.errors["local"]["median"]["NMSE"] += w * sqdiff2 / reality;
         double inside = ((reality <= quants[2]) && (reality >= quants[0])) ? 1.0 : 0.0;
         res.errors["global"]["ci"]["cov"] += inside;
-        res.errors["local"]["ci"]["cov"] += w * inside;
         rCI.push_back(CI);
         relativeCI.push_back(CI / reality);
-        lrCI.push_back(w * CI);
-        lrelativeCI.push_back(w * CI / reality);
+        // lrCI.push_back(w * CI);
+        // lrelativeCI.push_back(w * CI / reality);
     }
     if (!quiet) {
         std::cout << std::endl;
@@ -307,38 +316,44 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         predict_file.flush();
         predict_file.close();
     }
+    
+    std::cout << "Sum weights : " << sumw << std::endl;
 
     os.clear();
     os.str("");
     double acc;
     for(auto g_l : global_local) {
         os << g_l.second << std::endl;
+        auto normalize = (g_l.first == "global") ? ntest : sumw;
         for(auto m: mean_median_ci_l) {
-            os << mean_median_ci[m] << std::endl;
             if (m != "ci") {
+                os << mean_median_ci[m] << std::endl;
                 for (auto n : computed) {
-                    res.errors[g_l.first][m][n] /= static_cast<double>(ntest);
+                    res.errors[g_l.first][m][n] /= static_cast<double>(normalize);
                     os << fmt::format("{:>25} : {:<13}",n, res.errors[g_l.first][m][n]) << std::endl;
                 }
             }
             else {
-                for(auto c : ci) {
-                    if (c.first == "cov") 
-                        acc = res.errors[g_l.first][m][c.first]/static_cast<double>(ntest);
-                    else {
-                        auto& v  = (g_l.first == "global") ? rCI : lrCI;
-                        auto& rv = (g_l.first == "global") ? relativeCI : lrelativeCI;
-                        if(c.first == "meanCI") 
-                            acc = ranges::accumulate(v,0.0)/static_cast<double>(ntest);
-                        else if (c.first == "meanRCI")
-                            acc = ranges::accumulate(rv,0.0)/static_cast<double>(ntest);
-                        else if (c.first == "medianCI")
-                            acc = median(v);
-                        else if (c.first == "medianRCI")
-                            acc = median(rv);
+                if (g_l.first == "global") {
+                    os << mean_median_ci[m] << std::endl;
+                    for(auto c : ci) {
+                        // normalize = ntest;                        
+                        if (c.first == "cov") {
+                            acc = res.errors[g_l.first][m][c.first]/static_cast<double>(normalize);
+                        } else {
+                            if(c.first == "meanCI") 
+                                acc = ranges::accumulate(rCI,0.0)/static_cast<double>(normalize);
+                            else if (c.first == "meanRCI")
+                                acc = ranges::accumulate(relativeCI,0.0)/static_cast<double>(normalize);
+                            else if (c.first == "medianCI")
+                                acc = median(rCI);
+                            else if (c.first == "medianRCI")
+                                acc = median(relativeCI);
+                        }
+                        res.errors[g_l.first][m][c.first] = acc;
+                        os << fmt::format("{:>25} : {:<13}",c.second, acc) << std::endl;
+
                     }
-                    res.errors[g_l.first][m][c.first] = acc;
-                    os << fmt::format("{:>25} : {:<13}",c.second, acc) << std::endl;
 
                 }
 

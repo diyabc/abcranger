@@ -10,7 +10,7 @@
 
 namespace py = pybind11;
 
-py::scoped_ostream_redirect output;
+// py::scoped_ostream_redirect output;
 
 const cxxopts::ParseResult parseopt(std::string stropts) {
     std::istringstream ss("abcranger " + stropts);

@@ -51,6 +51,7 @@ void ForestOnlineRegression::growInternal()
   // predictions = std::vector<std::vector<std::vector<double>>>(1,
   //     std::vector<std::vector<double>>(1, std::vector<double>(num_samples, 0)));
   samples_oob_count.resize(num_samples, 0);
+  samples_boob_count = std::vector<size_t>(num_samples,0);
 }
 
 void ForestOnlineRegression::allocatePredictMemory()
@@ -147,7 +148,12 @@ void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx, bool oob)
     auto nb = inbag_count[sample_idx];
     if (nb > 0) // INBAG
       samples_terminalnodes[sample_idx] = node;
-    else { // OOB
+  }
+  for (size_t sample_idx = 0; sample_idx < num_samples; sample_idx++) {
+    double value = getTreePrediction(tree_idx, sample_idx);
+    size_t node = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
+    auto nb = inbag_count[sample_idx];
+    if (nb == 0) { // OOB
       if(std::isnan(predictions[0][0][sample_idx]))
         predictions[0][0][sample_idx] = 0.0;
       predictions[0][0][sample_idx] += value;
@@ -157,15 +163,19 @@ void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx, bool oob)
         if (tofind != oob_subset.end()) {
           size_t oob_idx = tofind->second;
           size_t Lb = 0;
+          samples_boob_count[sample_idx]++;
+
           for (size_t sample_internal_idx = 0; sample_internal_idx < num_samples; ++sample_internal_idx) {
                 auto nb = inbag_count[sample_internal_idx];
-                if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) 
+                if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) {
                   Lb += nb;
+                }
           }
           for (size_t sample_internal_idx = 0; sample_internal_idx < num_samples; ++sample_internal_idx) {
                 auto nb = inbag_count[sample_internal_idx];
-                if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) 
+                if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) {
                   predictions[5][oob_idx][sample_internal_idx] += static_cast<double>(nb)/static_cast<double>(Lb);
+                }
           }
         }
       }

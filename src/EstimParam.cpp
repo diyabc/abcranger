@@ -267,7 +267,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     for(auto p : forestreg.oob_subset) {
         // auto oobsumw = 0.0;
         // for (auto w : preds[5][p.second]) oobsumw += w; 
-        // // std::cout << "oob : " << p.first << " " << oobsumw << std::endl;
+        // // // std::cout << "oob : " << p.first << " " << oobsumw << std::endl;
         // for(auto i = 0; i < nref; i++)  preds[5][p.second][i] /= oobsumw;
         std::vector<double> quants = forestQuantiles(obs,preds[5][p.second],probs);
         auto reality = y(p.first);
@@ -317,7 +317,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         predict_file.close();
     }
     
-    std::cout << "Sum weights : " << sumw << std::endl;
+    // std::cout << "Sum weights : " << sumw << std::endl;
 
     os.clear();
     os.str("");

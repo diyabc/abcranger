@@ -14,15 +14,16 @@
  */
 #pragma once
 
+#include "various.hpp"
 #include <Eigen/Dense>
 #include <list>
+#include <algorithm>
 #include <range/v3/all.hpp>
 
 using namespace Eigen;
 using namespace std;
 using namespace ranges;
 
-size_t window_size = 15;
 
 template<class Derived, class OtherDerived>
 VectorXd pls(const MatrixBase<Derived>& x,
@@ -48,6 +49,8 @@ VectorXd pls(const MatrixBase<Derived>& x,
     VectorXd r(p);
     VectorXd t(p);
     VectorXd res(ncomp);
+    size_t window_size = std::max(2_z,ncomp/10_z);
+
     std::list<unsigned char> stopping_criterium(window_size,0);
     // Y.col(0) = y.rowwise() - y.colwise().mean();
     double ymean = y.mean();

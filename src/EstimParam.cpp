@@ -23,11 +23,12 @@ using namespace ranges;
 EstimParamResults EstimParam_fun(Reftable &myread,
                                  std::vector<double> origobs,
                                  const cxxopts::ParseResult opts,
-                                 bool quiet)
+                                 bool quiet,
+                                 bool weights)
 {
     size_t nref, ntree, nthreads, noisecols, seed, minnodesize, ntest;
     std::string outfile, parameter_of_interest;
-    double chosenscen;   
+    double chosenscen,plsmaxvar;   
     bool plsok,seeded;
 
     nref = opts["n"].as<size_t>();
@@ -39,6 +40,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         seed = opts["s"].as<size_t>();
     minnodesize = opts["m"].as<size_t>();
     ntest = opts["noob"].as<size_t>();
+    plsmaxvar = opts["plsmaxvar"].as<double>();
     chosenscen = static_cast<double>(opts["chosenscen"].as<size_t>());
     parameter_of_interest = opts["parameter"].as<std::string>();
     plsok = opts.count("nolinear") == 0;
@@ -87,20 +89,37 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         size_t ncomp_total = static_cast<size_t>(lround(1.0 * static_cast<double>(nstat)));
         MatrixXd Projection;
         RowVectorXd mean,std;
-        VectorXd percentYvar = pls(myread.stats,
-                                y,
-                                ncomp_total,Projection, mean, std,true);
-
+        size_t nComposante_sel;
+        
         const std::string& pls_filename = outfile + ".plsvar";
         std::ofstream pls_file;
         if (!quiet) pls_file.open(pls_filename, std::ios::out);
-        res.plsvar = std::vector<double>(percentYvar.size());
-        for(auto i = 0; i < percentYvar.size(); i++) {
-            if (!quiet) pls_file << percentYvar(i) << std::endl;
-            res.plsvar[i] = percentYvar(i);
+
+        if (plsmaxvar == 0.0 ) {
+            std::cout << "Using elbow method for selecting PLS axes" << std::endl;
+            VectorXd percentYvar = pls(myread.stats,
+                                    y,
+                                    ncomp_total,Projection, mean, std,true);
+            nComposante_sel = percentYvar.size();
+            for (auto i = 0; i < nComposante_sel; i++) res.plsvar.push_back(percentYvar(i));
+        } else {
+            VectorXd percentYvar = pls(myread.stats,
+                                    y,
+                                    ncomp_total,Projection, mean, std,false);            
+            auto maxres = percentYvar[percentYvar.size() - 1];
+            for(auto i = 0; i < percentYvar.size(); i++) 
+                if (percentYvar(i) <= plsmaxvar * maxres) res.plsvar.push_back(percentYvar(i));
+            nComposante_sel = res.plsvar.size();
         }
-        if (!quiet) pls_file.close();
-        size_t nComposante_sel = percentYvar.size();
+
+
+        //res.plsvar = std::vector<double>(percentYvar.size());
+        for(auto p: res.plsvar) 
+            if (!quiet) {
+                pls_file << p << std::endl;
+                pls_file.close();
+            }
+
 
         if (!quiet) std::cout << "Selecting only " << nComposante_sel << " pls components." << std::endl;
 
@@ -194,38 +213,11 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     std::vector<double> obs;
     std::copy(y.begin(),y.end(),std::back_inserter(obs));
 
-        
+    if (weights) res.oob_weights = MatrixXd(ntest,nref);
+    res.oob_map = forestreg.oob_subset;
+
     double expectation = 0.0;
     double variance = 0.0;
-    // double mae = 0.0;
-    // double variance2 = 0.0;
-    for(auto i = 0; i < nref; i++) {
-        expectation += preds[4][0][i] * y(i);
-        if (!std::isnan(preds[0][0][i])) {
-            double rest = y(i) - preds[0][0][i];
-            variance += preds[4][0][i] * rest * rest;
-            // mae += preds[4][0][i] * std::abs(rest/y(i));
-        }
-        // double rest = y(i) - preds[1][0][j];
-        // variance2 += preds[4][j][i] * rest * rest; 
-    }
-    std::vector<double> quants = forestQuantiles(obs,preds[4][0],probs);
-    std::map<std::string,double> point_estimates{
-        { "Expectation", expectation },
-        { "Median", quants[1] },
-        { "Quantile_0.05", quants[0] },
-        { "Quantile_0.95", quants[2] },
-        { "Variance", variance }
-    };
-
-    os << "Parameter estimation (point estimates)" << std::endl;
-    for(auto p: point_estimates) os << fmt::format("{:>14}",p.first);
-    os << std::endl;
-    for(auto p: point_estimates) os << fmt::format("{:>14.6f}",p.second);
-    os << std::endl;
-    for(auto p: point_estimates) res.point_estimates.insert(p);
-    os << std::endl;
-
     std::map<std::string,std::string> global_local{
         { "global", "Global (prior) errors" },
         { "local", "Local (posterior) errors" }
@@ -260,45 +252,67 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         }
     }
 
-    std::vector<double> ones(nref,1.0);
-    double postmed = quants[1];
-
+    // double variance2 = 0.0;
     double sumw = 0.0;
-    for(auto p : forestreg.oob_subset) {
-        // auto oobsumw = 0.0;
-        // for (auto w : preds[5][p.second]) oobsumw += w; 
-        // // // std::cout << "oob : " << p.first << " " << oobsumw << std::endl;
-        // for(auto i = 0; i < nref; i++)  preds[5][p.second][i] /= oobsumw;
-        std::vector<double> quants = forestQuantiles(obs,preds[5][p.second],probs);
-        auto reality = y(p.first);
-        auto w = preds[4][0][p.first];
-        sumw += w;
-        // auto w = preds[5][p.second][p.first] * nref;
-        auto diff = preds[0][0][p.first] - reality;
-        auto diff2 = (quants[1] - reality) ;
-        auto sqdiff = diff * diff;
-        auto sqdiff2 = diff2 * diff2;
-        auto CI = (quants[2] - quants[0]);
-        // std::cout << "CI : " << p.first << " " << CI << std::endl;
-        res.errors["global"]["mean"]["NMAE"] += std::abs(diff / reality);
-        res.errors["global"]["mean"]["MSE"] += sqdiff;
-        res.errors["global"]["mean"]["NMSE"] += sqdiff / reality;
-        res.errors["global"]["median"]["NMAE"] += std::abs(diff2 / reality);
-        res.errors["global"]["median"]["MSE"] += sqdiff2;
-        res.errors["global"]["median"]["NMSE"] += sqdiff2 / reality;
-        res.errors["local"]["mean"]["NMAE"] += w * std::abs(diff / reality);
-        res.errors["local"]["mean"]["MSE"] += w * sqdiff;
-        res.errors["local"]["mean"]["NMSE"] += w * sqdiff / reality;
-        res.errors["local"]["median"]["NMAE"] += w * std::abs(diff2 / reality);
-        res.errors["local"]["median"]["MSE"] += w * sqdiff2;
-        res.errors["local"]["median"]["NMSE"] += w * sqdiff2 / reality;
-        double inside = ((reality <= quants[2]) && (reality >= quants[0])) ? 1.0 : 0.0;
-        res.errors["global"]["ci"]["cov"] += inside;
-        rCI.push_back(CI);
-        relativeCI.push_back(CI / reality);
-        // lrCI.push_back(w * CI);
-        // lrelativeCI.push_back(w * CI / reality);
+    std::vector<double> quants = forestQuantiles(obs,preds[4][0],probs);
+
+    for(auto i = 0; i < nref; i++) {
+        auto w = preds[4][0][i];
+        auto pred_oob = preds[0][0][i];
+        auto reality = y(i);
+        expectation += w * reality;
+        if (!std::isnan(pred_oob)) {
+            double diff = reality - pred_oob;
+            auto sqdiff = diff * diff;
+            res.errors["global"]["mean"]["NMAE"] += std::abs(diff / reality);
+            res.errors["global"]["mean"]["MSE"] += sqdiff;
+            res.errors["global"]["mean"]["NMSE"] += sqdiff / reality;
+            res.errors["local"]["mean"]["NMAE"] += w * std::abs(diff / reality);
+            res.errors["local"]["mean"]["MSE"] += w * sqdiff;
+            res.errors["local"]["mean"]["NMSE"] += w * sqdiff / reality;
+        }
+        if (i < ntest) {
+            auto p = *(std::next(forestreg.oob_subset.begin(),i));
+            if (weights) 
+                for (auto i = 0; i < nref; i++) res.oob_weights(p.second,i) = preds[5][p.second][i];
+            std::vector<double> quants_oob = forestQuantiles(obs,preds[5][p.second],probs);
+            auto reality = y(p.first);
+            auto w = preds[4][0][p.first];
+            sumw += w;
+            auto diff = quants_oob[1] - reality;
+            auto sqdiff = diff * diff;
+            auto CI = quants_oob[2] - quants_oob[0];
+            res.errors["global"]["median"]["NMAE"] += std::abs(diff / reality);
+            res.errors["global"]["median"]["MSE"] += sqdiff;
+            res.errors["global"]["median"]["NMSE"] += sqdiff / reality;
+            res.errors["local"]["median"]["NMAE"] += w * std::abs(diff / reality);
+            res.errors["local"]["median"]["MSE"] += w * sqdiff;
+            res.errors["local"]["median"]["NMSE"] += w * sqdiff / reality;
+            double inside = ((reality <= quants_oob[2]) && (reality >= quants_oob[0])) ? 1.0 : 0.0;
+            res.errors["global"]["ci"]["cov"] += inside;
+            rCI.push_back(CI);
+            relativeCI.push_back(CI / reality);
+        }
     }
+
+    if (sumw == 0.0) std::cout << "Warning : not enough oob samples to have local errors with median as point estimates" << std::endl;
+
+    std::map<std::string,double> point_estimates{
+        { "Expectation", expectation },
+        { "Median", quants[1] },
+        { "Quantile_0.05", quants[0] },
+        { "Quantile_0.95", quants[2] },
+        { "Variance", res.errors["local"]["mean"]["MSE"] }
+    };
+
+    os << "Parameter estimation (point estimates)" << std::endl;
+    for(auto p: point_estimates) os << fmt::format("{:>14}",p.first);
+    os << std::endl;
+    for(auto p: point_estimates) os << fmt::format("{:>14.6f}",p.second);
+    os << std::endl;
+    for(auto p: point_estimates) res.point_estimates.insert(p);
+    os << std::endl;
+
     if (!quiet) {
         std::cout << std::endl;
         std::cout << os.str();
@@ -324,8 +338,11 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     double acc;
     for(auto g_l : global_local) {
         os << g_l.second << std::endl;
-        auto normalize = (g_l.first == "global") ? ntest : sumw;
         for(auto m: mean_median_ci_l) {
+            double normalize = 1.0;
+            if (g_l.first == "global")  
+                normalize = (m != "mean") ? ntest : nref;
+            else normalize = (m == "median") ? sumw : 1;
             if (m != "ci") {
                 os << mean_median_ci[m] << std::endl;
                 for (auto n : computed) {
@@ -337,7 +354,6 @@ EstimParamResults EstimParam_fun(Reftable &myread,
                 if (g_l.first == "global") {
                     os << mean_median_ci[m] << std::endl;
                     for(auto c : ci) {
-                        // normalize = ntest;                        
                         if (c.first == "cov") {
                             acc = res.errors[g_l.first][m][c.first]/static_cast<double>(normalize);
                         } else {

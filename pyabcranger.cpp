@@ -83,7 +83,7 @@ PYBIND11_MODULE(pyabcranger, m) {
                        MatrixXd,
                        std::vector<double>>());
     py::class_<ModelChoiceResults>(m,"modelchoice_results")
-        .def_readwrite("confusion_matrixc",&ModelChoiceResults::confusion_matrix)
+        .def_readwrite("confusion_matrix",&ModelChoiceResults::confusion_matrix)
         .def_readwrite("variable_importance",&ModelChoiceResults::variable_importance)
         .def_readwrite("ntree_oob_error",&ModelChoiceResults::ntree_oob_error)
         .def_readwrite("predicted_model",&ModelChoiceResults::predicted_model)

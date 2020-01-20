@@ -50,7 +50,7 @@ As a note, we may add a graphical interface in a near future.
 ``` text
  - ABC Random Forest - Model choice or parameter estimation command line options
 Usage:
-  abcranger [OPTION...]
+  ../build/abcranger [OPTION...]
 
   -h, --header arg        Header file (default: headerRF.txt)
   -r, --reftable arg      Reftable file (default: reftableRF.bin)
@@ -66,6 +66,8 @@ Usage:
   -c, --noisecolumns arg  Number of noise columns (default: 5)
       --nolinear          Disable LDA for model choice or PLS for parameter
                           estimation
+      --plsmaxvar arg     Percentage of maximum explained Y-variance for
+                          retaining pls axis (default: 0.9)
       --chosenscen arg    Chosen scenario (mandatory for parameter
                           estimation)
       --noob arg          number of oob testing samples (mandatory for
@@ -123,8 +125,11 @@ two existing parameters. like `t/N` or `T1+T2`.
 
 ## A note about PLS heuristic
 
-The Pls components are selected within *at least* 99% of the maximum
-explained variance of the output.
+The `--plsmaxvar` option (defaulting at 0.90) fixes the selected pls
+axes to be at the specified percentage of maximum explained variance of
+the output. The explained variance of the output of the
+![m](https://latex.codecogs.com/png.latex?m "m") first axes is defined
+by the R-squared of the output:
 
   
 ![Yvar^m =
@@ -135,37 +140,46 @@ where
 ![\\hat{y}^{m}](https://latex.codecogs.com/png.latex?%5Chat%7By%7D%5E%7Bm%7D
 "\\hat{y}^{m}") is the ![Y](https://latex.codecogs.com/png.latex?Y "Y")
 scored by the pls for the ![m](https://latex.codecogs.com/png.latex?m
-"m")th component. We take only the first
+"m")th component. So, only the
+![n\_{comp}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D
+"n_{comp}") first axis are kept like :
+
+We take only the first
 ![n\_{heur}](https://latex.codecogs.com/png.latex?n_%7Bheur%7D
 "n_{heur}") components, we stop when :
+
+  
+![n\_{comp} = \\underset{Yvar^m \\leq{} 0.90\*Yvar^M,
+}{\\operatorname{argmax}}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D%20%3D%20%5Cunderset%7BYvar%5Em%20%5Cleq%7B%7D%200.90%2AYvar%5EM%2C%20%7D%7B%5Coperatorname%7Bargmax%7D%7D
+"n_{comp} = \\underset{Yvar^m \\leq{} 0.90*Yvar^M, }{\\operatorname{argmax}}")  
+
+Note that if you spcify 0 as `--plsmaxvar`, an “elbow” heuristic is
+chosen where the following condition is tested at every computed axis :
 
   
 ![\\frac{Yvar^{k+1}+Yvar^{k}}{2} \\geq 0.99(N-k)\\left(Yvar^{k+1}-Yvar^
 {k}\\right)](https://latex.codecogs.com/png.latex?%5Cfrac%7BYvar%5E%7Bk%2B1%7D%2BYvar%5E%7Bk%7D%7D%7B2%7D%20%5Cgeq%200.99%28N-k%29%5Cleft%28Yvar%5E%7Bk%2B1%7D-Yvar%5E%20%7Bk%7D%5Cright%29
 "\\frac{Yvar^{k+1}+Yvar^{k}}{2} \\geq 0.99(N-k)\\left(Yvar^{k+1}-Yvar^ {k}\\right)")  
 
-We can easily prove than
-![n\_{heur}](https://latex.codecogs.com/png.latex?n_%7Bheur%7D
-"n_{heur}") is superior or equal to
-![n\_{comp}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D
-"n_{comp}") :
+If a windows of previous axies, sized ti 10% of the total possible axis
+verifies the condition, we stop the PLS axis computation.
 
-  
-![n\_{heur} \\ge n\_{comp} = \\underset{Yvar^m \\leq{} 0.99\*Yvar^M,
-}{\\operatorname{argmax}}](https://latex.codecogs.com/png.latex?n_%7Bheur%7D%20%5Cge%20n_%7Bcomp%7D%20%3D%20%5Cunderset%7BYvar%5Em%20%5Cleq%7B%7D%200.99%2AYvar%5EM%2C%20%7D%7B%5Coperatorname%7Bargmax%7D%7D
-"n_{heur} \\ge n_{comp} = \\underset{Yvar^m \\leq{} 0.99*Yvar^M, }{\\operatorname{argmax}}")  
-
-In practice, we find
+In practice, we find this
 ![n\_{heur}](https://latex.codecogs.com/png.latex?n_%7Bheur%7D
-"n_{heur}") close enough to
+"n_{heur}") close enough to the previous
 ![n\_{comp}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D
-"n_{comp}").
+"n_{comp}") for 99%, but it isn’t guaranteed.
 
 ## The signification of the `noob` parameter
 
-Computing the whole OOB set for weights predictions (Raynal et al.
-[2018](#ref-raynal2016abc)), is very costly, memory and cpu-wise, so we
-advise to compute them for only choose a subset of size `noob`.
+The median global/local statistics and confidence intervals (global)
+measures for parameter estimation need a number of OOB samples
+(`--noob`) to be reliable (typlially 30% of the size of the dataset is
+sufficient). Be aware than computing the whole set (i.e. assigning
+`--noob` the same than for `--nref`) for weights predictions (Raynal et
+al. [2018](#ref-raynal2016abc)) could be very costly, memory and
+cpu-wise, if your dataset is large in number of samples, so it could be
+adviseable to compute them for only choose a subset of size `noob`.
 
 ## Example (parameter estimation)
 
@@ -186,7 +200,7 @@ Five files (or seven if pls activated) are created :
     0.95 quantile for prediction
   - `estimparam_out.predweights` : csv of the value/weights pairs of the
     prediction (for density plot)
-  - `estimparam_out.teststats` : various statistics on test (MSE, NMSE,
+  - `estimparam_out.oobstats` : various statistics on oob (MSE, NMSE,
     NMAE etc.)
 
 if pls enabled :
@@ -199,10 +213,10 @@ if pls enabled :
 
 ## Input/Output
 
-  - [ ] Integrate hdf5 (or exdir? msgpack?) routines to save/load
+  - [x] Integrate hdf5 (or exdir? msgpack?) routines to save/load
     reftables/observed stats with associated metadata
-      - [ ] Provide R code to save/load the data
-      - [ ] Provide Python code to save/load the data
+  - [ ] Provide R code to save/load the data
+  - [x] Provide Python code to save/load the data
 
 ## C++ standalone
 
@@ -213,7 +227,7 @@ if pls enabled :
 ## External interfaces
 
   - [ ] R package
-  - [ ] Python package
+  - [x] Python package
 
 ## Documentation
 
@@ -222,7 +236,7 @@ if pls enabled :
 
 ## Continuous integration
 
-  - [ ] Fix travis build. Currently the vcpkg download of eigen3 head is
+  - [x] Fix travis build. Currently the vcpkg download of eigen3 head is
     broken.
   - [ ] osX travis build
   - [ ] Appveyor win32 build
@@ -241,7 +255,7 @@ if pls enabled :
 
 # References
 
-<div id="refs" class="references">
+<div id="refs" class="references hanging-indent">
 
 <div id="ref-friedman2001elements">
 

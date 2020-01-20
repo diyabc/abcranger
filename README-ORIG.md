@@ -35,7 +35,7 @@ As a note, we may add a graphical interface in a near future.
 ```text
  - ABC Random Forest - Model choice or parameter estimation command line options
 Usage:
-  abcranger [OPTION...]
+  ../build/abcranger [OPTION...]
 
   -h, --header arg        Header file (default: headerRF.txt)
   -r, --reftable arg      Reftable file (default: reftableRF.bin)
@@ -51,6 +51,8 @@ Usage:
   -c, --noisecolumns arg  Number of noise columns (default: 5)
       --nolinear          Disable LDA for model choice or PLS for parameter
                           estimation
+      --plsmaxvar arg     Percentage of maximum explained Y-variance for
+                          retaining pls axis (default: 0.9)
       --chosenscen arg    Chosen scenario (mandatory for parameter
                           estimation)
       --noob arg          number of oob testing samples (mandatory for
@@ -100,24 +102,28 @@ When specifying the parameter (option `--parameter`), one may specify simple com
 
 ## A note about PLS heuristic
 
-The Pls components are selected within _at least_ 99% of the maximum explained variance of the output.
+The `--plsmaxvar` option (defaulting at 0.90) fixes the selected pls axes to be at the specified percentage of maximum explained variance of the output. The explained variance of the output of the $m$ first axes is defined by the R-squared of the output: 
 
 $$Yvar^m = \frac{\sum_{i=1}^{N}{(\hat{y}^{m}_{i}-\bar{y})^2}}{\sum_{i=1}^{N}{(y_{i}-\hat{y})^2}}$$
 
 where $\hat{y}^{m}$ is the $Y$ scored by the pls for the $m$th component.
+So, only the $n_{comp}$ first axis are kept like :
+
 We take only the first $n_{heur}$ components, we stop when :
+
+$$n_{comp} = \underset{Yvar^m \leq{} 0.90*Yvar^M, }{\operatorname{argmax}}$$
+
+Note that if you spcify 0 as `--plsmaxvar`, an "elbow" heuristic is chosen where the following condition is tested at every computed axis :
 
 $$\frac{Yvar^{k+1}+Yvar^{k}}{2} \geq 0.99(N-k)\left(Yvar^{k+1}-Yvar^ {k}\right)$$
 
-We can easily prove than $n_{heur}$ is superior or equal to $n_{comp}$ :
+If a windows of previous axies, sized ti 10% of the total possible axis verifies the condition, we stop the PLS axis computation.
 
-$$n_{heur} \ge n_{comp} = \underset{Yvar^m \leq{} 0.99*Yvar^M, }{\operatorname{argmax}}$$
-
-In practice, we find $n_{heur}$ close enough to $n_{comp}$.
+In practice, we find this $n_{heur}$ close enough to the previous $n_{comp}$ for 99%, but it isn't guaranteed.
 
 ## The signification of the `noob` parameter
 
-Computing the whole OOB set for weights predictions [@raynal2016abc], is very costly, memory and cpu-wise, so we advise to compute them for only choose a subset of size `noob`.
+The median global/local statistics and confidence intervals (global) measures for parameter estimation need a number of OOB samples (`--noob`) to be reliable (typlially 30% of the size of the dataset is sufficient). Be aware than computing the whole set (i.e. assigning `--noob` the same than for `--nref`) for weights predictions [@raynal2016abc] could be very costly, memory and cpu-wise, if your dataset is large in number of samples, so it could be adviseable to compute them for only choose a subset of size `noob`.
 
 ## Example (parameter estimation)
 
@@ -146,9 +152,9 @@ if pls enabled :
 
 ## Input/Output
 
-- [ ] Integrate hdf5 (or exdir? msgpack?) routines to save/load reftables/observed stats with associated metadata
-  - [ ] Provide R code to save/load the data
-  - [ ]  Provide Python code to save/load the data
+- [X] Integrate hdf5 (or exdir? msgpack?) routines to save/load reftables/observed stats with associated metadata
+- [ ] Provide R code to save/load the data
+- [X]  Provide Python code to save/load the data
 
 ## C++ standalone
 
@@ -158,7 +164,7 @@ if pls enabled :
 ## External interfaces
 
 - [ ] R package
-- [ ] Python package
+- [X] Python package
   
 ## Documentation
 
@@ -167,7 +173,7 @@ if pls enabled :
 
 ## Continuous integration
 
-- [ ] Fix travis build. Currently the vcpkg download of eigen3 head is broken.
+- [X] Fix travis build. Currently the vcpkg download of eigen3 head is broken.
 - [ ] osX travis build
 - [ ] Appveyor win32 build
 

@@ -12,6 +12,7 @@
 #include "ks.hpp"
 
 #include "various.hpp"
+#include "tqdm.hpp"
 
 using namespace ranger;
 using namespace Eigen;
@@ -92,9 +93,9 @@ TEST_CASE("Online Ranger Regressor Distribution")
     auto nthreads = 8;
     auto ntest = 100;
     std::vector<double> mypredsR(ntest);
-
+    tqdm bar;
     for(auto i = 0; i < ntest; i++){
-        loadbar(i,ntest);    
+        bar.progress(i,ntest);    
         ForestOnlineRegression forestreg;
         auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, nref, nstat + 1));
         forestreg.init("Y",                       // dependant variable

@@ -8,6 +8,7 @@
 #include "ModelChoice.hpp"
 #include "ks.hpp"
 #include "various.hpp"
+#include "tqdm.hpp"
 
 #include "range/v3/all.hpp"
 
@@ -58,9 +59,9 @@ TEST_CASE("ModelChoice KS test")
         statobsfile = opts["b"].as<std::string>();
         auto myread = readreftable(headerfile, reftablefile, 3000,true);
         const auto statobs = readStatObs(statobsfile);
-
+        tqdm bar;
         for(auto i = 0; i < nrun; i++) {
-            loadbar(i,nrun);    
+            bar.progress(i,nrun);
 
             auto res = ModelChoice_fun(myread,statobs,opts,true);
             postprobas[i] = res.post_proba;

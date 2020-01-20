@@ -9,6 +9,7 @@
 #include "pls-eigen.hpp"
 #include "parse_parexpr.hpp"
 #include "forestQuantiles.hpp"
+#include "threadpool.hpp"
 
 #include "DataDense.hpp"
 #include "cxxopts.hpp"
@@ -256,10 +257,13 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     double sumw = 0.0;
     std::vector<double> quants = forestQuantiles(obs,preds[4][0],probs);
 
-    for(auto i = 0; i < nref; i++) {
+    std::mutex mutex_quant;
+
+    ThreadPool::ParallelFor<size_t>(0, nref,[&](auto i){
         auto w = preds[4][0][i];
         auto pred_oob = preds[0][0][i];
         auto reality = y(i);
+        mutex_quant.lock();
         expectation += w * reality;
         if (!std::isnan(pred_oob)) {
             double diff = reality - pred_oob;
@@ -271,6 +275,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
             res.errors["local"]["mean"]["MSE"] += w * sqdiff;
             res.errors["local"]["mean"]["NMSE"] += w * sqdiff / reality;
         }
+        mutex_quant.unlock();
         if (i < ntest) {
             auto p = *(std::next(forestreg.oob_subset.begin(),i));
             if (weights) 
@@ -278,10 +283,11 @@ EstimParamResults EstimParam_fun(Reftable &myread,
             std::vector<double> quants_oob = forestQuantiles(obs,preds[5][p.second],probs);
             auto reality = y(p.first);
             auto w = preds[4][0][p.first];
-            sumw += w;
             auto diff = quants_oob[1] - reality;
             auto sqdiff = diff * diff;
             auto CI = quants_oob[2] - quants_oob[0];
+            mutex_quant.lock();
+            sumw += w;
             res.errors["global"]["median"]["NMAE"] += std::abs(diff / reality);
             res.errors["global"]["median"]["MSE"] += sqdiff;
             res.errors["global"]["median"]["NMSE"] += sqdiff / reality;
@@ -292,7 +298,12 @@ EstimParamResults EstimParam_fun(Reftable &myread,
             res.errors["global"]["ci"]["cov"] += inside;
             rCI.push_back(CI);
             relativeCI.push_back(CI / reality);
+            mutex_quant.unlock();
         }
+
+    });
+
+    for(auto i = 0; i < nref; i++) {
     }
 
     if (sumw == 0.0) std::cout << "Warning : not enough oob samples to have local errors with median as point estimates" << std::endl;

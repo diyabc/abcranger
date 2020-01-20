@@ -7,6 +7,7 @@
 #include "cxxopts.hpp"
 #include "EstimParam.hpp"
 #include "ks.hpp"
+#include "tqdm.hpp"
 
 #include "range/v3/all.hpp"
 
@@ -78,12 +79,11 @@ TEST_CASE("EstimParam KS distribution")
         statobsfile = opts["b"].as<std::string>();
         auto myread = readreftable_scen(headerfile, reftablefile, 1, nref, true);
         const auto statobs = readStatObs(statobsfile);
-
+        tqdm bar;
         for(auto i = 0; i < nrun; i++) {
 
             auto res = EstimParam_fun(myread,statobs,opts,true);
-            std::cout << i << "...";
-            std::cout.flush();
+            bar.progress(i,nrun);
             expectations[i] = res.point_estimates["Expectation"];
             variances[i] = res.point_estimates["Variance"];
             quantiles1[i] = res.point_estimates["Quantile_0.05"];

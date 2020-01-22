@@ -15,6 +15,8 @@
 #include <vector>
 #include <math.h>
 #include <algorithm>
+#include <fmt/format.h>
+#include <fmt/printf.h>
 
 class tqdm {
     private:
@@ -103,8 +105,10 @@ class tqdm {
 
         void finish() {
             progress(total_,total_);
-            printf("\n");
-            fflush(stdout);
+            std::cout << std::endl;
+            // printf("\n");
+            std::cout << std::flush;
+            // fflush(stdout);
         }
         void progress(int curr, int tot) {
             if(is_tty && (curr%period == 0)) {
@@ -152,24 +156,32 @@ class tqdm {
                 double fills = ((double)curr / tot * width);
                 int ifills = (int)fills;
 
-                printf("\015 ");
+                std::cout << "\015 "; 
+                // printf("\015 ");
                 if (use_colors) {
                     if (color_transition) {
                         // red (hue=0) to green (hue=1/3)
                         int r = 255, g = 255, b = 255;
                         hsv_to_rgb(0.0+0.01*pct/3,0.65,1.0, r,g,b);
-                        printf("\033[38;2;%d;%d;%dm ", r, g, b);
+                        std::cout << "\033[38;2;" << r << ";" << g << ";" << b << "m";
+                        // printf("\033[38;2;%d;%d;%dm ", r, g, b);
                     } else {
-                        printf("\033[32m ");
+                        std::cout << "\033[32m ";
+                        // printf("\033[32m ");
                     }
                 }
                 for (int i = 0; i < ifills; i++) std::cout << bars[8];
-                if (!in_screen && (curr != tot)) printf("%s",bars[(int)(8.0*(fills-ifills))]);
+                if (!in_screen && (curr != tot)) std::cout << bars[(int)(8.0*(fills-ifills))];
+                // if (!in_screen && (curr != tot)) printf("%s",bars[(int)(8.0*(fills-ifills))]);
                 for (int i = 0; i < width-ifills-1; i++) std::cout << bars[0];
-                printf("%s ", right_pad.c_str());
-                if (use_colors) printf("\033[1m\033[31m");
-                printf("%4.1f%% ", pct);
-                if (use_colors) printf("\033[34m");
+                std::cout << right_pad << " ";
+                // printf("%s ", right_pad.c_str());
+                if (use_colors) std::cout << "\033[1m\033[31m";
+                // if (use_colors) printf("\033[1m\033[31m");
+
+                fmt::fprintf(std::cout,"%4.1f%% ", pct); // TOCONVERT
+                if (use_colors) std::cout << "\033[34m";
+                // if (use_colors) printf("\033[34m");
 
                 std::string unit = "Hz";
                 double div = 1.;
@@ -178,11 +190,14 @@ class tqdm {
                 } else if (avgrate > 1e3) {
                     unit = "kHz"; div = 1.0e3;
                 }
-                printf("[%4d/%4d | %3.1f %s | %.0fs<%.0fs] ", curr,tot,  avgrate/div, unit.c_str(), dt_tot, peta);
-                printf("%s ", label.c_str());
-                if (use_colors) printf("\033[0m\033[32m\033[0m\015 ");
+                fmt::fprintf(std::cout,"[%4d/%4d | %3.1f %s | %.0fs<%.0fs] ", curr,tot,  avgrate/div, unit.c_str(), dt_tot, peta); // TOCONVERT
+                std::cout << label << " ";
+                // printf("%s ", label.c_str());
+                if (use_colors) std::cout << "\033[0m\033[32m\033[0m\015 ";
+                // if (use_colors) printf("\033[0m\033[32m\033[0m\015 ");
 
-                if( ( tot - curr ) > period ) fflush(stdout);
+                if( ( tot - curr ) > period ) std::cout << std::flush;
+                // if( ( tot - curr ) > period ) fflush(stdout);
 
             }
         }

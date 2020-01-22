@@ -59,6 +59,11 @@ ModelChoiceResults ModelChoice_fun_py(Reftable &reftable,
                                    std::vector<double> statobs,
                                    std::string options,
                                    bool quiet = false) {
+    py::scoped_ostream_redirect stream(
+        std::cout,                               // std::ostream&
+        py::module::import("sys").attr("stdout") // Python output
+    );
+    py::gil_scoped_release release;
     return ModelChoice_fun(reftable,statobs,parseopt(options),quiet);
 }
 
@@ -67,12 +72,17 @@ EstimParamResults EstimParam_fun_py(Reftable &reftable,
                                    std::string options,
                                    bool quiet = false,
                                    bool weights = false) {
+    py::scoped_ostream_redirect stream(
+        std::cout,                               // std::ostream&
+        py::module::import("sys").attr("stdout") // Python output
+    );
+    py::gil_scoped_release release;
     return EstimParam_fun(reftable,statobs,parseopt(options),quiet,weights);
 }
 
 using namespace Eigen;
 
-PYBIND11_MODULE(pyabcranger, m) {
+PYBIND11_MODULE(pyabcranger, m) { 
     py::class_<Reftable>(m,"reftable")
         .def(py::init<int,
                        std::vector<size_t>,

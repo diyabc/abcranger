@@ -125,11 +125,11 @@ two existing parameters. like `t/N` or `T1+T2`.
 
 ## A note about PLS heuristic
 
-The `--plsmaxvar` option (defaulting at 0.90) fixes the selected pls
-axes to be at the specified percentage of maximum explained variance of
-the output. The explained variance of the output of the
-![m](https://latex.codecogs.com/png.latex?m "m") first axes is defined
-by the R-squared of the output:
+The `--plsmaxvar` option (defaulting at 0.90) fixes the number of
+selected pls axes so that we get at least the specified percentage of
+maximum explained variance of the output. The explained variance of the
+output of the ![m](https://latex.codecogs.com/png.latex?m "m") first
+axes is defined by the R-squared of the output:
 
   
 ![Yvar^m =
@@ -138,31 +138,28 @@ by the R-squared of the output:
 
 where
 ![\\hat{y}^{m}](https://latex.codecogs.com/png.latex?%5Chat%7By%7D%5E%7Bm%7D
-"\\hat{y}^{m}") is the ![Y](https://latex.codecogs.com/png.latex?Y "Y")
-scored by the pls for the ![m](https://latex.codecogs.com/png.latex?m
-"m")th component. So, only the
-![n\_{comp}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D
-"n_{comp}") first axis are kept like :
-
-We take only the first
-![n\_{heur}](https://latex.codecogs.com/png.latex?n_%7Bheur%7D
-"n_{heur}") components, we stop when :
+"\\hat{y}^{m}") is the output
+![Y](https://latex.codecogs.com/png.latex?Y "Y") scored by the pls for
+the ![m](https://latex.codecogs.com/png.latex?m "m")th component. So,
+only the ![n\_{comp}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D
+"n_{comp}") first axis are kept, and :
 
   
 ![n\_{comp} = \\underset{Yvar^m \\leq{} 0.90\*Yvar^M,
 }{\\operatorname{argmax}}](https://latex.codecogs.com/png.latex?n_%7Bcomp%7D%20%3D%20%5Cunderset%7BYvar%5Em%20%5Cleq%7B%7D%200.90%2AYvar%5EM%2C%20%7D%7B%5Coperatorname%7Bargmax%7D%7D
 "n_{comp} = \\underset{Yvar^m \\leq{} 0.90*Yvar^M, }{\\operatorname{argmax}}")  
 
-Note that if you spcify 0 as `--plsmaxvar`, an “elbow” heuristic is
-chosen where the following condition is tested at every computed axis :
+Note that if you specify 0 as `--plsmaxvar`, an “elbow” heuristic is
+activiated where the following condition is tested for every computed
+axis :
 
   
 ![\\frac{Yvar^{k+1}+Yvar^{k}}{2} \\geq 0.99(N-k)\\left(Yvar^{k+1}-Yvar^
 {k}\\right)](https://latex.codecogs.com/png.latex?%5Cfrac%7BYvar%5E%7Bk%2B1%7D%2BYvar%5E%7Bk%7D%7D%7B2%7D%20%5Cgeq%200.99%28N-k%29%5Cleft%28Yvar%5E%7Bk%2B1%7D-Yvar%5E%20%7Bk%7D%5Cright%29
 "\\frac{Yvar^{k+1}+Yvar^{k}}{2} \\geq 0.99(N-k)\\left(Yvar^{k+1}-Yvar^ {k}\\right)")  
 
-If a windows of previous axies, sized ti 10% of the total possible axis
-verifies the condition, we stop the PLS axis computation.
+If this condition is true for a windows of previous axes, sized to 10%
+of the total possible axis, then we stop the PLS axis computation.
 
 In practice, we find this
 ![n\_{heur}](https://latex.codecogs.com/png.latex?n_%7Bheur%7D

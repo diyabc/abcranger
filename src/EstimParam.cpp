@@ -306,7 +306,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     for(auto i = 0; i < nref; i++) {
     }
 
-    if (sumw == 0.0) std::cout << "Warning : not enough oob samples to have local errors with median as point estimates" << std::endl;
+    if (sumw == 0.0 && ntest != 0 && !quiet) std::cout << "Warning : not enough oob samples to have local errors with median as point estimates" << std::endl;
 
     std::map<std::string,double> point_estimates{
         { "Expectation", expectation },

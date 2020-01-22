@@ -175,8 +175,8 @@ add_subdirectory(testpy)
 
 add_executable(abcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp abcranger.cpp)
 
-target_link_libraries(abcranger ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt-header-only)
+target_link_libraries(abcranger ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt)
 
 pybind11_add_module(pyabcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp pyabcranger.cpp)
 
-target_link_libraries(pyabcranger PRIVATE ${TBBLIB} cxxopts::cxxopts abcrangerlib_so fmt::fmt-header-only)
+target_link_libraries(pyabcranger PRIVATE ${TBBLIB} cxxopts::cxxopts abcrangerlib_so fmt::fmt)

@@ -51,8 +51,9 @@ void ForestOnlineRegression::growInternal()
   // predictions = std::vector<std::vector<std::vector<double>>>(1,
   //     std::vector<std::vector<double>>(1, std::vector<double>(num_samples, 0)));
   samples_oob_count.resize(num_samples, 0);
-  samples_boob_count = std::vector<size_t>(num_samples,0);
 }
+
+thread_local std::vector<size_t> samples_terminalnodes;
 
 void ForestOnlineRegression::allocatePredictMemory()
 {
@@ -63,7 +64,9 @@ void ForestOnlineRegression::allocatePredictMemory()
     // OOB square error on n-trees (cumulative)
   predictions[2] = std::vector<std::vector<double>>(1,std::vector<double>(num_trees,0.0));
   // tree predictions
-  samples_terminalnodes = std::vector<size_t>(num_samples);
+//  samples_terminalnodes.resize(num_samples);
+  // Mutex for each sample
+  mutex_samples = std::vector<std::mutex>(num_samples);
   // predictions[3] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
   if (num_oob_weights > 0) {
     predictions[5] = std::vector<std::vector<double>>(num_oob_weights,std::vector<double>(num_samples,0));
@@ -116,7 +119,9 @@ void ForestOnlineRegression::predictInternal(size_t tree_idx)
         predictions[1][sample_idx][tree_idx] = static_cast<double>(getTreePredictionTerminalNodeID(tree_idx, sample_idx));
     else {
       auto value = getTreePrediction(tree_idx, sample_idx);
+      mutex_samples[sample_idx].lock();
       predictions[1][0][sample_idx] += value;
+      mutex_samples[sample_idx].unlock();
       if (predict_all) {
         auto node = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
         size_t Lb = 0;
@@ -127,43 +132,50 @@ void ForestOnlineRegression::predictInternal(size_t tree_idx)
         }
         for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx) {
               auto nb = inbag_count[sample_internal_idx];
-              if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) 
+              if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) {
+                mutex_samples[sample_idx].lock();
                 predictions[4][sample_idx][sample_internal_idx] += static_cast<double>(nb)/static_cast<double>(Lb);
+                mutex_samples[sample_idx].unlock();
+              }
         }
       }
     }
   }
 }
 
+
 void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx, bool oob)
 {
   // For each tree loop over OOB samples and count classes
   double se = 0.0;
   size_t num_predictions = 0;
+  if (samples_terminalnodes.empty()) samples_terminalnodes.resize(num_samples);
   // std::map<double,size_t> leaves_map;
   const std::vector<size_t>& inbag_count = getInbagCounts(tree_idx);
   for (size_t sample_idx = 0; sample_idx < num_samples; sample_idx++) {
     double value = getTreePrediction(tree_idx, sample_idx);
     size_t node = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
     auto nb = inbag_count[sample_idx];
-    if (nb > 0) // INBAG
-      samples_terminalnodes[sample_idx] = node;
+    if (nb > 0) { // INBAG{
+        samples_terminalnodes[sample_idx] = node;
+    }
   }
   for (size_t sample_idx = 0; sample_idx < num_samples; sample_idx++) {
     double value = getTreePrediction(tree_idx, sample_idx);
     size_t node = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
     auto nb = inbag_count[sample_idx];
     if (nb == 0) { // OOB
+      mutex_samples[sample_idx].lock();
       if(std::isnan(predictions[0][0][sample_idx]))
         predictions[0][0][sample_idx] = 0.0;
       predictions[0][0][sample_idx] += value;
       ++samples_oob_count[sample_idx];
+      mutex_samples[sample_idx].unlock();
       if (num_oob_weights > 0) {
         auto tofind = oob_subset.find(sample_idx);
         if (tofind != oob_subset.end()) {
           size_t oob_idx = tofind->second;
           size_t Lb = 0;
-          samples_boob_count[sample_idx]++;
 
           for (size_t sample_internal_idx = 0; sample_internal_idx < num_samples; ++sample_internal_idx) {
                 auto nb = inbag_count[sample_internal_idx];
@@ -174,21 +186,21 @@ void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx, bool oob)
           for (size_t sample_internal_idx = 0; sample_internal_idx < num_samples; ++sample_internal_idx) {
                 auto nb = inbag_count[sample_internal_idx];
                 if (nb > 0 && samples_terminalnodes[sample_internal_idx] == node) {
+                  mutex_samples[sample_internal_idx].lock();
                   predictions[5][oob_idx][sample_internal_idx] += static_cast<double>(nb)/static_cast<double>(Lb);
+                  mutex_samples[sample_internal_idx].unlock();
                 }
           }
         }
       }
     }
     if (samples_oob_count[sample_idx] > 0) {
-      num_predictions++;
       auto real_value = data->get(sample_idx,dependent_varID);
       auto oob_value = predictions[0][0][sample_idx]/static_cast<double>(samples_oob_count[sample_idx]) - real_value;
       se += oob_value * oob_value;
-
+      num_predictions++;
     }
   }
-
   predictions[2][0][tree_idx] = se/static_cast<double>(num_predictions);
 }
 

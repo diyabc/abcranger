@@ -38,10 +38,11 @@ private:
 
   // OOb counts for regression
   std::vector<size_t> samples_oob_count;
-  std::vector<size_t> samples_boob_count;
-  std::vector<size_t> samples_terminalnodes;
+//  std::vector<size_t> samples_terminalnodes;
   // Storing prediction sum by tree
   std::vector<double> prediction_sum;
+  std::mutex mutex_pred_0, mutex_pred_1, mutex_pred_4, mutex_pred_5;
+  std::vector<std::mutex> mutex_samples;
 
 private:
   double getTreePrediction(size_t tree_idx, size_t sample_idx) const;

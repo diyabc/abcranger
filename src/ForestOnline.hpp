@@ -190,8 +190,7 @@ protected:
   uint num_threads;
   std::vector<uint> thread_ranges;
 #ifndef OLD_WIN_R_BUILD
-  std::mutex mutex;
-  std::condition_variable condition_variable;
+  std::mutex mutex,mutex_post;
 #endif
 
   std::vector<std::unique_ptr<Tree>> trees;

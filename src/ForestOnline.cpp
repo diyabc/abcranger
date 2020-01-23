@@ -589,14 +589,12 @@ void ForestOnline::growTreesInThread(uint thread_idx, std::vector<double>* varia
 
       // Increase progress by 1 tree
       // std::unique_lock<std::mutex> lock(mutex);
-      mutex.lock();
       calculateAfterGrow(i,true);
-      // trees[i]->predict(input_data,false);
-      // calculateAfterGrow(i,false);
       trees[i]->predict(predict_data,false);
+      predictInternal(i);
+      mutex.lock();
       ++progress;
       if (verbose_out) bar.progress(progress,num_trees);
-      predictInternal(i);
       trees[i].reset(nullptr);
       mutex.unlock();
       // condition_variable.notify_one();
@@ -620,9 +618,10 @@ void ForestOnline::predictTreesInThread(uint thread_idx, const Data* prediction_
 #endif
 
       // Increase progress by 1 tree
-      std::unique_lock<std::mutex> lock(mutex);
+      mutex.lock();
       ++progress;
-      condition_variable.notify_one();
+      mutex.unlock();
+      // condition_variable.notify_one();
     }
   }
 }
@@ -639,17 +638,17 @@ void ForestOnline::predictInternalInThread(uint thread_idx) {
       // Check for user interrupt
 #ifdef R_BUILD
       if (aborted) {
-        std::unique_lock<std::mutex> lock(mutex);
+        mutex.lock();
         ++aborted_threads;
-        condition_variable.notify_one();
+        mutex.unlock();
         return;
       }
 #endif
 
       // Increase progress by 1 tree
-      std::unique_lock<std::mutex> lock(mutex);
+      mutex.lock();
       ++progress;
-      condition_variable.notify_one();
+      mutex.unlock();
     }
   }
 }
@@ -663,17 +662,17 @@ void ForestOnline::computeTreePermutationImportanceInThread(uint thread_idx, std
       // Check for user interrupt
 #ifdef R_BUILD
       if (aborted) {
-        std::unique_lock<std::mutex> lock(mutex);
+        mutex.lock();
         ++aborted_threads;
-        condition_variable.notify_one();
+        mutex.unlock();
         return;
       }
 #endif
 
       // Increase progress by 1 tree
-      std::unique_lock<std::mutex> lock(mutex);
+      mutex.lock();
       ++progress;
-      condition_variable.notify_one();
+      mutex.unlock();
     }
   }
 }
@@ -857,7 +856,7 @@ void ForestOnline::showProgress(std::string operation, size_t max_progress) {
 
 // Wait for message from threads and show output if enough time elapsed
   while (progress < max_progress) {
-    condition_variable.wait(lock);
+    mutex.lock();
     seconds elapsed_time = duration_cast<seconds>(steady_clock::now() - last_time);
 
     // Check for user interrupt
@@ -880,8 +879,10 @@ void ForestOnline::showProgress(std::string operation, size_t max_progress) {
       }
       last_time = steady_clock::now();
     }
-  }
+  mutex.unlock();
+} 
 }
+ 
 #endif
 
 } // namespace ranger

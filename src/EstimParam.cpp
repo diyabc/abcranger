@@ -257,13 +257,15 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     double sumw = 0.0;
     std::vector<double> quants = forestQuantiles(obs,preds[4][0],probs);
 
-    std::mutex mutex_quant;
+    std::vector<std::vector<double>> quants_w = forestQuantiles_b(obs,preds[5],probs);
+    // std::mutex mutex_quant;
 
-    ThreadPool::ParallelFor<size_t>(0, nref,[&](auto i){
+    for(auto i = 0; i < nref; i++) {
+    // ThreadPool::ParallelFor<size_t>(0, nref,[&](auto i){
         auto w = preds[4][0][i];
         auto pred_oob = preds[0][0][i];
         auto reality = y(i);
-        mutex_quant.lock();
+        // mutex_quant.lock();
         expectation += w * reality;
         if (!std::isnan(pred_oob)) {
             double diff = reality - pred_oob;
@@ -275,18 +277,19 @@ EstimParamResults EstimParam_fun(Reftable &myread,
             res.errors["local"]["mean"]["MSE"] += w * sqdiff;
             res.errors["local"]["mean"]["NMSE"] += w * sqdiff / reality;
         }
-        mutex_quant.unlock();
+        // mutex_quant.unlock();
         if (i < ntest) {
             auto p = *(std::next(forestreg.oob_subset.begin(),i));
             if (weights) 
                 for (auto i = 0; i < nref; i++) res.oob_weights(p.second,i) = preds[5][p.second][i];
-            std::vector<double> quants_oob = forestQuantiles(obs,preds[5][p.second],probs);
+            // std::vector<double> quants_oob = forestQuantiles(obs,preds[5][p.second],probs);
+            std::vector<double> quants_oob = quants_w[p.second];
             auto reality = y(p.first);
             auto w = preds[4][0][p.first];
             auto diff = quants_oob[1] - reality;
             auto sqdiff = diff * diff;
             auto CI = quants_oob[2] - quants_oob[0];
-            mutex_quant.lock();
+            // mutex_quant.lock();
             sumw += w;
             res.errors["global"]["median"]["NMAE"] += std::abs(diff / reality);
             res.errors["global"]["median"]["MSE"] += sqdiff;
@@ -298,10 +301,10 @@ EstimParamResults EstimParam_fun(Reftable &myread,
             res.errors["global"]["ci"]["cov"] += inside;
             rCI.push_back(CI);
             relativeCI.push_back(CI / reality);
-            mutex_quant.unlock();
+            // mutex_quant.unlock();
         }
-
-    });
+    }
+    // });
 
     for(auto i = 0; i < nref; i++) {
     }
@@ -405,6 +408,28 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         teststats_file.flush();
         teststats_file.close();
     }
+
+    // Pour Arnaud :
+    // Mean                Median            Q_5%                Q95%                Global_NMAE_from mean        Global_NMAE_from median        Local_NMAE_from mean        Local_NMAE_from mean
+    // std::cout << "OUTPUTS POUR ARNAUDS" << std::endl;
+    // std::cout << fmt::format("{:>25}","Meean");
+    // std::cout << fmt::format("{:>25}","Median");
+    // std::cout << fmt::format("{:>25}","Q_5%");
+    // std::cout << fmt::format("{:>25}","Q95%");
+    // std::cout << fmt::format("{:>25}","Global_NMAE_from mean");
+    // std::cout << fmt::format("{:>25}","Global_NMAE_from median");
+    // std::cout << fmt::format("{:>25}","Local_NMAE_from mean");
+    // std::cout << fmt::format("{:>25}","Local_NMAE_from median");
+    // std::cout << endl; 
+    // std::cout << fmt::format("{:>25.6f}",expectation);
+    // std::cout << fmt::format("{:>25.6f}",quants[1]);
+    // std::cout << fmt::format("{:>25.6f}",quants[0]);
+    // std::cout << fmt::format("{:>25.6f}",quants[2]);
+    // std::cout << fmt::format("{:>25.6f}",res.errors["global"]["mean"]["NMAE"]);
+    // std::cout << fmt::format("{:>25.6f}",res.errors["global"]["median"]["NMAE"]);
+    // std::cout << fmt::format("{:>25.6f}",res.errors["local"]["mean"]["NMAE"]);
+    // std::cout << fmt::format("{:>25.6f}",res.errors["local"]["median"]["NMAE"]);
+    // std::cout << std::endl;
 
     return res;
 }

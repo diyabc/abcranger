@@ -249,6 +249,9 @@ if pls enabled :
   - Write our own tree/rf implementation with better storage efficiency
     than ranger
   - Make functional tests for the two methodologies
+  - Possible to use mondrian forests for online batches ? See
+    (Lakshminarayanan, Roy, and Teh
+    [2014](#ref-lakshminarayanan2014mondrian))
 
 # References
 
@@ -266,6 +269,14 @@ statistics New York, NY, USA:
 
 Guennebaud, Gaël, Benoît Jacob, and others. 2010. “Eigen V3.”
 http://eigen.tuxfamily.org.
+
+</div>
+
+<div id="ref-lakshminarayanan2014mondrian">
+
+Lakshminarayanan, Balaji, Daniel M Roy, and Yee Whye Teh. 2014.
+“Mondrian Forests: Efficient Online Random Forests.” In *Advances in
+Neural Information Processing Systems*, 3140–8.
 
 </div>
 

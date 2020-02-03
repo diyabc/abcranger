@@ -183,5 +183,6 @@ if pls enabled :
 - Streamline the two methodologies (model choice and then parameters estimation)
 - Write our own tree/rf implementation with better storage efficiency than ranger
 - Make functional tests for the two methodologies
-
+- Possible to use mondrian forests for online batches ? See [@lakshminarayanan2014mondrian]
+  
 # References

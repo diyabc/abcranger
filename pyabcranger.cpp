@@ -112,5 +112,11 @@ PYBIND11_MODULE(pyabcranger, m) {
 
     m.def("modelchoice", &ModelChoice_fun_py);
     m.def("estimparam", &EstimParam_fun_py);
+    m.def("forestQuantiles_b", [](const std::vector<double>& obs, 
+        const std::vector<std::vector<double>>& weights,
+        const std::vector<double>& asked){
+            py::gil_scoped_release release;
+            return forestQuantiles_b(obs,weights,asked);
+        });
     m.def("forestQuantiles", &forestQuantiles);
 }

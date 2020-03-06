@@ -18,9 +18,11 @@ TEST_CASE("Standard Ranger Regresser")
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", 0);
     auto nstat = myread.stats_names.size();
     auto colnames = myread.stats_names;
+    MatrixXd data_extended(myread.nrec,0);
+
     addCols(myread.stats, Map<VectorXd>(error.data(),error.size()));
     colnames.push_back("Y");
-    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, colnames, myread.nrec, nstat + 1));
+    auto datastats = unique_cast<DataDense<MatrixXd>, Data>(std::make_unique<DataDense<MatrixXd>>(myread.stats, data_extended, colnames, myread.nrec, nstat + 1));
     ForestRegression forestreg;
     auto ntree = 500;
     auto nthreads = 8;

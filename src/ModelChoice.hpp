@@ -15,7 +15,8 @@ struct ModelChoiceResults
     double post_proba;
 };
 
-ModelChoiceResults ModelChoice_fun(Reftable &reftable,
+template<class MatrixType>
+ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &reftable,
                                    std::vector<double> statobs,
                                    const cxxopts::ParseResult opts,
                                    bool quiet = false);

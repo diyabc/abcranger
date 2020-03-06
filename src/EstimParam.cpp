@@ -21,7 +21,8 @@ using namespace ranger;
 using namespace Eigen;
 using namespace ranges;
 
-EstimParamResults EstimParam_fun(Reftable &myread,
+template<class MatrixType>
+EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
                                  std::vector<double> origobs,
                                  const cxxopts::ParseResult opts,
                                  bool quiet,
@@ -53,6 +54,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     std::vector<double> samplefract{std::min(1e5,static_cast<double>(myread.nrec))/static_cast<double>(myread.nrec)};
     auto nstat = myread.stats_names.size();
     MatrixXd statobs(1, nstat);
+    MatrixXd emptyrow(1,0);
 
     statobs = Map<MatrixXd>(origobs.data(), 1, nstat);
 
@@ -85,6 +87,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
 
 
     EstimParamResults res;
+    MatrixXd data_extended(n,0);
 
     if (plsok) {
         size_t ncomp_total = static_cast<size_t>(lround(1.0 * static_cast<double>(nstat)));
@@ -140,7 +143,7 @@ EstimParamResults EstimParam_fun(Reftable &myread,
         plsweights_file.close();
 
         auto Xc = (myread.stats.array().rowwise()-mean.array()).rowwise()/std.array();
-        addCols(myread.stats,(Xc.matrix() * Projection).leftCols(nComposante_sel));
+        addCols(data_extended,(Xc.matrix() * Projection).leftCols(nComposante_sel));
         auto Xcobs = (statobs.array().rowwise()-mean.array()).rowwise()/std.array();
         addCols(statobs,(Xcobs.matrix() * Projection).leftCols(nComposante_sel));
         for(auto i = 0; i < nComposante_sel; i++)
@@ -149,13 +152,13 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     }
 
 
-    addNoise(myread, statobs, noisecols);
+    addNoise(myread, data_extended, statobs, noisecols);
     std::vector<string> varwithouty = myread.stats_names;
-    auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(statobs,varwithouty, 1, varwithouty.size()));
-    addCols(myread.stats,y);
+    auto datastatobs = unique_cast<DataDense<MatrixXd>, Data>(std::make_unique<DataDense<MatrixXd>>(statobs,emptyrow,varwithouty, 1, varwithouty.size()));
+    addCols(data_extended,y);
     myread.stats_names.push_back("Y");
 
-    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats,myread.stats_names, nref, myread.stats_names.size()));
+    auto datastats = unique_cast<DataDense<MatrixType>, Data>(std::make_unique<DataDense<MatrixType>>(myread.stats,data_extended,myread.stats_names, nref, myread.stats_names.size()));
 
     ForestOnlineRegression forestreg;
     forestreg.init("Y",                       // dependant variable
@@ -200,10 +203,10 @@ EstimParamResults EstimParam_fun(Reftable &myread,
     if (!quiet) forestreg.writeWeightsFile();
 
 
-    auto dataptr2 = forestreg.releaseData();
-    auto& datareleased2 = static_cast<DataDense&>(*dataptr2.get());
-    datareleased2.data.conservativeResize(NoChange,nstat);
-    myread.stats = std::move(datareleased2.data);
+//    auto dataptr2 = forestreg.releaseData();
+//    auto& datareleased2 = static_cast<DataDense<MatrixType>&>(*dataptr2.get());
+//    datareleased2.data.conservativeResize(NoChange,nstat);
+//    myread.stats = std::move(datareleased2.data);
     myread.stats_names.resize(nstat);
 
     std::vector<double> probs{0.05,0.5,0.95};
@@ -433,3 +436,17 @@ EstimParamResults EstimParam_fun(Reftable &myread,
 
     return res;
 }
+
+template
+EstimParamResults EstimParam_fun(Reftable<MatrixXd> &myread,
+                                 std::vector<double> origobs,
+                                 const cxxopts::ParseResult opts,
+                                 bool quiet,
+                                 bool weights);
+
+template
+EstimParamResults EstimParam_fun(Reftable<Eigen::Ref<MatrixXd, 0, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>> &myread,
+                                 std::vector<double> origobs,
+                                 const cxxopts::ParseResult opts,
+                                 bool quiet,
+                                 bool weights);

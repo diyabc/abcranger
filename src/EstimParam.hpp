@@ -20,7 +20,8 @@ struct EstimParamResults {
             std::map<std::string,double>>> errors;
 };
 
-EstimParamResults EstimParam_fun(Reftable &reftable,
+template<class MatrixType>
+EstimParamResults EstimParam_fun(Reftable<MatrixType> &reftable,
                                    std::vector<double> statobs,
                                    const cxxopts::ParseResult opts,
                                    bool quiet = false,

@@ -55,7 +55,7 @@ const cxxopts::ParseResult parseopt(std::string stropts) {
     return res;
 }
 
-ModelChoiceResults ModelChoice_fun_py(Reftable &reftable,
+ModelChoiceResults ModelChoice_fun_py(Reftable<py::EigenDRef<MatrixXd>> &reftable,
                                    std::vector<double> statobs,
                                    std::string options,
                                    bool quiet = false) {
@@ -67,7 +67,7 @@ ModelChoiceResults ModelChoice_fun_py(Reftable &reftable,
     return ModelChoice_fun(reftable,statobs,parseopt(options),quiet);
 }
 
-EstimParamResults EstimParam_fun_py(Reftable &reftable,
+EstimParamResults EstimParam_fun_py(Reftable<py::EigenDRef<MatrixXd>> &reftable,
                                    std::vector<double> statobs,
                                    std::string options,
                                    bool quiet = false,
@@ -77,20 +77,22 @@ EstimParamResults EstimParam_fun_py(Reftable &reftable,
         py::module::import("sys").attr("stdout") // Python output
     );
     py::gil_scoped_release release;
+    // std::cout << reftable.stats << std::endl;
+    // std::cout << reftable.params << std::endl;
     return EstimParam_fun(reftable,statobs,parseopt(options),quiet,weights);
 }
-
+ 
 using namespace Eigen;
 
 PYBIND11_MODULE(pyabcranger, m) { 
-    py::class_<Reftable>(m,"reftable")
+    py::class_<Reftable<py::EigenDRef<MatrixXd>>>(m,"reftable")
         .def(py::init<int,
                        std::vector<size_t>,
                        std::vector<size_t>,
                        std::vector<string>,
                        std::vector<string>,
-                       MatrixXd,
-                       MatrixXd,
+                       py::EigenDRef<MatrixXd>,
+                       py::EigenDRef<MatrixXd>,
                        std::vector<double>>());
     py::class_<ModelChoiceResults>(m,"modelchoice_results")
         .def_readwrite("confusion_matrix",&ModelChoiceResults::confusion_matrix)

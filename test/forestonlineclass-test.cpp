@@ -15,11 +15,14 @@ TEST_CASE("Online Ranger classifier")
 {
     auto myread = readreftable("headerRF.txt", "reftableRF.bin", 0);
     auto nstat = myread.stats_names.size();
+    MatrixXd data_extended(myread.nrec,0);
+    MatrixXd emptyrow(1,0);
+
     MatrixXd statobs(1,nstat);
     statobs = Map<MatrixXd>(readStatObs("statobsRF.txt").data(),1,nstat);
-    auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(statobs, myread.stats_names, 1, myread.stats_names.size()));
-    addScen(myread);
-    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, myread.stats_names, myread.nrec, myread.stats_names.size()));
+    auto datastatobs = unique_cast<DataDense<MatrixXd>, Data>(std::make_unique<DataDense<MatrixXd>>(statobs, emptyrow, myread.stats_names, 1, myread.stats_names.size()));
+    addScen(myread,myread.stats);
+    auto datastats = unique_cast<DataDense<MatrixXd>, Data>(std::make_unique<DataDense<MatrixXd>>(myread.stats, data_extended, myread.stats_names, myread.nrec, myread.stats_names.size()));
     // ForestOnlineClassification forestclass;
     ForestOnlineClassification forestclass;
     auto ntree = 500;

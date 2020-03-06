@@ -119,6 +119,7 @@ void ForestOnlineRegression::predictInternal(size_t tree_idx)
         predictions[1][sample_idx][tree_idx] = static_cast<double>(getTreePredictionTerminalNodeID(tree_idx, sample_idx));
     else {
       auto value = getTreePrediction(tree_idx, sample_idx);
+      if (std::isnan(value)) throw std::runtime_error("NaN value");
       mutex_samples[sample_idx].lock();
       predictions[1][0][sample_idx] += value;
       mutex_samples[sample_idx].unlock();

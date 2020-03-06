@@ -7,12 +7,13 @@
 namespace ranger
 {
 
+template<class MatrixType = Eigen::MatrixXd>
 class DataDense : public Data
 {
   public:
     DataDense() = default;
 
-    DataDense(Eigen::MatrixXd &data, std::vector<std::string> variable_names, size_t num_rows,
+    DataDense(MatrixType &data, Eigen::MatrixXd& data_extended, std::vector<std::string> variable_names, size_t num_rows,
               size_t num_cols);
 
     DataDense(const DataDense &) = delete;
@@ -29,26 +30,33 @@ class DataDense : public Data
             col = getUnpermutedVarID(col);
             row = getPermutedSampleID(row);
         }
-        return data.coeff(row, col);
+        if (col >= data.cols()) 
+            return data_extended.coeff(row,col - data.cols());
+        else 
+            return data.coeff(row, col);
     }
 
     void reserveMemory() override
     {
-        data.resize(num_rows, num_cols);
     }
 
     void set(size_t col, size_t row, double value, bool &error) override
     {
-        data.coeffRef(row, col) = value;
+        if (col >= data.cols())
+            data_extended.coeffRef(row, col-data.cols()) = value;
+        else 
+            data.coeffRef(row, col) = value;
     }
 
-    void filterRows(const std::vector<size_t>& f) {
-        data = std::move(data(f,Eigen::all)).eval();
-        num_rows = f.size();
-    }
+    // void filterRows(const std::vector<size_t>& f) {
+    //     data = std::move(data(f,Eigen::all)).eval();
+    //     data_extended = std::move(data(f,Eigen::all)).eval();
+    //     num_rows = f.size();
+    // }
 
   public:
-    Eigen::MatrixXd data;
+    MatrixType data;
+    Eigen::MatrixXd& data_extended;
 };
 
 } // namespace ranger

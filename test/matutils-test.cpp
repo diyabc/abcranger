@@ -33,7 +33,7 @@ TEST_CASE("Matutils : add linear Combination") {
 
     m3 << 1, 2, 3, 22, 28, 
           4, 5, 6, 49, 64;
-    addLinearComb(m1,m2);
+    addLinearComb(m1,m1,m2);
     CHECK( (m3 - m1).lpNorm<Infinity>() == 0 );
 }
 

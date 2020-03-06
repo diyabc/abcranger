@@ -24,7 +24,7 @@ B readAndCast(ifstream& f) {
 
 using namespace std;
 
-Reftable readreftable(string headerpath, string reftablepath, size_t N, bool quiet) {
+Reftable<MatrixXd> readreftable(string headerpath, string reftablepath, size_t N, bool quiet) {
     ///////////////////////////////////////// read headers
     if (!quiet) cout << "///////////////////////////////////////// read headers" << endl;
     
@@ -152,20 +152,11 @@ Reftable readreftable(string headerpath, string reftablepath, size_t N, bool qui
     }
     reftableStream.close();
     if (!quiet) cout << endl << "read reftable done." << endl;
-    Reftable reftable = { 
-        nrec,
-        nrecscen,
-        nparam,
-        params_names,
-        stats_names,
-        stats,
-        params,
-        scenarios
-        };
+    Reftable reftable(nrec,nrecscen, nparam, params_names, stats_names, stats,params, scenarios);
     return reftable;
 }
 
-Reftable readreftable_scen(string headerpath, string reftablepath, size_t sel_scen, size_t N, bool quiet) {
+Reftable<MatrixXd> readreftable_scen(string headerpath, string reftablepath, size_t sel_scen, size_t N, bool quiet) {
     ///////////////////////////////////////// read headers
     if (!quiet) cout << "///////////////////////////////////////// read headers" << endl;
     
@@ -302,15 +293,7 @@ Reftable readreftable_scen(string headerpath, string reftablepath, size_t sel_sc
 
     reftableStream.close();
     if (!quiet) cout << endl << "read reftable done." << endl;
-    Reftable reftable = { 
-        ncount,
-        {nrecscen[sel_scen-1]},
-        nparam,
-        params_names,
-        stats_names,
-        stats,
-        params,
-        scenarios
-        };
+    std::vector<size_t> uniqrec  = { nrecscen[sel_scen-1] };
+    Reftable reftable(ncount,uniqrec, nparam, params_names, stats_names, stats,params, scenarios);
     return reftable;
 }

@@ -15,7 +15,8 @@ using namespace ranger;
 using namespace Eigen;
 using namespace ranges;
 
-ModelChoiceResults ModelChoice_fun(Reftable &myread,
+template<class MatrixType>
+ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
                                    std::vector<double> obs,
                                    const cxxopts::ParseResult opts,
                                    bool quiet)
@@ -59,18 +60,24 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
     auto nstat = myread.stats_names.size();
     size_t K = myread.nrecscen.size();
     MatrixXd statobs(1, nstat);
+    MatrixXd emptyrow(1,0);
+
+    size_t n = myread.nrec;
+
     statobs = Map<MatrixXd>(obs.data(), 1, nstat);
 
-    if (lda) addLda(myread, statobs);
+    MatrixXd data_extended(n,0);
 
-    addNoise(myread, statobs, noisecols);
+    if (lda) addLda(myread, data_extended, statobs);
 
-    addScen(myread);
+    addNoise(myread, data_extended, statobs, noisecols);
+
+    addScen(myread,data_extended);
     std::vector<string> varwithouty(myread.stats_names.size()-1);
     for(auto i = 0; i < varwithouty.size(); i++) varwithouty[i] = myread.stats_names[i];
 
-    auto datastatobs = unique_cast<DataDense, Data>(std::make_unique<DataDense>(statobs, varwithouty, 1, varwithouty.size()));
-    auto datastats = unique_cast<DataDense, Data>(std::make_unique<DataDense>(myread.stats, myread.stats_names, myread.nrec, myread.stats_names.size()));
+    auto datastatobs = unique_cast<DataDense<MatrixXd>, Data>(std::make_unique<DataDense<MatrixXd>>(statobs, emptyrow, varwithouty, 1, varwithouty.size()));
+    auto datastats = unique_cast<DataDense<MatrixType>, Data>(std::make_unique<DataDense<MatrixType>>(myread.stats, data_extended, myread.stats_names, myread.nrec, myread.stats_names.size()));
     ForestOnlineClassification forestclass;
     forestclass.init("Y",                       // dependant variable
                      MemoryMode::MEM_DOUBLE,    // memory mode double or float
@@ -127,22 +134,28 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
     size_t predicted_model = std::distance(votes.begin(),std::max_element(votes.begin(),votes.end()));
     res.predicted_model = predicted_model;
 
-    bool machin = false;
-    auto dataptr = forestclass.releaseData();
-    auto& datareleased = static_cast<DataDense&>(*dataptr.get());
-    size_t ycol = datareleased.getNumCols() - 1;
-    
-    for(size_t i = 0; i < preds[0][0].size(); i++) {
-        if (!std::isnan(preds[0][0][i]))
-            datareleased.set(ycol,i,preds[0][0][i] == myread.scenarios[i] ? 1.0 : 0.0, machin);
-    }
+    size_t ycol = data_extended.cols() - 1;
 
-    std::vector<size_t> defined_preds = preds[0][0]
-        | views::enumerate
-        | views::filter([](auto d){ return !std::isnan(d.second); })
-        | views::keys
-        | to<std::vector>();
-    datareleased.filterRows(defined_preds);
+    for(size_t i = 0; i < preds[0][0].size(); i++) 
+        if (!std::isnan(preds[0][0][i]))
+            data_extended(i,ycol) = preds[0][0][i] == myread.scenarios[i] ? 1.0 : 0.0;
+
+    // bool machin = false;
+    auto dataptr = forestclass.releaseData();
+    auto& datareleased = static_cast<DataDense<MatrixType>&>(*dataptr.get());
+    // size_t ycol = datareleased.getNumCols() - 1;
+    
+    // for(size_t i = 0; i < preds[0][0].size(); i++) {
+    //     if (!std::isnan(preds[0][0][i]))
+    //         datareleased.set(ycol,i,preds[0][0][i] == myread.scenarios[i] ? 1.0 : 0.0, machin);
+    // }
+
+    // std::vector<size_t> defined_preds = preds[0][0]
+    //     | views::enumerate
+    //     | views::filter([](auto d){ return !std::isnan(d.second); })
+    //     | views::keys
+    //     | to<std::vector>();
+    // datareleased.filterRows(defined_preds);
 
     auto statobsreleased = forestclass.releasePred();
     ForestOnlineRegression forestreg;
@@ -183,10 +196,10 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
 
     forestreg.run(!quiet,true);
 
-    auto dataptr2 = forestreg.releaseData();
-    auto& datareleased2 = static_cast<DataDense&>(*dataptr2.get());
-    datareleased2.data.conservativeResize(NoChange,nstat);
-    myread.stats = std::move(datareleased2.data);
+    // auto dataptr2 = forestreg.releaseData();
+    // auto& datareleased2 = static_cast<DataDense&>(*dataptr2.get());
+    // datareleased2.data.conservativeResize(NoChange,nstat);
+    // myread.stats = std::move(datareleased2.data);
     myread.stats_names.resize(nstat);
 
     auto predserr = forestreg.getPredictions();
@@ -221,3 +234,15 @@ ModelChoiceResults ModelChoice_fun(Reftable &myread,
 
     return res;
 }
+
+template 
+ModelChoiceResults ModelChoice_fun(Reftable<MatrixXd> &myread,
+                                   std::vector<double> obs,
+                                   const cxxopts::ParseResult opts,
+                                   bool quiet);
+
+template 
+ModelChoiceResults ModelChoice_fun(Reftable<Eigen::Ref<MatrixXd, 0, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>> &myread,
+                                   std::vector<double> obs,
+                                   const cxxopts::ParseResult opts,
+                                   bool quiet);

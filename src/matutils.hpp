@@ -54,11 +54,25 @@ void addNoiseCols(MatrixBase<Derived> const &X_, size_t n)
 //    X.block(0,ncols,X_.rows(),n) = X.block(0,ncols,X_.rows(),n).unaryExpr([](double x){ return dis(gen);});
 }
 
-template<class Derived>
-void addNoise(Reftable& rf, MatrixBase<Derived> const &statobs, size_t n) {
-    addNoiseCols(rf.stats,n);
+template<class Derived, class MatrixType>
+void addNoise(Reftable<MatrixType>& rf, MatrixXd& data, MatrixBase<Derived> const &statobs, size_t n) {
+    addNoiseCols(data,n);
     addNoiseCols(statobs,n);
     for(auto i = 0; i < n; i++) rf.stats_names.push_back("NOISE" + std::to_string(i+1));
+}
+
+template<class Derived, class OtherDerived>
+void addLinearComb(MatrixBase<Derived> const & ref, MatrixBase<Derived> const & X_,const MatrixBase<OtherDerived>& M) {
+    auto ncols = X_.cols();
+    auto& X = constCastAddColsMatrix(X_,M.cols());
+    X.block(0,ncols,X.rows(),M.cols()) = ref * M;    
+}
+
+template<class Derived, class OtherDerived>
+void addLinearComb(Eigen::Ref<MatrixXd, 0, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>> ref, MatrixBase<Derived> const & X_,const MatrixBase<OtherDerived>& M) {
+    auto ncols = X_.cols();
+    auto& X = constCastAddColsMatrix(X_,M.cols());
+    X.block(0,ncols,X.rows(),M.cols()) = ref * M;    
 }
 
 template<class Derived, class OtherDerived>
@@ -68,21 +82,22 @@ void addLinearComb(MatrixBase<Derived> const & X_, const MatrixBase<OtherDerived
     X.block(0,ncols,X.rows(),M.cols()) = X.block(0,0,X.rows(),ncols) * M;    
 }
 
-template<class Derived>
-void addLda(Reftable& rf, MatrixBase<Derived> const &statobs) {
+template<class Derived, class MatrixType>
+void addLda(Reftable<MatrixType>& rf, MatrixXd& data, MatrixBase<Derived> const &statobs) {
     VectorXs scen(rf.nrec);
     for(auto i = 0; i < rf.nrec; i++) scen(i) = static_cast<size_t>(rf.scenarios[i]) - 1;
     MatrixXd Ld;
     lda(rf.stats, scen, Ld);
-    addLinearComb(rf.stats,Ld);
+    addLinearComb(rf.stats,data,Ld);
     addLinearComb(statobs,Ld);
     for(auto i = 0; i < rf.nrecscen.size() - 1; i++) {
         rf.stats_names.push_back("LDA" + std::to_string(i+1));
     }
 }
 
-static void addScen(Reftable& rf) {
-    addCols(rf.stats, Map<VectorXd>(rf.scenarios.data(),rf.nrec));
+template<class MatrixType>
+static void addScen(Reftable<MatrixType>& rf, MatrixXd& data) {
+    addCols(data, Map<VectorXd>(rf.scenarios.data(),rf.nrec));
     rf.stats_names.push_back("Y");
 }
 

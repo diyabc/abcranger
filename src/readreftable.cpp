@@ -140,8 +140,8 @@ Reftable<MatrixXd> readreftable(string headerpath, string reftablepath, size_t N
         }
         for(auto j = 0; j < parambyscenh[scen].size(); j++)
             params(i,parambyscenh[scen][j] - 1) = lparam[j];
-        for(auto j = 0; j < nmutparams; j++)
-            params(i,j) = lparam[nparam[scen] - nmutparams + j - 1];
+        for(auto j = nparam[scen] - nmutparams; j < nparam[scen]; j++)
+            params(i,j) = lparam[j];
         for(auto j = 0; j < nstat; j++) {
             float r;
             reftableStream.read(reinterpret_cast<char *>(&r),4);
@@ -279,8 +279,8 @@ Reftable<MatrixXd> readreftable_scen(string headerpath, string reftablepath, siz
         }
         for(auto j = 0; j < parambyscenh[scen].size(); j++)
             if (matched) params(ncount,parambyscenh[scen][j] - 1) = lparam[j];
-        for(auto j = 0; j < nmutparams; j++)
-            if (matched) params(ncount,j) = lparam[nparam[scen] - nmutparams + j - 1];
+        for(auto j = nparam[scen] - nmutparams; j < nparam[scen]; j++)
+            params(i,j) = lparam[j];
         for(auto j = 0; j < nstat; j++) {
             float r;
             reftableStream.read(reinterpret_cast<char *>(&r),4);

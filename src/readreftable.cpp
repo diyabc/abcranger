@@ -29,6 +29,10 @@ Reftable<MatrixXd> readreftable(string headerpath, string reftablepath, size_t N
     if (!quiet) cout << "///////////////////////////////////////// read headers" << endl;
     
     ifstream headerStream(headerpath,ios::in);
+    if (headerStream.fail()){
+        cout << "No header file, exiting" << endl;
+        exit(1);
+    }
     headerStream >> noskipws;
     const std::string hS(istream_iterator<char>{headerStream}, {});
     
@@ -108,6 +112,10 @@ Reftable<MatrixXd> readreftable(string headerpath, string reftablepath, size_t N
 
 
     ifstream reftableStream(reftablepath,ios::in|ios::binary);
+    if (reftableStream.fail()){
+        cout << "No Reftable, exiting" << endl;
+        exit(1);
+    }
     size_t realnrec = readAndCast<int,size_t>(reftableStream);
     // reftableStream.read(reinterpret_cast<char *>(realnrec_i),sizeof(realnr));
     size_t nrec = N > 0 ? min(realnrec,N) : realnrec;
@@ -161,6 +169,10 @@ Reftable<MatrixXd> readreftable_scen(string headerpath, string reftablepath, siz
     if (!quiet) cout << "///////////////////////////////////////// read headers" << endl;
     
     ifstream headerStream(headerpath,ios::in);
+    if (headerStream.fail()){
+        cout << "No header file, exiting" << endl;
+        exit(1);
+    }
     headerStream >> noskipws;
     const std::string hS(istream_iterator<char>{headerStream}, {});
     
@@ -240,6 +252,10 @@ Reftable<MatrixXd> readreftable_scen(string headerpath, string reftablepath, siz
 
 
     ifstream reftableStream(reftablepath,ios::in|ios::binary);
+    if (headerStream.fail()){
+        cout << "No Reftable, exiting" << endl;
+        exit(1);
+    }
     size_t realnrec = readAndCast<int,size_t>(reftableStream);
     // reftableStream.read(reinterpret_cast<char *>(realnrec_i),sizeof(realnr));
     if (N == 0) N = realnrec;

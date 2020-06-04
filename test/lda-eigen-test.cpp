@@ -213,3 +213,56 @@ TEST_CASE("LDA with Eigen")
         CHECK(std::min(LdPlus.col(c).lpNorm<Infinity>(),LdMinus.col(c).lpNorm<Infinity>()) == Approx(0.0).margin(1e-13));
     }
 }
+
+TEST_CASE("LDA with Eigen and constant variable")
+{
+    const size_t K = 3;
+    const size_t p = 4;
+    const size_t n = (S.size() + C.size() + V.size()) / p;
+    Matrix<size_t,-1,1> y(n);
+    MatrixXd x(n,p+1);
+    // S
+    for (auto i = 0; i < (S.size()) / p; i++)
+    {
+        y[i] = 0;
+        for (auto j = 0; j < p; j++)
+            x(i, j) = S[i * p + j];
+    }
+    for (auto i = 0; i < (C.size()) / p; i++)
+    {
+        auto ii = (S.size() / p) + i;
+        y[ii] = 1;
+        for (auto j = 0; j < p; j++)
+            x(ii, j) = C[i * p + j];
+    }
+    for (auto i = 0; i < (V.size()) / p; i++)
+    {
+        auto ii = (S.size() + C.size()) / p + i;
+        y[ii] = 2;
+        for (auto j = 0; j < p; j++)
+            x(ii, j) = V[i * p + j];
+    }
+    for(auto i = 0; i < n; i++) {
+        x(i,p) = x(i,2);
+        x(i,2) = y[i];
+    }
+    MatrixXd Ld;
+    lda(x,y,Ld);
+
+    MatrixXd LdMass(p,K-1);
+    LdMass << 
+        //  0.8293776,  0.02410215,
+        //  1.5344731,  2.16452123,
+        // -2.2012117, -0.93192121,
+        // -2.8104603,  2.83918785; 
+        -0.82937764226600674,  0.024102148876954166,
+        -1.53447306770001091,  2.164521234658435489,
+         2.81046030884310172,  2.839187852982734128,
+         2.20121165556177356, -0.931921210029371894;
+
+    auto LdPlus = Ld + LdMass;
+    auto LdMinus = Ld - LdMass;
+    for(auto c = 0; c < K - 1; c++) {
+        CHECK(std::min(LdPlus.col(c).lpNorm<Infinity>(),LdMinus.col(c).lpNorm<Infinity>()) == Approx(0.0).margin(1e-13));
+    }
+}

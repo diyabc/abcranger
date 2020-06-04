@@ -76,20 +76,39 @@ void addLinearComb(Eigen::Ref<MatrixXd, 0, Eigen::Stride<Eigen::Dynamic, Eigen::
 }
 
 template<class Derived, class OtherDerived>
+void addLinearComb(Eigen::Ref<MatrixXd, 0, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>> ref, MatrixBase<Derived> const & X_,const MatrixBase<OtherDerived>& M, std::vector<int>& validvars) {
+    auto ncols = X_.cols();
+    auto& X = constCastAddColsMatrix(X_,M.cols());
+    X.block(0,ncols,X.rows(),M.cols()) = ref(all,validvars).eval() * M;    
+}
+
+template<class Derived, class OtherDerived>
 void addLinearComb(MatrixBase<Derived> const & X_, const MatrixBase<OtherDerived>& M) {
     auto ncols = X_.cols();
     auto& X = constCastAddColsMatrix(X_,M.cols());
     X.block(0,ncols,X.rows(),M.cols()) = X.block(0,0,X.rows(),ncols) * M;    
 }
 
+template<class Derived, class OtherDerived>
+void addLinearComb(MatrixBase<Derived> const & X_, const MatrixBase<OtherDerived>& M, std::vector<int>& validvars) {
+    auto ncols = X_.cols();
+    auto& X = constCastAddColsMatrix(X_,M.cols());
+    X.block(0,ncols,X.rows(),M.cols()) = X.block(0,0,X.rows(),ncols)(all,validvars).eval() * M;    
+}
+
+
 template<class Derived, class MatrixType>
 void addLda(Reftable<MatrixType>& rf, MatrixXd& data, MatrixBase<Derived> const &statobs) {
     VectorXs scen(rf.nrec);
     for(auto i = 0; i < rf.nrec; i++) scen(i) = static_cast<size_t>(rf.scenarios[i]) - 1;
     MatrixXd Ld;
-    lda(rf.stats, scen, Ld);
-    addLinearComb(rf.stats,data,Ld);
-    addLinearComb(statobs,Ld);
+    std::vector<int> validvars = lda(rf.stats, scen, Ld);
+    addLinearComb(rf.stats,data,Ld,validvars);
+    addLinearComb(statobs,Ld,validvars);
+    for(auto i = 0; i < rf.stats.cols(); i++) {
+        if (std::find(std::begin(validvars),std::end(validvars),i) == std::end(validvars))
+            std::cout << "LDA Warning : " << rf.stats_names[i] << " is constant within class, removed." << std::endl;
+    }
     for(auto i = 0; i < rf.nrecscen.size() - 1; i++) {
         rf.stats_names.push_back("LDA" + std::to_string(i+1));
     }

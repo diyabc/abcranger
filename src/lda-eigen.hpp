@@ -25,13 +25,13 @@ typedef Matrix<size_t, Dynamic, 1> VectorXs;
  * @param Ld computes matrix whoses columns are Ld vectors
  */
 template<class Derived>
-void lda(const MatrixBase<Derived> &x,
+std::vector<int> lda(const MatrixBase<Derived> &x,
          const VectorXs &y,
          MatrixXd& Ld)
 {
     auto n = x.rows();
-    auto p = x.cols();
     auto K = y.maxCoeff() + 1;
+    auto p = x.cols();
 
     // M = Centroids
     MatrixXd M = MatrixXd::Zero(K, p);
@@ -59,7 +59,7 @@ void lda(const MatrixBase<Derived> &x,
     MatrixXd D(n, p);
 
     // W = Within-class covariance matrix
-    MatrixXd W = MatrixXd::Zero(p, p);
+    MatrixXd Wraw = MatrixXd::Zero(p, p);
     size_t slicepos = 0;
     for (auto c = 0; c < K; c++)
     {
@@ -67,10 +67,15 @@ void lda(const MatrixBase<Derived> &x,
         MatrixXd Dc = x.block(slicepos, 0, d[c], p);
         // Centering
         Dc.rowwise() -= M.row(c);
-        W += Dc.transpose() * Dc;
+        Wraw += Dc.transpose() * Dc;
         slicepos += d[c];
     }
-    W /= static_cast<double>(n - K);
+    Wraw /= static_cast<double>(n - K);
+    auto validvars = std::vector<int>();
+    for(auto i = 0; i< x.cols(); i++) {
+        if (std::abs(Wraw(i,i)) >= 1.0e-8) validvars.push_back(i);
+    }
+    auto W = Wraw(validvars,validvars);
     // [4,4]((0.265008,0.0927211,0.167514,0.0384014),(0.0927211,0.115388,0.0552435,0.0327102),(0.167514,0.0552435,0.185188,0.0426653),(0.0384014,0.0327102,0.0426653,0.0418816))
 
     // Calculate pseudo-inverse square root for W with SVD
@@ -84,9 +89,9 @@ void lda(const MatrixBase<Derived> &x,
     // }
     //auto W12 = svd.matrixU() * svd.eigenvalues().array().inverse().sqrt().matrix().asDiagonal() * svd.matrixU().transpose();
 //    auto W12 = svd.operatorInverseSqrt();
-
-    MatrixXd Mstar = M * W12;
-    VectorXd mstar = VectorXd::Zero(p);
+    MatrixXd Mvalid = M(all,validvars);
+    MatrixXd Mstar = Mvalid * W12;
+    VectorXd mstar = VectorXd::Zero(validvars.size());
     for (auto c = 0; c < K; c++)
         mstar += Mstar.row(c);
     mstar /= static_cast<double>(K);
@@ -98,4 +103,5 @@ void lda(const MatrixBase<Derived> &x,
     JacobiSVD<MatrixXd> svd2(Bstar,ComputeThinU);
     MatrixXd Vl = W12 * svd2.matrixU();
     Ld = Vl.leftCols(K-1);
+    return validvars;
 }

@@ -252,7 +252,7 @@ Reftable<MatrixXd> readreftable_scen(string headerpath, string reftablepath, siz
 
 
     ifstream reftableStream(reftablepath,ios::in|ios::binary);
-    if (headerStream.fail()){
+    if (reftableStream.fail()){
         cout << "No Reftable, exiting" << endl;
         exit(1);
     }

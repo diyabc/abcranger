@@ -107,7 +107,7 @@ void addLda(Reftable<MatrixType>& rf, MatrixXd& data, MatrixBase<Derived> const 
     addLinearComb(statobs,Ld,validvars);
     for(auto i = 0; i < rf.stats.cols(); i++) {
         if (std::find(std::begin(validvars),std::end(validvars),i) == std::end(validvars))
-            std::cout << "LDA Warning : " << rf.stats_names[i] << " is constant within class, removed." << std::endl;
+            std::cout << "The explanatory statistic " << rf.stats_names[i] << " is constant within class and was thus ignored during RF treatments." << std::endl;
     }
     for(auto i = 0; i < rf.nrecscen.size() - 1; i++) {
         rf.stats_names.push_back("LDA" + std::to_string(i+1));

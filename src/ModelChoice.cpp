@@ -21,11 +21,10 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
                                    const cxxopts::ParseResult opts,
                                    bool quiet)
 {
-    size_t nref, ntree, nthreads, noisecols, seed, minnodesize;
+    size_t ntree, nthreads, noisecols, seed, minnodesize;
     std::string outfile;
     bool lda,seeded;
 
-    nref = opts["n"].as<size_t>();
     ntree = opts["t"].as<size_t>();
     nthreads = opts["j"].as<size_t>();
     noisecols = opts["c"].as<size_t>();

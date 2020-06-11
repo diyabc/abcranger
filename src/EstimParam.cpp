@@ -33,7 +33,6 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
     double chosenscen,plsmaxvar;   
     bool plsok,seeded;
 
-    nref = opts["n"].as<size_t>();
     ntree = opts["t"].as<size_t>();
     nthreads = opts["j"].as<size_t>();
     noisecols = opts["c"].as<size_t>();
@@ -64,9 +63,9 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
 
     auto nparam = myread.params_names.size();
 
-    size_t n = myread.nrec;
+    nref = myread.nrec;
 
-    VectorXd y(n);
+    VectorXd y(nref);
     switch(op) {
         case op_type::none : 
             y = myread.params(all,p1);
@@ -87,7 +86,7 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
 
 
     EstimParamResults res;
-    MatrixXd data_extended(n,0);
+    MatrixXd data_extended(nref,0);
 
     if (plsok) {
         size_t ncomp_total = static_cast<size_t>(lround(1.0 * static_cast<double>(nstat)));

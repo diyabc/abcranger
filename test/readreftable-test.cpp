@@ -21,11 +21,12 @@
 #include "statobsTest.hpp"
 #include "readstatobs.hpp"
 #include "threadpool.hpp"
-#include "floatvectormatcher.hpp"
 
 #include "H5Cpp.h"
 
 #include <range/v3/all.hpp>
+#include "floatvectormatcher.hpp"
+
 using namespace ranges;
 using namespace HighFive;
 
@@ -73,7 +74,7 @@ bool equalifnan(double const &t1, double const &t2)
 
 using namespace HighFive;
 
-void test_random_lines(HighFive::File &file, const string &dataname, MatrixXd p)
+void test_random_lines(HighFive::File &file, const string &dataname, const MatrixXd& p)
 {
     DataSet dataset =
         file.getDataSet(dataname);
@@ -89,7 +90,8 @@ void test_random_lines(HighFive::File &file, const string &dataname, MatrixXd p)
 
     ThreadPool::ParallelFor((size_t)0u, nloop, [&](size_t j) {
         auto i = indices[j];
-        const auto &expected = Catch::Matchers::Approx<decltype(p.row(i)), std::vector<double>>(p.row(i));
+        const auto& row = p.row(i);
+        const auto &expected = Catch::Matchers::Approx<decltype(row),std::vector<double>>(row);
         CHECK_THAT(data[i], expected);
     });
 }

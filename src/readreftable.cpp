@@ -164,6 +164,7 @@ Reftable<MatrixXd> readreftable(string headerpath, string reftablepath, size_t N
     return reftable;
 }
 
+#define READSCEN_BUFFER_SIZE 1000
 Reftable<MatrixXd> readreftable_scen(string headerpath, string reftablepath, size_t sel_scen, size_t N, bool quiet) {
     ///////////////////////////////////////// read headers
     if (!quiet) cout << "///////////////////////////////////////// read headers" << endl;
@@ -282,9 +283,9 @@ Reftable<MatrixXd> readreftable_scen(string headerpath, string reftablepath, siz
         size_t scen = readAndCast<int,size_t>(reftableStream);
 //        reftableStream.read(reinterpret_cast<char *>(&scen),4);
         bool matched = (scen == sel_scen);
-        if (matched) {
-            stats.conservativeResize(stats.rows() + 1,NoChange);
-            params.conservativeResize(params.rows() + 1,NoChange);
+        if (matched && ncount == stats.rows()) {
+            stats.conservativeResize(stats.rows() + READSCEN_BUFFER_SIZE,NoChange);
+            params.conservativeResize(params.rows() + READSCEN_BUFFER_SIZE,NoChange);
         }
         scenarios[i] = static_cast<double>(scen);
         // data.set(nstat,i,static_cast<double>(scen),hasError);
@@ -311,7 +312,9 @@ Reftable<MatrixXd> readreftable_scen(string headerpath, string reftablepath, siz
 
     reftableStream.close();
     if (!quiet) cout << endl << "read reftable done." << endl;
-    std::vector<size_t> uniqrec  = { nrecscen[sel_scen-1] };
+    stats.conservativeResize(ncount,NoChange);
+    params.conservativeResize(ncount,NoChange);
+   std::vector<size_t> uniqrec  = { nrecscen[sel_scen-1] };
     Reftable reftable(ncount,uniqrec, nparam, params_names, stats_names, stats,params, scenarios);
     return reftable;
 }

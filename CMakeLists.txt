@@ -37,7 +37,7 @@ IF(MSVC)
   if("${CMAKE_CXX_COMPILER_ID}" MATCHES "[Cc]lang")
     add_compile_options(/permissive-)
   else()
-    add_compile_options(/permissive- /experimental:preprocessor /wd5105)
+    add_compile_options(/permissive- /Zc:preprocessor /wd5105)
   endif()
   add_subdirectory (wingetopt)
   link_directories (${wingetopt_BINARY_DIR})
@@ -80,7 +80,7 @@ pmm(
     # DEBUG
     VCPKG
         # REVISION e37cc662ee29852f45e85961124f62d91acb488a
-        REVISION af5f57c248d997d015f4b28a6cd390cbeef00396
+        REVISION 46bf8c52cb343b6557a48b5b80aad56cdeedd4d8
         TRIPLET ${VCPKG_TARGET_TRIPLET}
         REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] eigen3-head highfive-head pybind11 ${TBBPKG} ${BOOSTREGEX}
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head" "${PROJECT_SOURCE_DIR}/highfive-head"
@@ -122,7 +122,11 @@ endif()
 include(CTest)
 enable_testing()
 
-add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING -D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
+add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING 
+                -D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING 
+                -D_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING
+                -D_CRT_SECURE_NO_WARNINGS
+                -D_ENFORCE_MATCHING_ALLOCATORS=0)
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 ### C++ Threads (required by ranger)
@@ -139,7 +143,7 @@ endif()
 
 ### Range v3
 find_package(range-v3 CONFIG REQUIRED)
-link_libraries(meta range-v3)
+link_libraries(range-v3)
 
 ### Boost::regex with MSVC
 # if(MSVC)
@@ -150,6 +154,9 @@ link_libraries(meta range-v3)
 #      set(WINDOWS_EXPORT_ALL_SYMBOLS True)
 # endif()
 
+## FMT
+find_package(fmt CONFIG REQUIRED)
+
 add_subdirectory(src)
 include_directories(src)
 
@@ -157,9 +164,6 @@ link_libraries(Threads::Threads)
 
 ## CXXOPTS
 find_package(cxxopts CONFIG REQUIRED)
-
-## FMT
-find_package(fmt CONFIG REQUIRED)
 
 ## Pybind11
 find_package(pybind11 CONFIG REQUIRED)
@@ -175,8 +179,10 @@ add_subdirectory(testpy)
 
 add_executable(abcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp abcranger.cpp)
 
-target_link_libraries(abcranger ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt)
+target_link_libraries(abcranger ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib)
+
+find_package(Python REQUIRED COMPONENTS Development)
 
 pybind11_add_module(pyabcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp pyabcranger.cpp)
 
-target_link_libraries(pyabcranger PRIVATE ${TBBLIB} cxxopts::cxxopts abcrangerlib_so fmt::fmt)
+target_link_libraries(pyabcranger PRIVATE ${TBBLIB} Python::Python cxxopts::cxxopts abcrangerlib_so)

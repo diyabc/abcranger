@@ -4,7 +4,7 @@
 // https://www.seehuhn.de/pages/matrixfn.html
 #include <iostream>
 #include <Eigen/Dense>
-#include "floatvectormatcher.hpp"
+// #include "floatvectormatcher.hpp"
 
 using namespace Eigen;
 
@@ -41,6 +41,7 @@ TEST_CASE( "Simple eigen square root" )
     JacobiSVD<MatrixXd> svd(m, ComputeFullU);
     auto D = svd.singularValues().array().sqrt().matrix().asDiagonal();
     auto U = svd.matrixU();
+
     // SelfAdjointEigenSolver<MatrixXd> svd(m);
     // auto D = svd.eigenvalues().array().sqrt().matrix().asDiagonal();
     // auto U = svd.eigenvectors();
@@ -49,7 +50,7 @@ TEST_CASE( "Simple eigen square root" )
     md  = d * d;
     std::cout << "Here is the result of d * d" << std::endl;
     std::cout << md << std::endl;
-    const auto expected = Catch::Matchers::Approx<std::vector<double>,std::vector<double>>(mdbuf).margin(1e-10);
+    const auto expected = Catch::Matchers::Approx(mdbuf).margin(1e-10);
     CHECK_THAT( mbuf, expected );
 
 

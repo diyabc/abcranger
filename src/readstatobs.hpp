@@ -18,7 +18,6 @@ vector<double> readStatObs(const std::string &path) {
     vector<double> statobs;
     auto it = itstat;
     sregex_token_iterator endregexp;
-    int i = 0;
     while (it != endregexp) {
         const string st(*it++);
         statobs.push_back(stod(st));

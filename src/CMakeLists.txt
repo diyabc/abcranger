@@ -23,7 +23,9 @@ ${ABCRANGER_SOURCE_DIR}/ForestOnlineRegression.cpp
 )
 
 add_library(abcrangerlib STATIC ${PROJECT_abcranger_SRCS})
-add_library(abcrangerlib_so SHARED ${PROJECT_abcranger_SRCS})
+target_link_libraries(abcrangerlib fmt::fmt)
+add_library(abcrangerlib_so STATIC ${PROJECT_abcranger_SRCS})
+target_link_libraries(abcrangerlib_so fmt::fmt)
 
 # if(MSVC)
 #     target_link_libraries(abcrangerlib PRIVATE Boost::regex)

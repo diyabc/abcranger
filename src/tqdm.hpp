@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <fmt/format.h>
 #include <fmt/printf.h>
+#include <cstdlib>
 
 class tqdm {
     private:
@@ -35,8 +36,9 @@ class tqdm {
 
         std::vector<const char*> bars = {" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"};
 
-        bool in_screen = (system("test $STY") == 0);
-        bool in_tmux = (system("test $TMUX") == 0);
+
+        bool in_screen = std::getenv("STY") != nullptr;
+        bool in_tmux = std::getenv("TMUX") != nullptr;
         bool is_tty = isatty(1);
         bool use_colors = true;
         bool color_transition = true;

@@ -91,7 +91,7 @@ void test_random_lines(HighFive::File &file, const string &dataname, const Matri
     ThreadPool::ParallelFor((size_t)0u, nloop, [&](size_t j) {
         auto i = indices[j];
         auto row = p.row(i);
-        const auto &expected = Catch::Matchers::Approx<decltype(row),std::vector<double>>(row);
+        const auto &expected = Catch::Matchers::Approx<double, decltype(row),std::vector<double>>(row);
         CHECK_THAT(data[i], expected);
     });
 }

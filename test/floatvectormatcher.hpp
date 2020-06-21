@@ -57,7 +57,7 @@ namespace Catch
             template <typename Rng1, typename Rng2>
             struct ApproxMatcher : MatcherBase<Rng2>
             {
-                typedef ranges::range_value_t<Rng1> T;
+                typedef ranges::range_value_t<Rng2> T;
 
                 ApproxMatcher(Rng1 const &comparator) : m_comparator(comparator), approx{0.} {}
 
@@ -109,7 +109,7 @@ namespace Catch
             template <typename Rng1, typename Rng2>
             struct EqualsMatcher : MatcherBase<Rng2>
             {
-                typedef ranges::range_value_t<Rng1> T;
+                typedef ranges::range_value_t<Rng2> T;
 
                 EqualsMatcher(const Rng1 &comparator) : m_comparator(comparator) {}
 
@@ -138,13 +138,13 @@ namespace Catch
             };
         } // namespace Range
 
-        template <typename Rng1, typename Rng2>
+        template <typename T, typename Rng1, typename Rng2>
         Range::ApproxMatcher<Rng1, Rng2> Approx(Rng1 const &comparator)
         {
             return Range::ApproxMatcher<Rng1, Rng2>(comparator);
         }
 
-        template <typename Rng1, typename Rng2>
+        template <typename T, typename Rng1, typename Rng2>
         Range::EqualsMatcher<Rng1, Rng2> Equals(const Rng1 &comparator)
         {
             return Range::EqualsMatcher<Rng1, Rng2>(comparator);

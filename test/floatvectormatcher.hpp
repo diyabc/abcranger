@@ -138,13 +138,13 @@ namespace Catch
             };
         } // namespace Range
 
-        template <typename Rng1, typename Rng2>
+        template <typename Rng2,typename Rng1>
         Range::ApproxMatcher<Rng1, Rng2> ApproxRng(Rng1 const &comparator)
         {
             return Range::ApproxMatcher<Rng1, Rng2>(comparator);
         }
 
-        template <typename Rng1, typename Rng2>
+        template <typename Rng2, typename Rng1>
         Range::EqualsMatcher<Rng1, Rng2> EqualsRng(const Rng1 &comparator)
         {
             return Range::EqualsMatcher<Rng1, Rng2>(comparator);

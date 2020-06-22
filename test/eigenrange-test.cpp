@@ -48,7 +48,7 @@ TEST_CASE("Eigen with ranges")
       //    const auto& expected = Catch::Range::EqualsMatcher<std::vector<int>,std::vector<int>>(std::vector{1,2,3});
       auto row0 = m1.row(0);
       std::vector<int> vect_expected{1, std::numeric_limits<int>::quiet_NaN(), 3};
-      const auto &expected = Catch::Matchers::EqualsRng<decltype(row0), std::vector<int>>(row0);
+      const auto &expected = Catch::Matchers::EqualsRng<std::vector<int>>(row0);
       CHECK_THAT(vect_expected, expected);
 
       MatrixXd m2(2, 3);
@@ -58,7 +58,7 @@ TEST_CASE("Eigen with ranges")
 
       auto row1 = m2.row(0);
       std::vector<double> vect_expected2{1.0, 2.0, 3.0};
-      const auto &expected2 = Catch::Matchers::ApproxRng<decltype(row1), std::vector<double>>(row1);
+      const auto &expected2 = Catch::Matchers::ApproxRng<std::vector<double>>(row1);
       CHECK_THAT(vect_expected2, expected2);
 
       MatrixXd m3(2, 3);
@@ -67,7 +67,7 @@ TEST_CASE("Eigen with ranges")
 
       auto row2 = m3.row(0);
       std::vector<double> vect_expected3{1.0, std::numeric_limits<double>::quiet_NaN(), 3.0};
-      const auto &expected3 = Catch::Matchers::ApproxRng<decltype(row2), std::vector<double>>(row2);
+      const auto &expected3 = Catch::Matchers::ApproxRng<std::vector<double>>(row2);
       CHECK_THAT(vect_expected3, expected3);
 
       MatrixXd m4(2, 3);
@@ -75,7 +75,7 @@ TEST_CASE("Eigen with ranges")
           4.0, 5.0, 6.0;
 
       auto row3 = m3.row(0);
-      const auto &expected4 = Catch::Matchers::ApproxRng<decltype(row1), std::vector<double>>(row3);
+      const auto &expected4 = Catch::Matchers::ApproxRng<std::vector<double>>(row3);
       CHECK_THAT(vect_expected2, !expected4);
 
       RowVectorXd vec1(3);

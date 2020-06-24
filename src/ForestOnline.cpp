@@ -12,6 +12,8 @@
 #include <stdio.h>
 #ifdef __APPLE__
         #include <sys/uio.h>
+#elif defined(_MSC_VER)
+        #include <io.h>
 #else
         #include <sys/io.h>
 #endif

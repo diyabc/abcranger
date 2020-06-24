@@ -13,6 +13,15 @@
 #include "readreftable.hpp"
 #include "tqdm.hpp"
 
+#include <stdio.h>
+#ifdef __APPLE__
+        #include <sys/uio.h>
+#elif defined(_MSC_VER)
+        #include <io.h>
+#else
+        #include <sys/io.h>
+#endif
+
 // using namespace boost;
 
 template<class A, class B> 
@@ -136,7 +145,12 @@ Reftable<MatrixXd> readreftable(string headerpath, string reftablepath, size_t N
     // bool hasError;
     tqdm bar;
     for(auto i = 0; i < nrec; i++) {
-        if (!quiet) bar.progress(i,nrec);
+        if (!quiet) {
+            if (isatty(fileno(stdin))) 
+                bar.progress(i,nrec);
+            else 
+                cout << "read: " << i << std::endl;
+        }
         size_t scen = readAndCast<int,size_t>(reftableStream);
 //        reftableStream.read(reinterpret_cast<char *>(&scen),4);
         scenarios[i] = static_cast<double>(scen);

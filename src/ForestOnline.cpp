@@ -607,7 +607,7 @@ void ForestOnline::growTreesInThread(uint thread_idx, std::vector<double>* varia
         if (isatty(fileno(stdin))) 
           bar.progress(progress,num_trees);
         else 
-          *verbose_out << "computed: " << num_trees << std::endl;
+          *verbose_out << "computed: " << progress << std::endl;
       }
       trees[i].reset(nullptr);
       mutex.unlock();

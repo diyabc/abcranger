@@ -9,6 +9,9 @@
 #include <chrono>
 #endif
 
+#include <stdio.h>
+#include <io.h>
+
 #include "utility.h"
 #include "ForestOnline.hpp"
 #include "DataChar.h"
@@ -594,7 +597,12 @@ void ForestOnline::growTreesInThread(uint thread_idx, std::vector<double>* varia
       predictInternal(i);
       mutex.lock();
       ++progress;
-      if (verbose_out) bar.progress(progress,num_trees);
+      if (verbose_out) {
+        if (isatty(fileno(stdin))) 
+          bar.progress(progress,num_trees);
+        else 
+          *verbose_out << "computed: " << num_trees << std::endl;
+      }
       trees[i].reset(nullptr);
       mutex.unlock();
       // condition_variable.notify_one();

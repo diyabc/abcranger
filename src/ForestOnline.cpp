@@ -10,7 +10,11 @@
 #endif
 
 #include <stdio.h>
-#include <io.h>
+#ifdef __APPLE__
+        #include <sys/uio.h>
+#else
+        #include <sys/io.h>
+#endif
 
 #include "utility.h"
 #include "ForestOnline.hpp"

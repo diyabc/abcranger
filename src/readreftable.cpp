@@ -10,8 +10,10 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include "readreftable.hpp"
 #include "tqdm.hpp"
+#include <range/v3/all.hpp>
 
 #include <stdio.h>
 #ifdef __APPLE__
@@ -23,6 +25,7 @@
 #endif
 
 // using namespace boost;
+// using namespace ranges;
 
 template<class A, class B> 
 B readAndCast(ifstream& f) {
@@ -33,10 +36,10 @@ B readAndCast(ifstream& f) {
 
 using namespace std;
 
-Reftable<MatrixXd> readreftable(string headerpath, string reftablepath, size_t N, bool quiet) {
+Reftable<MatrixXd> readreftable(string headerpath, string reftablepath, size_t N, bool quiet, std::string groups_opt) {
     ///////////////////////////////////////// read headers
     if (!quiet) cout << "///////////////////////////////////////// read headers" << endl;
-    
+
     ifstream headerStream(headerpath,ios::in);
     if (headerStream.fail()){
         cout << "No header file, exiting" << endl;
@@ -143,38 +146,75 @@ Reftable<MatrixXd> readreftable(string headerpath, string reftablepath, size_t N
     MatrixXd stats = MatrixXd::Constant(nrec,nstat,NAN);
     // DataDouble data(stats,statsname,nrec,nstat + 1);
     // bool hasError;
+    std::vector<int> groups;
+    if (groups_opt.length() > 0) {
+        groups = std::vector<int>(nscen,0);
+        auto groupstr = groups_opt
+            | ranges::views::split(';')
+            | ranges::views::transform([](auto&& s) { return s 
+                | ranges::views::split(',') 
+                | ranges::views::transform([](auto&& si){ return si | ranges::to<std::string>; }); 
+                    }
+                )
+            | ranges::views::enumerate
+            | ranges::to<std::vector>;
+        for(auto&& s: groupstr) 
+            for(auto&& si: s.second)
+                groups[std::stoi(si)-1] = static_cast<double>(s.first + 1);
+        
+
+        std::vector<size_t> new_nrecscen = std::vector<size_t>(groupstr.size());
+        for(auto i = 0; i < nscen; i++) 
+            if (groups[i] > 0) new_nrecscen[groups[i] - 1] += nrecscen[i];
+        nrecscen = new_nrecscen;
+        // myread.scenarios |= actions::transform([&groups](auto&& si){ return groups[si-1]; });        
+    }
+    size_t rcount = 0;
     tqdm bar;
     for(auto i = 0; i < nrec; i++) {
+        bool to_skip = false;
         if (!quiet) {
             if (isatty(fileno(stdin))) 
                 bar.progress(i,nrec);
             else 
-                cout << "read: " << i << std::endl;
+                cout << "read " << (i + 1) << "/" << nrec << std::endl;
         }
         size_t scen = readAndCast<int,size_t>(reftableStream);
+        if (groups.size() > 0) {
+            if (groups[scen-1] == 0) to_skip = true;
+            else scenarios[rcount] = static_cast<double>(groups[scen-1]);
+        } else scenarios[rcount] = static_cast<double>(scen);
 //        reftableStream.read(reinterpret_cast<char *>(&scen),4);
-        scenarios[i] = static_cast<double>(scen);
+
         // data.set(nstat,i,static_cast<double>(scen),hasError);
         scen--;
         vector<float> lparam(nparam[scen]);
         for(auto& r: lparam) {
             reftableStream.read(reinterpret_cast<char *>(&r),sizeof(r));
         }
-        for(auto j = 0; j < parambyscenh[scen].size(); j++)
-            params(i,parambyscenh[scen][j] - 1) = lparam[j];
-        for(auto j = nparam[scen] - nmutparams; j < nparam[scen]; j++)
-            params(i,j) = lparam[j];
+        if (!to_skip) {
+            for(auto j = 0; j < parambyscenh[scen].size(); j++)
+                params(rcount,parambyscenh[scen][j] - 1) = lparam[j];
+            for(auto j = nparam[scen] - nmutparams; j < nparam[scen]; j++)
+                params(rcount,j) = lparam[j];
+        }
         for(auto j = 0; j < nstat; j++) {
             float r;
             reftableStream.read(reinterpret_cast<char *>(&r),4);
             // col * num_rows + row
-            stats(i,j) = r;
+            if (!to_skip) stats(rcount,j) = r;
             // data.set(j,i,r,hasError);
         }
+        if (!to_skip) rcount++;
+    }
+    if (rcount < nrec) {
+        stats.conservativeResize(rcount,NoChange);
+        params.conservativeResize(rcount,NoChange);
+        scenarios.resize(rcount);
     }
     reftableStream.close();
     if (!quiet) cout << endl << "read reftable done." << endl;
-    Reftable reftable(nrec,nrecscen, nparam, params_names, stats_names, stats,params, scenarios);
+    Reftable reftable(rcount,nrecscen, nparam, params_names, stats_names, stats,params, scenarios);
     return reftable;
 }
 
@@ -293,7 +333,12 @@ Reftable<MatrixXd> readreftable_scen(string headerpath, string reftablepath, siz
     size_t ncount = 0;
     tqdm bar;
     for(auto i = 0; (i < nrec) && (ncount < N); i++) {
-        if (!quiet) bar.progress(ncount,N);
+        if (!quiet) {
+            if (isatty(fileno(stdin))) 
+                bar.progress(i,nrec);
+            else 
+                cout << "read " << (i + 1) << "/" << nrec << std::endl;
+        }
         size_t scen = readAndCast<int,size_t>(reftableStream);
 //        reftableStream.read(reinterpret_cast<char *>(&scen),4);
         bool matched = (scen == sel_scen);

@@ -604,10 +604,14 @@ void ForestOnline::growTreesInThread(uint thread_idx, std::vector<double>* varia
       mutex.lock();
       ++progress;
       if (verbose_out) {
-        if (isatty(fileno(stdin))) 
+        #ifdef PYTHON_OUTPUT
           bar.progress(progress,num_trees);
-        else 
-          *verbose_out << "computed: " << progress << std::endl;
+        #else
+          if (isatty(fileno(stdin))) 
+           bar.progress(progress,num_trees);
+          else 
+            *verbose_out << "computed_" << !predict_all << " " << progress << "/" << num_trees << std::endl;
+        #endif
       }
       trees[i].reset(nullptr);
       mutex.unlock();

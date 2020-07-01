@@ -16,6 +16,10 @@
 #include <algorithm>
 #include <fstream>
 #include "range/v3/all.hpp"
+#ifdef PYTHON_OUTPUT
+#include <pybind11/pybind11.h>
+namespace py = pybind11;
+#endif
 
 using namespace ranger;
 using namespace Eigen;
@@ -88,6 +92,7 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
     EstimParamResults res;
     MatrixXd data_extended(nref,0);
 
+
     if (plsok) {
         size_t ncomp_total = static_cast<size_t>(lround(1.0 * static_cast<double>(nstat)));
         MatrixXd Projection;
@@ -150,6 +155,22 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
 
     }
 
+    if (!quiet) {
+        const std::string& settings_filename = outfile + "_settings.txt";
+        std::ofstream settings_file;
+        settings_file << "- " << "Parameter name: " << parameter_of_interest << std::endl;
+        settings_file << "- " << "Scenario " << chosenscen << std::endl;
+        settings_file << "- " << myread.nrec << " simulated datasets" << std::endl;
+        settings_file << "- " << ntree << " trees" << std::endl;
+        settings_file << "- " << "Minimum node size of " << (minnodesize == 0 ? 5 : minnodesize) << std::endl;
+        settings_file << "- " << myread.stats.cols() << " summary statistics" << std::endl;
+        if (plsok) {
+            settings_file << "- " << data_extended.cols() << " axes of summary statistics PLS linear combination" << std::endl;
+        }
+        settings_file << "- " << noisecols << " noise variables" << std::endl;
+        settings_file.close();
+    }
+
 
     addNoise(myread, data_extended, statobs, noisecols);
     std::vector<string> varwithouty = myread.stats_names;
@@ -170,7 +191,7 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
                      (seeded ? seed : r()),                    // seed rd()
                      nthreads,                  // number of threads
                      ImportanceMode::IMP_GINI,  // Default IMP_NONE
-                     5,                         // default min node size (classif = 1, regression 5)
+                     minnodesize,                         // default min node size (classif = 1, regression 5)
                      "",                        // status variable name, only for survival
                      false,                     // prediction mode (true = predict)
                      true,                      // replace

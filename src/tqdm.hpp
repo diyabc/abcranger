@@ -19,6 +19,11 @@
 #include <fmt/printf.h>
 #include <cstdlib>
 
+#ifdef PYTHON_OUTPUT
+#include <pybind11/pybind11.h>
+namespace py = pybind11;
+#endif
+
 class tqdm {
     private:
         // time, iteration counters and deques for rate calculations
@@ -113,6 +118,9 @@ class tqdm {
             // fflush(stdout);
         }
         void progress(int curr, int tot) {
+        #ifdef PYTHON_OUTPUT
+            py::gil_scoped_acquire acquire;
+        #endif
             if(is_tty && (curr%period == 0)) {
                 total_ = tot;
                 nupdates++;
@@ -202,5 +210,9 @@ class tqdm {
                 // if( ( tot - curr ) > period ) fflush(stdout);
 
             }
+        #ifdef PYTHON_OUTPUT
+            py::gil_scoped_release release;
+        #endif
+
         }
 };

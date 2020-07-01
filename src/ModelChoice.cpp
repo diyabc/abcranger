@@ -10,6 +10,10 @@
 #include <algorithm>
 #include <fstream>
 #include "range/v3/all.hpp"
+#ifdef PYTHON_OUTPUT
+#include <pybind11/pybind11.h>
+namespace py = pybind11;
+#endif
 
 using namespace ranger;
 using namespace Eigen;
@@ -36,25 +40,6 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
     outfile = (opts.count("output") == 0) ? "modelchoice_out" : opts["o"].as<std::string>();
 
 
-    if (opts.count("groups") != 0) {
-        std::vector<double> groups(myread.nrecscen.size());
-        auto groupstr = opts["g"].as<std::string>() 
-            | views::split(';')
-            | views::transform([](auto&& s) { return s 
-                | views::split(',') 
-                | views::transform([](auto&& si){ return si | to<std::string>; }); 
-                    }
-                )
-            | views::enumerate
-            | to<std::vector>;
-        for(auto&& s: groupstr) 
-            for(auto&& si: s.second)
-                groups[std::stoi(si)-1] = static_cast<double>(s.first + 1);
-        
-        myread.nrecscen = std::vector<size_t>(groupstr.size());
-        myread.scenarios |= actions::transform([&groups](auto&& si){ return groups[si-1]; });
-    }
-
     std::vector<double> samplefract{std::min(1e5,static_cast<double>(myread.nrec))/static_cast<double>(myread.nrec)};
     auto nstat = myread.stats_names.size();
     size_t K = myread.nrecscen.size();
@@ -67,13 +52,40 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
 
     MatrixXd data_extended(n,0);
 
-    if (lda) addLda(myread, data_extended, statobs);
+    if (!quiet) {
+        const std::string& settings_filename = outfile + "_settings.txt";
+        std::ofstream settings_file;
+        settings_file.open(settings_filename, std::ios::out);
+
+        settings_file << "- " << myread.nrec << " simulated datasets" << std::endl;
+        settings_file << "- " << ntree << " trees" << std::endl;
+        settings_file << "- " << "Minimum node size of " << (minnodesize == 0 ? 1 : minnodesize) << std::endl;
+        settings_file << "- " << myread.stats.cols() << " summary statistics" << std::endl;
+        if (lda) {
+            settings_file << "- " << (K - 1) << " axes of summary statistics LDA linear combination" << std::endl;
+        }
+        settings_file << "- " << noisecols << " noise variables" << std::endl;
+        settings_file.close();
+    }
+
+
+    if (lda) {
+        addLda(myread, data_extended, statobs);
+        const std::string& lda_filename = outfile + ".lda";
+        std::ofstream lda_file;
+        if (!quiet) {
+            lda_file.open(lda_filename, std::ios::out);
+            lda_file << data_extended << std::endl;
+        }
+        lda_file.close();
+    }
 
     addNoise(myread, data_extended, statobs, noisecols);
 
     addScen(myread,data_extended);
     std::vector<string> varwithouty(myread.stats_names.size()-1);
     for(auto i = 0; i < varwithouty.size(); i++) varwithouty[i] = myread.stats_names[i];
+
 
     auto datastatobs = unique_cast<DataDense<MatrixXd>, Data>(std::make_unique<DataDense<MatrixXd>>(statobs, emptyrow, varwithouty, 1, varwithouty.size()));
     auto datastats = unique_cast<DataDense<MatrixType>, Data>(std::make_unique<DataDense<MatrixType>>(myread.stats, data_extended, myread.stats_names, myread.nrec, myread.stats_names.size()));
@@ -107,12 +119,22 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
 
     ModelChoiceResults res;
     if (!quiet) {
+        #ifdef PYTHON_OUTPUT
+            py::gil_scoped_acquire acquire0;
+        #endif
         forestclass.verbose_out = &std::cout;
         std::cout << "///////////////////////////////////////// First forest (training on ABC output)" << std::endl;
     }
 
+    #ifdef PYTHON_OUTPUT
+        py::gil_scoped_release release0;
+    #endif
     forestclass.run(!quiet, true);
-    
+
+    #ifdef PYTHON_OUTPUT
+        py::gil_scoped_acquire acquire1;
+    #endif
+
     auto preds = forestclass.getPredictions();
     // Overall oob error
     res.oob_error = forestclass.getOverallPredictionError();
@@ -193,7 +215,13 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
         std::cout << "///////////////////////////////////////// Second forest (training on error)" << std::endl;
     }
 
+    #ifdef PYTHON_OUTPUT
+        py::gil_scoped_release release1;
+    #endif
     forestreg.run(!quiet,true);
+    #ifdef PYTHON_OUTPUT
+        py::gil_scoped_acquire acquire2;
+    #endif
 
     // auto dataptr2 = forestreg.releaseData();
     // auto& datareleased2 = static_cast<DataDense&>(*dataptr2.get());

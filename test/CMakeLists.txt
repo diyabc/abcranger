@@ -34,7 +34,7 @@ foreach(filename ${cxx_files})
     catch_discover_tests(${target} WORKING_DIRECTORY ${DATADIR})
 endforeach(filename)
 
-target_sources(readreftable-test PRIVATE ${ABCRANGER_SOURCE_DIR}/readreftable.cpp)
+target_sources(readreftable-test PRIVATE ${ABCRANGER_SOURCE_DIR}/readreftable.cpp ${ABCRANGER_SOURCE_DIR}/tqdm.cpp)
 target_sources(parse_parexpr-test PRIVATE ${ABCRANGER_SOURCE_DIR}/parse_parexpr.cpp)
 target_sources(quantile-test PRIVATE ${ABCRANGER_SOURCE_DIR}/forestQuantiles.cpp)
 target_sources(forestestimparam-ks-test PRIVATE ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp)

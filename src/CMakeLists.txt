@@ -20,6 +20,7 @@ ${ABCRANGER_SOURCE_DIR}/DataDense.cpp
 ${ABCRANGER_SOURCE_DIR}/ForestOnline.cpp
 ${ABCRANGER_SOURCE_DIR}/ForestOnlineClassification.cpp
 ${ABCRANGER_SOURCE_DIR}/ForestOnlineRegression.cpp
+${ABCRANGER_SOURCE_DIR}/tqdm.cpp
 )
 
 add_library(abcrangerlib STATIC ${PROJECT_abcranger_SRCS})

@@ -370,7 +370,8 @@ Reftable<MatrixXd> readreftable_scen(string headerpath, string reftablepath, siz
     }
 
     reftableStream.close();
-    if (!quiet) cout << endl << "read reftable done." << endl;
+    if (!quiet) cout << endl << "read reftable done. " << ncount << " samples of total " << nrec << ", " << N << " asked and " << nrecscen[sel_scen-1] << " avalaible." << endl;
+    if (!quiet && (N > nrecscen[sel_scen-1])) cout << "Warning : asked for more samples than available." << endl;
     stats.conservativeResize(ncount,NoChange);
     params.conservativeResize(ncount,NoChange);
    std::vector<size_t> uniqrec  = { nrecscen[sel_scen-1] };

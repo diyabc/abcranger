@@ -75,6 +75,8 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
         std::ofstream lda_file;
         if (!quiet) {
             lda_file.open(lda_filename, std::ios::out);
+            lda_file << "# First line is observed data" << std::endl;
+            lda_file << statobs(all,lastN(data_extended.cols())) << std::endl;
             lda_file << data_extended << std::endl;
         }
         lda_file.close();

@@ -53,10 +53,11 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
     MatrixXd data_extended(n,0);
 
     if (!quiet) {
-        const std::string& settings_filename = outfile + "_settings.txt";
+        const std::string& settings_filename = outfile + ".settings";
         std::ofstream settings_file;
         settings_file.open(settings_filename, std::ios::out);
 
+        settings_file << "Model choice analyses proceeded using: " << std::endl;
         settings_file << "- " << myread.nrec << " simulated datasets" << std::endl;
         settings_file << "- " << ntree << " trees" << std::endl;
         settings_file << "- " << "Minimum node size of " << (minnodesize == 0 ? 1 : minnodesize) << std::endl;

@@ -68,6 +68,7 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
     auto nparam = myread.params_names.size();
 
     nref = myread.nrec;
+    ntest = std::min(nref,ntest);
 
     VectorXd y(nref);
     switch(op) {
@@ -156,8 +157,11 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
     }
 
     if (!quiet) {
-        const std::string& settings_filename = outfile + "_settings.txt";
+        const std::string& settings_filename = outfile + ".settings";
         std::ofstream settings_file;
+        settings_file.open(settings_filename, std::ios::out);
+
+        settings_file << "Parameter estimation analyses proceeded using: " << std::endl;
         settings_file << "- " << "Parameter name: " << parameter_of_interest << std::endl;
         settings_file << "- " << "Scenario " << chosenscen << std::endl;
         settings_file << "- " << myread.nrec << " simulated datasets" << std::endl;
@@ -168,6 +172,7 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
             settings_file << "- " << data_extended.cols() << " axes of summary statistics PLS linear combination" << std::endl;
         }
         settings_file << "- " << noisecols << " noise variables" << std::endl;
+        settings_file << "- " << ntest << " out-of-band samples used as test" << std::endl;
         settings_file.close();
     }
 

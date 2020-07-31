@@ -122,16 +122,16 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
 
     ModelChoiceResults res;
     if (!quiet) {
-        #ifdef PYTHON_OUTPUT
-            py::gil_scoped_acquire acquire0;
-        #endif
+        // #ifdef PYTHON_OUTPUT
+        //     py::gil_scoped_acquire acquire0;
+        // #endif
         forestclass.verbose_out = &std::cout;
         std::cout << "///////////////////////////////////////// First forest (training on ABC output)" << std::endl;
     }
 
-    #ifdef PYTHON_OUTPUT
-        py::gil_scoped_release release0;
-    #endif
+    // #ifdef PYTHON_OUTPUT
+    //     py::gil_scoped_release release0;
+    // #endif
     forestclass.run(!quiet, true);
 
     #ifdef PYTHON_OUTPUT

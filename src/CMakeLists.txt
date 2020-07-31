@@ -31,7 +31,8 @@ else()
     add_library(abcrangerlib_so SHARED ${PROJECT_abcranger_SRCS})
 endif()
 
-target_link_libraries(abcrangerlib_so fmt::fmt)
+target_link_libraries(abcrangerlib_so fmt::fmt Python::Python)
+target_compile_definitions(abcrangerlib_so PRIVATE PYTHON_OUTPUT)
 
 # if(MSVC)
 #     target_link_libraries(abcrangerlib PRIVATE Boost::regex)

@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
         } else {
             std::cout << "> Model Choice <" << std::endl;
             
-            auto myread = readreftable(headerfile, reftablefile, nref);
+            auto myread = readreftable(headerfile, reftablefile, nref, false, opts.count("g") > 0 ? opts["g"].as<std::string>() : "");
             const auto statobs = readStatObs(statobsfile);
             auto res = ModelChoice_fun(myread,statobs,opts);
 

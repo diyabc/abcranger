@@ -125,8 +125,7 @@ enable_testing()
 add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING 
                 -D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING 
                 -D_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING
-                -D_CRT_SECURE_NO_WARNINGS
-                -D_ENFORCE_MATCHING_ALLOCATORS=0)
+                -D_CRT_SECURE_NO_WARNINGS)
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 ### C++ Threads (required by ranger)
@@ -157,6 +156,8 @@ link_libraries(range-v3)
 ## FMT
 find_package(fmt CONFIG REQUIRED)
 
+find_package(Python REQUIRED COMPONENTS Development)
+
 add_subdirectory(src)
 include_directories(src)
 
@@ -165,7 +166,7 @@ link_libraries(Threads::Threads)
 ## CXXOPTS
 find_package(cxxopts CONFIG REQUIRED)
 
-## Pybind11
+## Pybind11PYTHO
 find_package(pybind11 CONFIG REQUIRED)
 
 if((NOT MSVC) AND MAKE_STATIC_EXE AND USE_MKL)
@@ -180,8 +181,6 @@ add_subdirectory(testpy)
 add_executable(abcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp abcranger.cpp)
 
 target_link_libraries(abcranger ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib)
-
-find_package(Python REQUIRED COMPONENTS Development)
 
 pybind11_add_module(pyabcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp pyabcranger.cpp)
 

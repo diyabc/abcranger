@@ -59,6 +59,7 @@ ModelChoiceResults ModelChoice_fun_py(Reftable<py::EigenDRef<MatrixXd>> &reftabl
                                    std::vector<double> statobs,
                                    std::string options,
                                    bool quiet = false) {
+    py::gil_scoped_acquire acquire;
     py::scoped_ostream_redirect stream(
         std::cout,                               // std::ostream&
         py::module::import("sys").attr("stdout") // Python output
@@ -72,13 +73,12 @@ EstimParamResults EstimParam_fun_py(Reftable<py::EigenDRef<MatrixXd>> &reftable,
                                    std::string options,
                                    bool quiet = false,
                                    bool weights = false) {
+    py::gil_scoped_acquire acquire;
     py::scoped_ostream_redirect stream(
         std::cout,                               // std::ostream&
         py::module::import("sys").attr("stdout") // Python output
     );
     py::gil_scoped_release release;
-    // std::cout << reftable.stats << std::endl;
-    // std::cout << reftable.params << std::endl;
     return EstimParam_fun(reftable,statobs,parseopt(options),quiet,weights);
 }
  
@@ -112,8 +112,8 @@ PYBIND11_MODULE(pyabcranger, m) {
         .def_readwrite("point_estimates",&EstimParamResults::point_estimates)
         .def_readwrite("errors",&EstimParamResults::errors);
 
-    m.def("modelchoice", &ModelChoice_fun_py);
-    m.def("estimparam", &EstimParam_fun_py);
+    m.def("modelchoice", &ModelChoice_fun_py, py::call_guard<py::gil_scoped_release>());
+    m.def("estimparam", &EstimParam_fun_py, py::call_guard<py::gil_scoped_release>());
     m.def("forestQuantiles_b", [](const std::vector<double>& obs, 
         const std::vector<std::vector<double>>& weights,
         const std::vector<double>& asked){

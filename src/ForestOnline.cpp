@@ -135,6 +135,9 @@ void ForestOnline::init(std::string dependent_variable_name, MemoryMode memory_m
   if (!prediction_mode && order_snps) {
     data->orderSnpLevels(dependent_variable_name, (importance_mode == IMP_GINI_CORRECTED));
   }
+
+  tree_order = std::vector<size_t>(num_trees);
+
 }
 
 void ForestOnline::run(bool verbose, bool compute_oob_error) {
@@ -602,6 +605,7 @@ void ForestOnline::growTreesInThread(uint thread_idx, std::vector<double>* varia
       trees[i]->predict(predict_data,false);
       predictInternal(i);
       mutex.lock();
+      tree_order[progress] = i;
       ++progress;
       if (verbose_out) {
         #ifdef PYTHON_OUTPUT

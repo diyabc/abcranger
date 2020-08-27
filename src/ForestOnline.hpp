@@ -181,7 +181,7 @@ protected:
   PredictionType prediction_type;
   uint num_random_splits;
   uint max_depth;
-
+  std::vector<size_t> tree_order;
   // MAXSTAT splitrule
   double alpha;
   double minprop;

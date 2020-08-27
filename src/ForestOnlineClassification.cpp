@@ -172,7 +172,7 @@ void ForestOnlineClassification::calculateAfterGrow(size_t tree_idx, bool oob) {
         mutex_post.lock();
         ++class_counts[sampleID][res];
         mutex_post.unlock();
-        if (!class_counts[sample_idx].empty())
+        if (!class_counts[sampleID].empty())
           to_add += (mostFrequentValue(class_counts[sampleID], random_number_generator) == data->get(sampleID,dependent_varID)) ? 0.0 : 1.0;
       }
       predictions[2][0][tree_idx] += to_add/static_cast<double>(numOOB);
@@ -237,7 +237,9 @@ void ForestOnlineClassification::computePredictionErrorInternal()
     for(auto sample_idx = 0; sample_idx < predict_data->getNumRows(); sample_idx++) {
       predictions[1][0][sample_idx] = mostFrequentValue(class_count[sample_idx], random_number_generator);
     }
-
+  std::vector<double> sort_oob_trees(num_trees);
+  for(auto i = 0; i < num_trees; i++) sort_oob_trees[i] = predictions[2][0][tree_order[i]];
+  predictions[2][0] = sort_oob_trees;
 }
 
 // #nocov start

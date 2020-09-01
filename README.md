@@ -52,7 +52,8 @@ Collin et al. [2020](#ref-Collin_2020)).
     ![MA(q)](https://latex.codecogs.com/png.latex?MA%28q%29 "MA(q)")](https://github.com/diyabc/abcranger/blob/master/notebooks/Toy%20example%20MA(q).ipynb)
 -   [Population genetics
     demo](https://github.com/diyabc/abcranger/blob/master/notebooks/Population%20genetics%20Demo.ipynb),
-    data from
+    data from (F. D. Collin et al. [2020](#ref-Collin_2020)), available
+    [there](https://github.com/diyabc/diyabc/tree/master/diyabc-tests/MER/modelchoice/IndSeq)
 
 # Usage
 

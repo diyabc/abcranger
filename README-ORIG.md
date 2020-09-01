@@ -33,7 +33,7 @@ The standalone is part of a specialized Population Genetics graphical interface 
 # Python notebooks examples 
 
 - On a [toy example with $MA(q)$](https://github.com/diyabc/abcranger/blob/master/notebooks/Toy%20example%20MA(q).ipynb)
-- [Population genetics demo](https://github.com/diyabc/abcranger/blob/master/notebooks/Population%20genetics%20Demo.ipynb), data from 
+- [Population genetics demo](https://github.com/diyabc/abcranger/blob/master/notebooks/Population%20genetics%20Demo.ipynb), data from [@Collin_2020], available [there](https://github.com/diyabc/diyabc/tree/master/diyabc-tests/MER/modelchoice/IndSeq)
 
 # Usage
 

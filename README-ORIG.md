@@ -9,7 +9,7 @@ toc-depth: 1
 <!-- pandoc -f markdown README-ORIG.md -t gfm -o README.md --bibliography=ref.bib -s --toc --toc-depth=1 -->
 <!-- pandoc --atx-headers -f markdown README-ORIG.md -t gfm -o README.md --bibliography=ref.bib -s --toc --toc-depth=1 --webtex=https://latex.codecogs.com/png.latex? -->
 
-[![Build Status](https://travis-ci.com/fradav/abcranger.svg)](https://travis-ci.com/fradav/abcranger)
+<!-- [![Build Status](https://travis-ci.com/fradav/abcranger.svg)](https://travis-ci.com/fradav/abcranger) -->
 
 Random forests methodologies for :
 
@@ -28,7 +28,12 @@ There are available within the "[Releases](https://github.com/fradav/abcranger/r
 
 This is pure command line binary, and they are no prerequisites or library dependencies in order to run it. Just download them and launch them from your terminal software of choice. The usual caveats with command line executable apply there : if you're not proficient with the command line interface of your platform, please learn some basics or ask someone who might help you in those matters.
 
-As a note, we may add a graphical interface in a near future.
+The standalone is part of a specialized Population Genetics graphical interface [DIYABC-RF](https://diyabc.github.io/), with a (currently under review) submission to MER (Molecular Ecology Resources), [@Collin_2020].
+
+# Python notebooks examples 
+
+- On a [toy example with $MA(q)$](https://github.com/diyabc/abcranger/blob/master/notebooks/Toy%20example%20MA(q).ipynb)
+- [Population genetics demo](https://github.com/diyabc/abcranger/blob/master/notebooks/Population%20genetics%20Demo.ipynb), data from 
 
 # Usage
 
@@ -186,3 +191,6 @@ if pls enabled :
 - Possible to use mondrian forests for online batches ? See [@lakshminarayanan2014mondrian]
   
 # References
+
+This have been the subject of a proceedings in [JOBIM 2020](https://jobim2020.sciencesconf.org/), [PDF](https://hal.archives-ouvertes.fr/hal-02910067v2) and [video](https://relaiswebcasting.mediasite.com/mediasite/Play/8ddb4e40fc88422481f1494cf6af2bb71d?catalog=e534823f0c954836bf85bfa80af2290921) (in french), [@collin:hal-02910067].
+

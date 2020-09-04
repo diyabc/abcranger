@@ -253,7 +253,11 @@ void ForestOnlineRegression::computePredictionErrorInternal()
       for (size_t sample_internal_idx = 0; sample_internal_idx < data->getNumRows(); ++sample_internal_idx)
         predictions[5][sample_idx.second][sample_internal_idx] /= static_cast<double>(samples_oob_count[sample_idx.first]);
   }
-          
+
+  std::vector<double> sort_oob_trees(num_trees);
+  for(auto i = 0; i < num_trees; i++) sort_oob_trees[i] = predictions[2][0][tree_order[i]];
+  predictions[2][0] = sort_oob_trees;  
+
 }
 
 // #nocov start

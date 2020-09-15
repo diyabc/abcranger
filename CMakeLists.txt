@@ -185,3 +185,4 @@ target_link_libraries(abcranger ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxop
 pybind11_add_module(pyabcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp pyabcranger.cpp)
 
 target_link_libraries(pyabcranger PRIVATE ${TBBLIB} Python::Python cxxopts::cxxopts abcrangerlib_so)
+target_compile_definitions(pyabcranger PRIVATE PYTHON_OUTPUT=1)

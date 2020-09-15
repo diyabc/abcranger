@@ -2,7 +2,6 @@ name: Build and upload to PyPI
 
 env:
   global:
-    - CIBW_PLATFORM=linux
     - CIBW_BUILD=cp38-manylinux_x86_64
     - CIBW_BEFORE_BUILD= pip install cmake_setup pybind11
 

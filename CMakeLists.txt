@@ -80,7 +80,7 @@ pmm(
     # DEBUG
     VCPKG
         # REVISION e37cc662ee29852f45e85961124f62d91acb488a
-        REVISION 46bf8c52cb343b6557a48b5b80aad56cdeedd4d8
+        REVISION 56fffbe49dfb4dd8fae0940f272c5fd2b86be991
         TRIPLET ${VCPKG_TARGET_TRIPLET}
         REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] eigen3-head highfive-head pybind11 ${TBBPKG} ${BOOSTREGEX}
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head" "${PROJECT_SOURCE_DIR}/highfive-head"

@@ -64,7 +64,7 @@ if(MSVC AND MAKE_STATIC_EXE)
   set(VCPKG_TARGET_TRIPLET "x64-windows-static")
 endif()
 
-if((NOT MSVC) AND MAKE_STATIC_EXE AND USE_MKL)
+if(MAKE_STATIC_EXE AND USE_MKL)
   set(TBBPKG tbb)
 endif()
 
@@ -169,7 +169,7 @@ find_package(cxxopts CONFIG REQUIRED)
 ## Pybind11PYTHO
 find_package(pybind11 CONFIG REQUIRED)
 
-if((NOT MSVC) AND MAKE_STATIC_EXE AND USE_MKL)
+if(MAKE_STATIC_EXE AND USE_MKL)
   find_package(TBB CONFIG REQUIRED)
   set(TBBLIB TBB::tbb)
 endif()

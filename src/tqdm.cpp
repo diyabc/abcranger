@@ -15,12 +15,14 @@ namespace py = pybind11;
 
 tqdm::tqdm()  {
 #if _MSC_VER
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    DWORD dwMode = 0;
-    GetConsoleMode(hOut, &dwMode);
-    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    SetConsoleMode(hOut, dwMode);
-    SetConsoleOutputCP(CP_UTF8);
+    if(is_tty) {
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        DWORD dwMode = 0;
+        GetConsoleMode(hOut, &dwMode);
+        dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+        SetConsoleMode(hOut, dwMode);
+        SetConsoleOutputCP(CP_UTF8);
+    }
 #endif
     if (in_screen) {
         set_theme_basic();

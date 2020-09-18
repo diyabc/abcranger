@@ -41,9 +41,9 @@ target_sources(forestestimparam-ks-test PRIVATE ${ABCRANGER_SOURCE_DIR}/EstimPar
 target_sources(forestmodelchoice-ks-test PRIVATE ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp)
 
 if((NOT MAKE_STATIC_EXE) AND (NOT MSVC))
-    target_link_libraries(readreftable-test HighFive hdf5::hdf5_cpp-static fmt::fmt)
+    target_link_libraries(readreftable-test ${TBBLIB} HighFive hdf5::hdf5_cpp-static fmt::fmt)
 else()
-    target_link_libraries(readreftable-test ${MAKE_STATIC_FLAG_EXE} HighFive hdf5::hdf5_cpp-static fmt::fmt)
+    target_link_libraries(readreftable-test ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} HighFive hdf5::hdf5_cpp-static fmt::fmt)
 endif()
 
 # if(MSVC)

@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include <numeric>
+#include <execution>
 
 #define H5_USE_EIGEN
 #include <highfive/H5Easy.hpp>
@@ -20,7 +21,7 @@
 #include "readreftable.hpp"
 #include "statobsTest.hpp"
 #include "readstatobs.hpp"
-#include "threadpool.hpp"
+// #include "threadpool.hpp"
 
 #include "H5Cpp.h"
 
@@ -88,7 +89,8 @@ void test_random_lines(HighFive::File &file, const string &dataname, const Matri
     std::mt19937 g(rd());
     std::shuffle(std::begin(indices), std::end(indices), g);
 
-    ThreadPool::ParallelFor((size_t)0u, nloop, [&](size_t j) {
+    auto loopvec = views::ints((size_t)0u,nloop) | to<std::vector>();
+    std::for_each(std::execution::par,loopvec.begin(),loopvec.end(), [&](size_t j) {
         auto i = indices[j];
         auto row = p.row(i);
         const auto &expected = Catch::Matchers::ApproxRng<std::vector<double>>(row);

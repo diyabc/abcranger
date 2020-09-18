@@ -405,3 +405,8 @@ packages/
 paket-files/
 .vscode/
 *_out.*
+.eggs/
+dist/
+.ipynb_checkpoints
+*-checkpoint.ipynb
+*.egg-info/

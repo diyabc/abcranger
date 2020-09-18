@@ -3,6 +3,7 @@ cmake_policy(SET CMP0074 NEW)
 
 project(abcrangerlib VERSION 0.2.0 LANGUAGES CXX)
 
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(PROJECT_abcranger_SRCS
 ${RANGER_SOURCE_DIR}/Data.cpp
@@ -25,14 +26,6 @@ ${ABCRANGER_SOURCE_DIR}/tqdm.cpp
 
 add_library(abcrangerlib STATIC ${PROJECT_abcranger_SRCS})
 target_link_libraries(abcrangerlib fmt::fmt)
-if (MSVC)
-    add_library(abcrangerlib_so STATIC ${PROJECT_abcranger_SRCS})
-else()
-    add_library(abcrangerlib_so SHARED ${PROJECT_abcranger_SRCS})
-endif()
-
-target_link_libraries(abcrangerlib_so fmt::fmt Python::Python)
-target_compile_definitions(abcrangerlib_so PRIVATE PYTHON_OUTPUT)
 
 # if(MSVC)
 #     target_link_libraries(abcrangerlib PRIVATE Boost::regex)
@@ -43,3 +36,5 @@ target_compile_definitions(abcrangerlib_so PRIVATE PYTHON_OUTPUT)
 #     include(GenerateExportHeader)
 #     generate_export_header(abcrangerlib)
 # endif()
+
+add_subdirectory(pyabcranger)

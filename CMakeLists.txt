@@ -75,6 +75,9 @@ if(LAPACK_ROOT)
   link_libraries(${LAPACK_LIBRARIES})
 endif()
 
+set(ENV{"VCPKG_KEEP_ENV_VARS"} "CC;CXX;CXXFLAGS")
+set(ENV{"VCPKG_FORCE_SYSTEM_BINARIES"} "1")
+
 pmm(
     # VERBOSE
     # DEBUG
@@ -130,6 +133,7 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 ### C++ Threads (required by ranger)
 find_package(Threads REQUIRED)
+link_libraries(Threads::Threads)
 
 ### Eigen
 find_package(Eigen3 CONFIG REQUIRED)
@@ -144,45 +148,25 @@ endif()
 find_package(range-v3 CONFIG REQUIRED)
 link_libraries(range-v3)
 
-### Boost::regex with MSVC
-# if(MSVC)
-#     find_package(Boost REQUIRED COMPONENTS regex)
-# endif()
-
-# if (WIN32)
-#      set(WINDOWS_EXPORT_ALL_SYMBOLS True)
-# endif()
-
 ## FMT
 find_package(fmt CONFIG REQUIRED)
-
-find_package(Python REQUIRED COMPONENTS Development)
-
-add_subdirectory(src)
-include_directories(src)
-
-link_libraries(Threads::Threads)
 
 ## CXXOPTS
 find_package(cxxopts CONFIG REQUIRED)
 
-## Pybind11PYTHO
-find_package(pybind11 CONFIG REQUIRED)
-
+## TBBLI8
 if(MAKE_STATIC_EXE AND USE_MKL)
   find_package(TBB CONFIG REQUIRED)
   set(TBBLIB TBB::tbb)
 endif()
+
+include_directories(src)
+
+add_subdirectory(src)
 
 add_subdirectory(test)
 
 add_subdirectory(testpy)
 
 add_executable(abcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp abcranger.cpp)
-
 target_link_libraries(abcranger ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib)
-
-pybind11_add_module(pyabcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp pyabcranger.cpp)
-
-target_link_libraries(pyabcranger PRIVATE ${TBBLIB} Python::Python cxxopts::cxxopts abcrangerlib_so)
-target_compile_definitions(pyabcranger PRIVATE PYTHON_OUTPUT=1)

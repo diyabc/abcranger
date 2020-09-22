@@ -104,7 +104,7 @@ void ForestOnline::init(std::string dependent_variable_name, MemoryMode memory_m
     this->predict_data->setIsOrderedVariable(data->getIsOrderedVariable());
   }
 
-  data->addNoSplitVariable(dependent_varID);
+  if (data->getNoSplitVariables().size() == 0) data->addNoSplitVariable(dependent_varID);
 
   initInternal(status_variable_name);
 

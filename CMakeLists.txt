@@ -83,10 +83,10 @@ pmm(
     # DEBUG
     VCPKG
         # REVISION e37cc662ee29852f45e85961124f62d91acb488a
-        REVISION 56fffbe49dfb4dd8fae0940f272c5fd2b86be991
+        REVISION 6185aa76504a5025f36754324abf307cc776f3da
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] eigen3-head highfive-head pybind11 ${TBBPKG} ${BOOSTREGEX}
-        PORTS "${PROJECT_SOURCE_DIR}/eigen3-head" "${PROJECT_SOURCE_DIR}/highfive-head"
+        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] eigen3-head highfive pybind11 ${TBBPKG} ${BOOSTREGEX}
+        PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
 )
 
 if(MAKE_STATIC_EXE)
@@ -107,17 +107,15 @@ if(MAKE_STATIC_EXE)
   else()
     set(MAKE_STATIC_FLAG_EXE "-static")
 
-if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    message("USING Clang, checking libc++..")
-    include(CheckCXXSourceCompiles)
-    check_cxx_source_compiles("#include <iostream>
-                               int main() { return _LIBCPP_VERSION; }" USES_LIBCXX)
-	if(USES_LIBCXX)
-         message("USING libc++")
-	 link_libraries(c++ c++abi)
-	endif()
-endif()
-
+    if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+        message("USING Clang, checking libc++..")
+        include(CheckCXXSourceCompiles)
+        check_cxx_source_compiles("#include <iostream>
+                                  int main() { return _LIBCPP_VERSION; }" USES_LIBCXX)
+      if(USES_LIBCXX)
+            message("USING libc++")
+      endif()
+    endif()
 
   endif()
 endif()
@@ -170,3 +168,6 @@ add_subdirectory(testpy)
 
 add_executable(abcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp abcranger.cpp)
 target_link_libraries(abcranger ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib)
+if(USE_LIBCXX)
+  target_link_libraries(abcranger PRIVATE c++ c++abi)
+endif()

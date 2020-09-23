@@ -9,6 +9,10 @@ pybind11_add_module(pyabcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRAN
 
 target_link_libraries(pyabcranger PRIVATE ${TBBLIB} Python::Python fmt::fmt cxxopts::cxxopts)
 target_compile_definitions(pyabcranger PRIVATE PYTHON_OUTPUT=1)
+if (USES_LIBCXX)
+    target_link_options(pyabcranger PRIVATE -nodefaultlibs)
+    target_link_libraries(pyabcranger PRIVATE libc++.a libc++abi.a libgcc_eh.a libgcc.a)
+endif()
 
 # install pyd files one directory structure UP in the destination as 
 # CMAKE_CURRENT_SOURCE_DIR is holding the source files of the MODULE

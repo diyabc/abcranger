@@ -87,6 +87,7 @@ pmm(
         TRIPLET ${VCPKG_TARGET_TRIPLET}
         REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] eigen3-head highfive pybind11 ${TBBPKG} ${BOOSTREGEX}
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
+        USESYSTEMBINARIES
 )
 
 if(MAKE_STATIC_EXE)

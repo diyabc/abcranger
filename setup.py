@@ -1,12 +1,9 @@
 from cmaketools import setup
 import os
 
-os.environ["VCPKG_KEEP_ENV_VARS"] = "CC;CXX;CXXFLAGS"
-os.environ["VCPKG_FORCE_SYSTEM_BINARIES"] = "1"
-
 setup(
     name="pyabcranger",
-    version="0.0.20",
+    version="0.0.21",
     author="François-David Collin",
     author_email="fradav@gmail.com",
     description="ABC random forests for model choice and parameter estimation, python wrapper",

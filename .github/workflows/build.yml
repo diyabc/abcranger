@@ -2,8 +2,16 @@ name: Build and upload to PyPI
 
 env:
   CIBW_BUILD: cp38-manylinux_x86_64
-  CIBW_BEFORE_BUILD: pip install cmaketools pybind11 cmake ninja
-  CIBW_ENVIRONMENT: "VCPKG_FORCE_SYSTEM_BINARIES=1"
+  CIBW_BEFORE_BUILD: |
+    pip install cmaketools pybind11 cmake ninja
+    sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+    sudo apt install libc++-11-dev libc++abi-11-dev
+    wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+    sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+    sudo sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list'
+    sudo apt-get update
+    sudo apt-get -y install libc++-11-dev libc++abi-11-dev intel-mkl-64bit-2020.0-088
+  CIBW_ENVIRONMENT: "PATH=$HOME/.local/bin:$PATH CC=clang-11 CXX=clang++-11 CXXFLAGS=\"-stdlib=libc++\" VCPKG_KEEP_ENV_VARS=\"CC;CXX;CXXFLAGS\ VCPKG_FORCE_SYSTEM_BINARIES=1"
 
 # Build on every branch push, tag push, and pull request change:
 on: [push, pull_request]

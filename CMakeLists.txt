@@ -75,9 +75,6 @@ if(LAPACK_ROOT)
   link_libraries(${LAPACK_LIBRARIES})
 endif()
 
-set(ENV{"VCPKG_KEEP_ENV_VARS"} "CC;CXX;CXXFLAGS")
-set(ENV{"VCPKG_FORCE_SYSTEM_BINARIES"} "1")
-
 pmm(
     # VERBOSE
     # DEBUG

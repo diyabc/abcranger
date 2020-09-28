@@ -3,7 +3,7 @@ import os
 
 setup(
     name="pyabcranger",
-    version="0.0.22",
+    version="0.0.23",
     author="François-David Collin",
     author_email="fradav@gmail.com",
     description="ABC random forests for model choice and parameter estimation, python wrapper",

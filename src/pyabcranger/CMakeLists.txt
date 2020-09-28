@@ -1,13 +1,11 @@
 project(pyabcranger)
 
-## Pybind11PYTHO
-find_package(Python REQUIRED COMPONENTS Development)
-
+## Pybind11
 find_package(pybind11 CONFIG REQUIRED)
 
 pybind11_add_module(pyabcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp pyabcranger.cpp ${PROJECT_abcranger_SRCS})
 
-target_link_libraries(pyabcranger PRIVATE ${TBBLIB} Python::Python fmt::fmt cxxopts::cxxopts)
+target_link_libraries(pyabcranger PRIVATE ${TBBLIB} fmt::fmt cxxopts::cxxopts)
 target_compile_definitions(pyabcranger PRIVATE PYTHON_OUTPUT=1)
 if (USES_LIBCXX)
     target_link_options(pyabcranger PRIVATE -nodefaultlibs)

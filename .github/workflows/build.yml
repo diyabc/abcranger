@@ -40,13 +40,14 @@ jobs:
       - name: Build wheels
         run: |
           python -m cibuildwheel --output-dir wheelhouse
+          pip install cmake ninja
           python setup.py sdist -d wheelhouse
 
       - uses: actions/upload-artifact@v2
         with:
-          path: ./wheelhouse/*.whl
-          path: ./wheelhoust/*.tar.gz
-
+          path: |
+            ./wheelhouse/*.whl
+            ./wheelhoust/*.tar.gz
 
   upload_pypi:
     needs: [build_wheels]

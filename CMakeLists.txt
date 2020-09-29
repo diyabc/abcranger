@@ -75,7 +75,7 @@ if(LAPACK_ROOT)
   link_libraries(${LAPACK_LIBRARIES})
 endif()
 
-if(NOT NO_TEST)
+if(TEST)
   set(TESTDEPS hdf5[cpp] highfive)
 endif()
 
@@ -170,7 +170,7 @@ if(USE_LIBCXX)
   target_link_libraries(abcranger PRIVATE c++ c++abi)
 endif()
 
-if(NOT NO_TEST)
+if(TEST)
   add_subdirectory(test)
   add_subdirectory(testpy)
 else()

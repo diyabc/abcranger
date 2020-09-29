@@ -1,5 +1,9 @@
 from cmaketools import setup
-import os
+import sys
+
+configure_opts = ["""--no-warn-unused-cli -DMAKE_STATIC_EXE:BOOL=TRUE -DUSE_MKL:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/mkl/lib/intel64 "-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group\;pthread\;m\;dl" "-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group\;pthread\;m\;dl" -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja ../"""]
+if(len(sys.argv) > 1 and sys.argv[1] == "sdist"):
+    configure_opts = ["""--no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja ../"""]
 
 setup(
     name="pyabcranger",
@@ -14,6 +18,6 @@ setup(
     generator="Ninja",
     has_package_data=False,
     packages=["pyabcranger"],
-    configure_opts=["""--no-warn-unused-cli -DMAKE_STATIC_EXE:BOOL=TRUE -DNO_TEST:BOOL=TRUE -DUSE_MKL:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/mkl/lib/intel64 "-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group\;pthread\;m\;dl" "-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group\;pthread\;m\;dl" -DRFTEST_TOLERANCE:STRING=2e-2 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja ../"""],
+    configure_opts=configure_opts,
     build_opts=["--target","pyabcranger"]
 )

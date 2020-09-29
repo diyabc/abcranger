@@ -40,7 +40,7 @@ jobs:
       - name: Build wheels
         run: |
           python -m cibuildwheel --output-dir wheelhouse
-          pip install cmake ninja cmaketools
+          pip install cmake ninja cmaketools wheel
           python setup.py sdist -d wheelhouse
 
       - uses: actions/upload-artifact@v2

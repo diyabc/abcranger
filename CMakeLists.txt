@@ -86,7 +86,7 @@ pmm(
         # REVISION e37cc662ee29852f45e85961124f62d91acb488a
         REVISION 6185aa76504a5025f36754324abf307cc776f3da
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt  eigen3-head pybind11 ${TBBPKG} ${NO_TEST}
+        REQUIRES range-v3 catch2 cxxopts fmt  eigen3-head pybind11 ${TBBPKG} ${TESTDEPS}
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
 )
 
@@ -173,5 +173,7 @@ endif()
 if(NOT NO_TEST)
   add_subdirectory(test)
   add_subdirectory(testpy)
+else()
+  message("Skipping tests")
 endif()
 

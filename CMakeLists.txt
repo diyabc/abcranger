@@ -75,6 +75,10 @@ if(LAPACK_ROOT)
   link_libraries(${LAPACK_LIBRARIES})
 endif()
 
+if(NOT NO_TEST)
+  set(TESTDEPS hdf5[cpp] highfive)
+endif()
+
 pmm(
     # VERBOSE
     # DEBUG
@@ -82,7 +86,7 @@ pmm(
         # REVISION e37cc662ee29852f45e85961124f62d91acb488a
         REVISION 6185aa76504a5025f36754324abf307cc776f3da
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt hdf5[cpp] eigen3-head highfive pybind11 ${TBBPKG} ${BOOSTREGEX}
+        REQUIRES range-v3 catch2 cxxopts fmt  eigen3-head pybind11 ${TBBPKG} ${NO_TEST}
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
 )
 
@@ -159,12 +163,15 @@ include_directories(src)
 
 add_subdirectory(src)
 
-add_subdirectory(test)
-
-add_subdirectory(testpy)
-
 add_executable(abcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp abcranger.cpp)
 target_link_libraries(abcranger ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib)
+
 if(USE_LIBCXX)
   target_link_libraries(abcranger PRIVATE c++ c++abi)
 endif()
+
+if(NOT NO_TEST)
+  add_subdirectory(test)
+  add_subdirectory(testpy)
+endif()
+

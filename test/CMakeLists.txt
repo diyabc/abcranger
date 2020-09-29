@@ -40,17 +40,8 @@ target_sources(quantile-test PRIVATE ${ABCRANGER_SOURCE_DIR}/forestQuantiles.cpp
 target_sources(forestestimparam-ks-test PRIVATE ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp)
 target_sources(forestmodelchoice-ks-test PRIVATE ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp)
 
-if((NOT MAKE_STATIC_EXE) AND (NOT MSVC))
-    target_link_libraries(readreftable-test ${TBBLIB} HighFive hdf5::hdf5_cpp-static fmt::fmt)
-else()
-    target_link_libraries(readreftable-test ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} HighFive hdf5::hdf5_cpp-static fmt::fmt)
-endif()
 
-# if(MSVC)
-#     target_link_libraries(readreftable-test Boost::regex)
-#     target_link_libraries(parse_parexpr-test Boost::regex)
-# endif()
-
+target_link_libraries(readreftable-test ${TBBLIB} HighFive hdf5::hdf5_cpp-static fmt::fmt)
 target_link_libraries(forestestimparam-ks-test ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt)
 target_link_libraries(forestmodelchoice-ks-test ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt)
 target_link_libraries(cxxopts-test cxxopts::cxxopts)

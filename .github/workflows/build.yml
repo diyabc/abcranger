@@ -2,13 +2,17 @@ name: Build and upload to PyPI
 
 env:
   CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-  CIBW_BEFORE_BUILD: bash presetup.sh
-#  CIBW_ENVIRONMENT: "PATH=$HOME/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04/bin:$HOME/.local/bin:$PATH CC=clang CXX=clang++ CXXFLAGS=\"-stdlib=libc++\" LDFLAGS=\"-L$HOME/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04/lib\" VCPKG_KEEP_ENV_VARS=\"CC;CXX;CXXFLAGS\" VCPKG_FORCE_SYSTEM_BINARIES=1"
-  CIBW_ENVIRONMENT: "PATH=$HOME/.local/bin:$PATH VCPKG_FORCE_SYSTEM_BINARIES=1"
+  CIBW_BEFORE_ALL: bash presetup.sh
+  CIBW_BEFORE_BUILD: pip install cmaketools cmake ninja
 
 # Build on every branch push, tag push, and pull request change:
-on: [push, pull_request]
+# on: [push, pull_request]
 # Alternatively, to publish when a (published) GitHub Release is created, use the following:
+on:
+  push:
+    tags:
+      - '*'
+
 # on:
 #   push:
 #   pull_request:
@@ -52,7 +56,7 @@ jobs:
     needs: [build_wheels]
     runs-on: ubuntu-latest
     # upload to PyPI on every tag starting with 'v'
-    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
+    # if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
     # alternatively, to publish when a GitHub Release is created, use the following rule:
     # if: github.event_name == 'release' && github.event.action == 'published'
     steps:

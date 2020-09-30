@@ -1,4 +1,4 @@
--   [Python notebooks examples](#python-notebooks-examples)
+-   [Python](#python)
 -   [Usage](#usage)
 -   [Model Choice](#model-choice)
 -   [Parameter Estimation](#parameter-estimation)
@@ -46,7 +46,13 @@ interface [DIYABC-RF](https://diyabc.github.io/), with a (currently
 under review) submission to MER (Molecular Ecology Resources), (F. D.
 Collin et al. [2020](#ref-Collin_2020)).
 
-# Python notebooks examples
+# Python
+
+## Installation
+
+    pip install pyabcranger
+
+## Notebooks examples
 
 -   On a [toy example with
     ![MA(q)](https://latex.codecogs.com/png.latex?MA%28q%29 "MA(q)")](https://github.com/diyabc/abcranger/blob/master/notebooks/Toy%20example%20MA(q).ipynb)

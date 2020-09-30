@@ -30,7 +30,15 @@ This is pure command line binary, and they are no prerequisites or library depen
 
 The standalone is part of a specialized Population Genetics graphical interface [DIYABC-RF](https://diyabc.github.io/), with a (currently under review) submission to MER (Molecular Ecology Resources), [@Collin_2020].
 
-# Python notebooks examples 
+# Python 
+
+## Installation
+
+  ```bash
+  pip install pyabcranger
+  ```
+
+## Notebooks examples
 
 - On a [toy example with $MA(q)$](https://github.com/diyabc/abcranger/blob/master/notebooks/Toy%20example%20MA(q).ipynb)
 - [Population genetics demo](https://github.com/diyabc/abcranger/blob/master/notebooks/Population%20genetics%20Demo.ipynb), data from [@Collin_2020], available [there](https://github.com/diyabc/diyabc/tree/master/diyabc-tests/MER/modelchoice/IndSeq)

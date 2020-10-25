@@ -11,7 +11,7 @@ if(len(sys.argv) > 1 and sys.argv[1] == "sdist"):
 
 setup(
     name="pyabcranger",
-    version="0.0.24",
+    version="0.0.37",
     author="François-David Collin",
     author_email="fradav@gmail.com",
     description="ABC random forests for model choice and parameter estimation, python wrapper",

@@ -7,7 +7,7 @@ set(CPPRANGER_SOURCE_DIR ${CMAKE_SOURCE_DIR}/ranger/cpp_version/src)
 set(ABCRANGER_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 
 
-project(ranger-standalone VERSION 0.1.0 LANGUAGES CXX)
+project(ranger-standalone LANGUAGES CXX)
 
 set(PROJECT_cppranger_SRCS
 ${CPPRANGER_SOURCE_DIR}/main.cpp
@@ -52,7 +52,7 @@ else()
 endif()
 
 
-project(abcranger VERSION 0.2.0 LANGUAGES CXX C)
+project(abcranger VERSION 1.0.5 LANGUAGES CXX C)
 
 include(pmm.cmake)
 
@@ -64,7 +64,7 @@ if(MSVC AND MAKE_STATIC_EXE)
   set(VCPKG_TARGET_TRIPLET "x64-windows-static")
 endif()
 
-if(MAKE_STATIC_EXE AND USE_MKL)
+if(USE_MKL)
   set(TBBPKG tbb)
 endif()
 

@@ -1,0 +1,164 @@
+# Copyright (c) 2019-2020 Luca Cappa
+# Released under the term specified in file LICENSE.txt
+# SPDX short identifier: MIT
+name: abcranger-build
+on: [push]
+  
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    outputs:
+        upload_url: ${{ steps.new_release.outputs.upload_url }}
+        new_tag: ${{ steps.bump_version.outputs.new_tag }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+      - name: Bump version and push tag
+        id: bump_version
+        uses: anothrNick/github-tag-action@1.26.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          INITIAL_VERSION: 1.2.9
+          DEFAULT_BUMP: patch
+      - name: Create release
+        id: new_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.bump_version.outputs.new_tag }}
+          release_name: Release ${{ steps.bump_version.outputs.new_tag }}
+          draft: true
+          prerelease: true  
+  job:
+    name: diyabc-${{ matrix.os }}
+    needs: create_release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: windows-latest
+            shortos: windows
+            cmakeargs: -DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DPYBIND11_PYTHON_VERSION:STRING=3.7 -DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static "-DLAPACK_LIBRARIES:STRING=mkl_intel_lp64.lib\;mkl_sequential.lib\;mkl_core.lib" "-DLAPACK_ROOT:STRING=C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/mkl/lib/intel64_win" -DBLA_VENDOR:STRING=Intel10_64lp -DMAKE_STATIC_EXE:BOOL=TRUE -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja
+          - os: ubuntu-latest
+            shortos: linux
+            mkl-version: intel-mkl-64bit-2020.0-088
+            cmakeargs: '-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=TRUE -DMAKE_STATIC_EXE:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/mkl/lib/intel64 "-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group\;pthread\;m\;dl" "-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group\;pthread\;m\;dl" -DRFTEST_TOLERANCE:STRING=2e-2 -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja'
+          - os: macos-latest
+            shortos: macos
+            cmakeargs: '-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DPYBIND11_PYTHON_VERSION:STRING=3.7 -DBLA_VENDOR:STRING=Intel10_64lp_seq -DBLA_STATIC:STRING=ON -DLAPACK_ROOT:STRING=/opt/intel/compilers_and_libraries/mac/mkl/lib "-DLAPACK_LIBRARIES:STRING=/opt/intel/compilers_and_libraries/mac/mkl/lib/libmkl_intel_lp64.a\;/opt/intel/compilers_and_libraries/mac/mkl/lib/libmkl_sequential.a\;/opt/intel/compilers_and_libraries/mac/mkl/lib/libmkl_core.a" -DRFTEST_TOLERANCE:STRING=2e-2 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja' 
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+
+      - uses: lukka/get-cmake@latest
+      - name: Get R version
+        run: echo "::set-output name=R_VERSION::$(Rscript -e 'cat(as.character(getRversion()))')"
+        id: get-r-version
+      - name: restore/cache R site-packages
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/RLibrary 
+          key: R-site-packages-${{ matrix.shortos }}-${{ steps.get-r-version.outputs.R_VERSION }}
+      - name: restore/cache clang
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/${{ matrix.clang-dir }}
+          key: ${{ matrix.clang-dir }}-v3
+        if: matrix.os == 'ubuntu-latest'
+      - name: restore/cache mkl
+        uses: actions/cache@v2
+        with:
+          path: /opt/intel
+          key: ${{ matrix.mkl-version }}
+        if: matrix.os == 'ubuntu-latest'
+      - name: setup x64-linux
+        run: |
+          if [ ! -d /opt/intel/lib/intel64 ]; then
+            wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+            sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+            sudo sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list'
+            sudo apt-get update
+            sudo apt-get install -y ${{ matrix.mkl-version }}
+          fi
+          echo "CC=gcc-10" >> $GITHUB_ENV
+          echo "CXX=g++-10" >> $GITHUB_ENV
+        if: matrix.os == 'ubuntu-latest'
+      - name: setup MacOS
+        run: |
+          brew install ninja libomp
+          echo "CFLAGS=-static-libgcc" >> $GITHUB_ENV
+          echo "CXXFLAGS=-static-libstdc++ -static-libgcc" >> $GITHUB_ENV
+        if: matrix.os == 'macos-latest'
+      - name: Configure MSVC console (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: ilammy/msvc-dev-cmd@v1.4.1
+      - name: setup windows
+        run: |
+          # Set these env vars so cmake picks the correct compiler
+          echo "CXX=cl.exe" | Out-File -Append -FilePath $env:GITHUB_ENV -Encoding utf8
+          echo "CC=cl.exe" | Out-File -Append -FilePath $env:GITHUB_ENV -Encoding utf8
+        if: matrix.os == 'windows-latest'
+      - name: Run CMake+Ninja
+        uses: lukka/run-cmake@v3
+        id: runcmake_cmd
+        with:
+          cmakeGenerator: 'Ninja'  
+          cmakeListsOrSettingsJson: 'CMakeListsTxtAdvanced'
+          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+          buildWithCMakeArgs: '--target abcranger -- -v'
+          buildWithCMake: true
+          buildDirectory: ${{ runner.workspace }}/b/ninja/
+          cmakeAppendedArgs: '${{ matrix.cmakeargs }}'
+      - name: Failure
+        if: failure() 
+        uses: author/action-rollback@stable
+        with:
+          id: ${{ needs.create_release.id }}
+          tag: ${{ needs.create_release.outputs.new_tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Upload windows binary
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: diyabc-${{ matrix.os }}
+      #     path: ${{ runner.workspace }}/b/ninja/install/
+      #   if: contains( matrix.os, 'windows')
+      # - name: Upload binary
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: diyabc-${{ matrix.os }}
+      #     path: ${{ runner.workspace }}/b/ninja/install/general
+      #   if: "! contains( matrix.os, 'windows')"
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        shell: bash      
+      - name: Upload Release Asset Unix
+        id: upload-release-asset-unix
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ${{ runner.workspace }}/b/ninja/abcranger
+          asset_name: abcranger-${{ matrix.shortos }}-${{ needs.create_release.outputs.new_tag }}
+          asset_content_type: application/octet-stream
+        if: matrix.os != 'windows-latest'
+      - name: Upload Release Asset Windows
+        id: upload-release-asset-windows
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ${{ runner.workspace }}/b/ninja/abcranger.exe
+          asset_name: abcranger-${{ matrix.shortos }}-${{ needs.create_release.outputs.new_tag }}.exe
+          asset_content_type: application/octet-stream
+        if: matrix.os == 'windows-latest'
+  

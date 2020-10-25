@@ -9,6 +9,9 @@
 <!-- pandoc --atx-headers -f markdown README-ORIG.md -t gfm -o README.md --bibliography=ref.bib -s --toc --toc-depth=1 --webtex=https://latex.codecogs.com/png.latex? -->
 <!-- [![Build Status](https://travis-ci.com/fradav/abcranger.svg)](https://travis-ci.com/fradav/abcranger) -->
 
+[![PyPI](https://img.shields.io/pypi/v/pyabcranger.svg)](https://pypi.python.org/pypi/pyabcranger)
+[![Build](https://github.com/diyabc/abcranger/workflows/Build%20and%20upload%20to%20PyPI/badge.svg)](https://github.com/diyabc/abcranger/actions?query=workflow%3ABuild+branch%3Amaster)
+
 Random forests methodologies for :
 
 -   ABC model choice (Pudlo et al. [2015](#ref-pudlo2015reliable))

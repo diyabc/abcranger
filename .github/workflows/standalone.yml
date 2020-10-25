@@ -60,11 +60,6 @@ jobs:
       - name: Get R version
         run: echo "::set-output name=R_VERSION::$(Rscript -e 'cat(as.character(getRversion()))')"
         id: get-r-version
-      - name: restore/cache R site-packages
-        uses: actions/cache@v2
-        with:
-          path: ${{ github.workspace }}/RLibrary 
-          key: R-site-packages-${{ matrix.shortos }}-${{ steps.get-r-version.outputs.R_VERSION }}
       - name: restore/cache clang
         uses: actions/cache@v2
         with:
@@ -94,6 +89,8 @@ jobs:
           brew install ninja libomp
           echo "CFLAGS=-static-libgcc" >> $GITHUB_ENV
           echo "CXXFLAGS=-static-libstdc++ -static-libgcc" >> $GITHUB_ENV
+          echo "CC=gcc-10" >> $GITHUB_ENV
+          echo "CXX=g++-10" >> $GITHUB_ENV
         if: matrix.os == 'macos-latest'
       - name: Configure MSVC console (Windows)
         if: matrix.os == 'windows-latest'

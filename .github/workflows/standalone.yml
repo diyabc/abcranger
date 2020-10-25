@@ -3,7 +3,10 @@
 # SPDX short identifier: MIT
 name: abcranger-build
 on: [push]
-  
+
+env:
+  VCPKG_REVISION: "6185aa76504a5025f36754324abf307cc776f3da"
+
 jobs:
   create_release:
     runs-on: ubuntu-latest
@@ -43,14 +46,14 @@ jobs:
         include:
           - os: windows-latest
             shortos: windows
-            cmakeargs: -DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DPYBIND11_PYTHON_VERSION:STRING=3.7 -DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static "-DLAPACK_LIBRARIES:STRING=mkl_intel_lp64.lib\;mkl_sequential.lib\;mkl_core.lib" "-DLAPACK_ROOT:STRING=C:/Program Files (x86)/IntelSWTools/compilers_and_libraries/windows/mkl/lib/intel64_win" -DBLA_VENDOR:STRING=Intel10_64lp -DMAKE_STATIC_EXE:BOOL=TRUE -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja
+            cmakeargs: -DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DMAKE_STATIC_EXE:BOOL=TRUE -DPYBIND11_PYTHON_VERSION:STRING=3.7 -DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja
           - os: ubuntu-latest
             shortos: linux
             mkl-version: intel-mkl-64bit-2020.0-088
-            cmakeargs: '-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=TRUE -DMAKE_STATIC_EXE:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/mkl/lib/intel64 "-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group\;pthread\;m\;dl" "-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group\;pthread\;m\;dl" -DRFTEST_TOLERANCE:STRING=2e-2 -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja'
+            cmakeargs: '-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=TRUE -DMAKE_STATIC_EXE:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/mkl/lib/intel64 "-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group\;pthread\;m\;dl" "-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group\;pthread\;m\;dl" -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja'
           - os: macos-latest
             shortos: macos
-            cmakeargs: '-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DPYBIND11_PYTHON_VERSION:STRING=3.7 -DBLA_VENDOR:STRING=Intel10_64lp_seq -DBLA_STATIC:STRING=ON -DLAPACK_ROOT:STRING=/opt/intel/compilers_and_libraries/mac/mkl/lib "-DLAPACK_LIBRARIES:STRING=/opt/intel/compilers_and_libraries/mac/mkl/lib/libmkl_intel_lp64.a\;/opt/intel/compilers_and_libraries/mac/mkl/lib/libmkl_sequential.a\;/opt/intel/compilers_and_libraries/mac/mkl/lib/libmkl_core.a" -DRFTEST_TOLERANCE:STRING=2e-2 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja' 
+            cmakeargs: '-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DPYBIND11_PYTHON_VERSION:STRING=3.7 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja' 
     steps:
       - uses: actions/checkout@v1
         with:
@@ -60,12 +63,18 @@ jobs:
       - name: Get R version
         run: echo "::set-output name=R_VERSION::$(Rscript -e 'cat(as.character(getRversion()))')"
         id: get-r-version
-      - name: restore/cache clang
+      - name: restore/cache vcpkg/ubuntu
         uses: actions/cache@v2
         with:
-          path: ${{ github.workspace }}/${{ matrix.clang-dir }}
-          key: ${{ matrix.clang-dir }}-v3
+          path: /home/runner/.local/share/pmm
+          key: unbuntu-vcpkg-${{ env.VCPKG_REVISION }}
         if: matrix.os == 'ubuntu-latest'
+      - name: restore/cache vcpkg/windows
+        uses: actions/cache@v2
+        with:
+          path: C:/Users/runneradmin/AppData/Local/pmm
+          key: windows-vcpkg-${{ env.VCPKG_REVISION }}
+        if: matrix.os == 'windows-latest'
       - name: restore/cache mkl
         uses: actions/cache@v2
         with:
@@ -86,11 +95,11 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
       - name: setup MacOS
         run: |
-          brew install ninja libomp
+          brew install ninja
           echo "CFLAGS=-static-libgcc" >> $GITHUB_ENV
           echo "CXXFLAGS=-static-libstdc++ -static-libgcc" >> $GITHUB_ENV
-          echo "CC=gcc-10" >> $GITHUB_ENV
-          echo "CXX=g++-10" >> $GITHUB_ENV
+          echo "CC=gcc-9" >> $GITHUB_ENV
+          echo "CXX=g++-9" >> $GITHUB_ENV
         if: matrix.os == 'macos-latest'
       - name: Configure MSVC console (Windows)
         if: matrix.os == 'windows-latest'

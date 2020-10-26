@@ -26,7 +26,7 @@ foreach(filename ${cxx_files})
     add_executable(${target} ${filename})
     target_link_libraries(${target} Catch2::Catch2)
     if(target MATCHES "^forest.*")
-        target_link_libraries(${target} abcrangerlib fmt::fmt)
+        target_link_libraries(${target} ${BOOSTLIBS} abcrangerlib fmt::fmt)
     endif()
     if(target MATCHES ".*eigen.*")
 	target_link_libraries(${target} ${TBBLIB})
@@ -41,7 +41,7 @@ target_sources(forestestimparam-ks-test PRIVATE ${ABCRANGER_SOURCE_DIR}/EstimPar
 target_sources(forestmodelchoice-ks-test PRIVATE ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp)
 
 
-target_link_libraries(readreftable-test ${TBBLIB} HighFive hdf5::hdf5_cpp-static fmt::fmt)
+target_link_libraries(readreftable-test ${TBBLIB} ${BOOSTLIBS} HighFive hdf5::hdf5_cpp-static fmt::fmt)
 target_link_libraries(forestestimparam-ks-test ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt)
 target_link_libraries(forestmodelchoice-ks-test ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt)
 target_link_libraries(cxxopts-test cxxopts::cxxopts)

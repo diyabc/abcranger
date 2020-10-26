@@ -47,6 +47,7 @@ add_executable(ranger ${PROJECT_cppranger_SRCS})
 if (MSVC)
   target_link_libraries(ranger Threads::Threads wingetopt)
   include_directories(${CMAKE_SOURCE_DIR}/wingetopt/src)
+  set(BOOSTREPKG boost-regex)
 else()
   target_link_libraries(ranger Threads::Threads)
 endif()
@@ -86,7 +87,7 @@ pmm(
         # REVISION e37cc662ee29852f45e85961124f62d91acb488a
         REVISION 6185aa76504a5025f36754324abf307cc776f3da
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt  eigen3-head pybind11 ${TBBPKG} ${TESTDEPS}
+        REQUIRES range-v3 catch2 cxxopts fmt  eigen3-head pybind11 ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
 )
 
@@ -123,6 +124,11 @@ endif()
 
 include(CTest)
 enable_testing()
+
+if(MSVC)
+  find_package(Boost REQUIRED COMPONENTS regex)
+  set(BOOSTLIBS Boost::headers Boost::regex)
+endif()
 
 add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING 
                 -D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING 
@@ -164,7 +170,7 @@ include_directories(src)
 add_subdirectory(src)
 
 add_executable(abcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp abcranger.cpp)
-target_link_libraries(abcranger ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} cxxopts::cxxopts abcrangerlib)
+target_link_libraries(abcranger ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} ${BOOSTLIBS} cxxopts::cxxopts abcrangerlib)
 
 if(USE_LIBCXX)
   target_link_libraries(abcranger PRIVATE c++ c++abi)

@@ -14,7 +14,6 @@ ${RANGER_SOURCE_DIR}/TreeClassification.cpp
 ${RANGER_SOURCE_DIR}/TreeRegression.cpp
 ${RANGER_SOURCE_DIR}/utility.cpp
 
-${ABCRANGER_SOURCE_DIR}/readreftable.cpp
 ${ABCRANGER_SOURCE_DIR}/parse_parexpr.cpp
 ${ABCRANGER_SOURCE_DIR}/forestQuantiles.cpp
 ${ABCRANGER_SOURCE_DIR}/DataDense.cpp
@@ -24,7 +23,7 @@ ${ABCRANGER_SOURCE_DIR}/ForestOnlineRegression.cpp
 ${ABCRANGER_SOURCE_DIR}/tqdm.cpp
 )
 
-add_library(abcrangerlib STATIC ${PROJECT_abcranger_SRCS})
+add_library(abcrangerlib STATIC ${PROJECT_abcranger_SRCS} ${ABCRANGER_SOURCE_DIR}/readreftable.cpp)
 target_link_libraries(abcrangerlib fmt::fmt)
 
 # if(MSVC)

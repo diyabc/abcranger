@@ -89,8 +89,8 @@ PYBIND11_MODULE(pyabcranger, m) {
         .def(py::init<int,
                        std::vector<size_t>,
                        std::vector<size_t>,
-                       std::vector<string>,
-                       std::vector<string>,
+                       std::vector<std::string>,
+                       std::vector<std::string>,
                        py::EigenDRef<MatrixXd>,
                        py::EigenDRef<MatrixXd>,
                        std::vector<double>>());

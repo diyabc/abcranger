@@ -1,10 +1,4 @@
-#define _REGEX_MAX_STACK_COUNT 5000
-// #if defined(_MSC_VER)
-// #include <boost/regex.hpp>
-// using namespace boost;
-// #else
-#include <regex>
-// #endif
+#define _REGEX_MAX_STACK_COUNT 5000L
 #include <string>
 #include <map>
 #include <algorithm>
@@ -17,70 +11,76 @@
 
 #include <stdio.h>
 #ifdef __APPLE__
-        #include <sys/uio.h>
+    #include <sys/uio.h>
 #elif defined(_MSC_VER)
-        #include <io.h>
+    #include <io.h>
 #else
-        #include <sys/io.h>
+    #include <sys/io.h>
+#endif
+
+#if defined(_MSC_VER)
+    #include <boost/regex.hpp>
+    using namespace boost;
+#else
+    #include <regex>
+    using namespace std;
 #endif
 
 // using namespace boost;
 // using namespace ranges;
 
 template<class A, class B> 
-B readAndCast(ifstream& f) {
+B readAndCast(std::ifstream& f) {
     A t;
     f.read(reinterpret_cast<char *>(&t),sizeof(A));
     return static_cast<B>(t);
 } 
 
-using namespace std;
-
-Reftable<MatrixXd> readreftable(string headerpath, string reftablepath, size_t N, bool quiet, std::string groups_opt) {
+Reftable<MatrixXd> readreftable(std::string headerpath, std::string reftablepath, size_t N, bool quiet, std::string groups_opt) {
     ///////////////////////////////////////// read headers
-    if (!quiet) cout << "///////////////////////////////////////// read headers" << endl;
+    if (!quiet) std::cout << "///////////////////////////////////////// read headers" << std::endl;
 
-    ifstream headerStream(headerpath,ios::in);
+    std::ifstream headerStream(headerpath, std::ios::in);
     if (headerStream.fail()){
-        cout << "No header file, exiting" << endl;
+        std::cout << "No header file, exiting" << std::endl;
         exit(1);
     }
-    headerStream >> noskipws;
-    const std::string hS(istream_iterator<char>{headerStream}, {});
+    headerStream >> std::noskipws;
+    const std::string hS(std::istream_iterator<char>{headerStream}, {});
     
     const regex scen_re(R"#(\bscenario\s+(\d+)\s+.*?\n((?:(?!(?:scenario|\n)).*?\n)+))#");
-    sregex_token_iterator itscen(begin(hS), end(hS), scen_re, {1,2});
+    sregex_token_iterator itscen(std::begin(hS), std::end(hS), scen_re, {1,2});
     //    print(itscen, {});
 
-    auto nscenh = distance(itscen, {})/2;
-    vector<string> scendesc(nscenh);
+    auto nscenh = std::distance(itscen, {})/2;
+    std::vector<std::string> scendesc(nscenh);
     sregex_token_iterator endregexp;
     
     auto it = itscen;
     while (it != endregexp) {
-        const string num(*it++);
-        const string desc(*it++);
+        const std::string num(*it++);
+        const std::string desc(*it++);
         scendesc[stoi(num)-1] = desc;
     }
-    //cout << scendesc[0];
+    //std::cout << scendesc[0];
     const regex nparamtot(R"#(historical parameters priors \((\d+)\D)#");
     smatch base_match;
-    regex_search(begin(hS), end(hS),base_match,nparamtot);
+    regex_search(std::begin(hS), std::end(hS),base_match,nparamtot);
     auto nparamtoth = stoi(base_match[1]);
-//    cout << nparamtoth << endl;
-    string reparamlistrestr = R"#(\bhistorical parameters priors.*?\n((?:\w+\W[^\n]*?\n){)#" + to_string(nparamtoth) + "})";
+//    std::cout << nparamtoth << std::endl;
+    std::string reparamlistrestr = R"#(\bhistorical parameters priors.*?\n((?:\w+\W[^\n]*?\n){)#" + std::to_string(nparamtoth) + "})";
     const regex reparamlist(reparamlistrestr);
     smatch base_match2;
-    regex_search(begin(hS), end(hS),base_match2,reparamlist);
-    //cout << base_match[1] << endl;
-    const string paramlistmatch = base_match2[1];
+    regex_search(std::begin(hS), std::end(hS),base_match2,reparamlist);
+    //std::cout << base_match[1] << std::endl;
+    const std::string paramlistmatch = base_match2[1];
     const regex reparam(R"#((\w+)\W+\w\W+\w\w\[((?:\d|\.)+?)\W*,((?:\d|\.)+?)(?:,.+?)?\]?\n)#");
-    sregex_token_iterator reparamit(begin(paramlistmatch),end(paramlistmatch), reparam, {1,2,3});
+    sregex_token_iterator reparamit(std::begin(paramlistmatch),std::end(paramlistmatch), reparam, {1,2,3});
     it = reparamit;
     size_t reali = 1;
-    map<string,size_t> paramdesc;
+    std::map<std::string,size_t> paramdesc;
     while (it != endregexp) {
-        const string param = *it++;
+        const std::string param = *it++;
         const double mini = stod(*it++);
         const double maxi = stod(*it++);
         if (maxi != 0.0) {
@@ -91,58 +91,58 @@ Reftable<MatrixXd> readreftable(string headerpath, string reftablepath, size_t N
         }
     }
     size_t realparamtot = reali - 1;
-    vector<vector<size_t>> parambyscenh(nscenh);
+    std::vector<std::vector<size_t>> parambyscenh(nscenh);
     const regex splitre(R"#(\W)#");
     for(auto i = 0; i < nscenh; i++) {
-        sregex_token_iterator it(begin(scendesc[i]),end(scendesc[i]),splitre,-1);
+        sregex_token_iterator it(std::begin(scendesc[i]),std::end(scendesc[i]),splitre,-1);
         for(; it != endregexp; ++it) {
-            const string term = *it;
+            const std::string term = *it;
             if (paramdesc.count(term) > 0) {
                 const size_t nterm = paramdesc[term];
-                if (find(parambyscenh[i].begin(),parambyscenh[i].end(),nterm)  == parambyscenh[i].end())
+                if (find(std::begin(parambyscenh[i]),std::end(parambyscenh[i]),nterm)  == std::end(parambyscenh[i]))
                     parambyscenh[i].push_back(nterm);
             } 
         }
     }
     // for (auto scen : parambyscenh) {
-    //     for(auto p : scen) cout << p << " ";
-    //     cout << endl;       
+    //     for(auto p : scen) std::cout << p << " ";
+    //     std::cout << std::endl;       
     // }
     smatch base_match3;
     const regex restatsname(R"#(\n\s*\nscenario\s+)#");
-    regex_search(begin(hS), end(hS),base_match3,restatsname);
-    const string allstatsname = base_match3.suffix();
+    regex_search(std::begin(hS), std::end(hS),base_match3,restatsname);
+    const std::string allstatsname = base_match3.suffix();
     const regex splitre2(R"#(\s+)#");
-    vector<string> allcolspre;
-    for(sregex_token_iterator it(allstatsname.begin(),allstatsname.end(),splitre2,-1); it != endregexp; it++)
+    std::vector<std::string> allcolspre;
+    for(sregex_token_iterator it(std::begin(allstatsname),std::end(allstatsname),splitre2,-1); it != endregexp; it++)
         allcolspre.push_back(*it);
 
-    if (!quiet) cout << "read headers done." << endl;
+    if (!quiet) std::cout << "read headers done." << std::endl;
     headerStream.close();
      ///////////////////////////////////////// read reftable
-    if (!quiet) cout << "///////////////////////////////////////// read reftable" << endl;
+    if (!quiet) std::cout << "///////////////////////////////////////// read reftable" << std::endl;
 
 
-    ifstream reftableStream(reftablepath,ios::in|ios::binary);
+    std::ifstream reftableStream(reftablepath, std::ios::in|std::ios::binary);
     if (reftableStream.fail()){
-        cout << "No Reftable, exiting" << endl;
+        std::cout << "No Reftable, exiting" << std::endl;
         exit(1);
     }
     size_t realnrec = readAndCast<int,size_t>(reftableStream);
     // reftableStream.read(reinterpret_cast<char *>(realnrec_i),sizeof(realnr));
-    size_t nrec = N > 0 ? min(realnrec,N) : realnrec;
+    size_t nrec = N > 0 ? std::min(realnrec,N) : realnrec;
     size_t nscen = readAndCast<int,size_t>(reftableStream);
-    vector<size_t> nrecscen(nscen);
+    std::vector<size_t> nrecscen(nscen);
     for(auto& r : nrecscen) r = readAndCast<int,size_t>(reftableStream);
-    vector<size_t> nparam(nscen);
+    std::vector<size_t> nparam(nscen);
     for(auto& r : nparam) r = readAndCast<int,size_t>(reftableStream);
     size_t nstat = readAndCast<int,size_t>(reftableStream);
-    vector<string> params_names { allcolspre.begin(), allcolspre.begin() + (allcolspre.size() - nstat) };
-    vector<string> stats_names  { allcolspre.begin()+ (allcolspre.size() - nstat),  allcolspre.end() };
-    vector<double> scenarios(nrec);
+    std::vector<std::string> params_names { std::begin(allcolspre), std::begin(allcolspre) + (allcolspre.size() - nstat) };
+    std::vector<std::string> stats_names  { std::begin(allcolspre)+ (allcolspre.size() - nstat),  std::end(allcolspre) };
+    std::vector<double> scenarios(nrec);
     size_t nmutparams = params_names.size() - realparamtot;
     MatrixXd params = MatrixXd::Constant(nrec,params_names.size(),NAN);
-    // for(auto r : statsname) cout << r << endl;
+    // for(auto r : statsname) std::cout << r << std::endl;
     MatrixXd stats = MatrixXd::Constant(nrec,nstat,NAN);
     // DataDouble data(stats,statsname,nrec,nstat + 1);
     // bool hasError;
@@ -177,7 +177,8 @@ Reftable<MatrixXd> readreftable(string headerpath, string reftablepath, size_t N
             if (isatty(fileno(stdin))) 
                 bar.progress(i,nrec);
             else 
-                cout << "read " << (i + 1) << "/" << nrec << std::endl;
+                if ((i + 1) % 500 == 0)
+                     std::cout << "read " << (i + 1) << "/" << nrec << std::endl;
         }
         size_t scen = readAndCast<int,size_t>(reftableStream);
         if (groups.size() > 0) {
@@ -188,7 +189,7 @@ Reftable<MatrixXd> readreftable(string headerpath, string reftablepath, size_t N
 
         // data.set(nstat,i,static_cast<double>(scen),hasError);
         scen--;
-        vector<float> lparam(nparam[scen]);
+        std::vector<float> lparam(nparam[scen]);
         for(auto& r: lparam) {
             reftableStream.read(reinterpret_cast<char *>(&r),sizeof(r));
         }
@@ -213,57 +214,57 @@ Reftable<MatrixXd> readreftable(string headerpath, string reftablepath, size_t N
         scenarios.resize(rcount);
     }
     reftableStream.close();
-    if (!quiet) cout << endl << "read reftable done." << endl;
+    if (!quiet) std::cout << std::endl << "read reftable done." << std::endl;
     Reftable reftable(rcount,nrecscen, nparam, params_names, stats_names, stats,params, scenarios);
     return reftable;
 }
 
 #define READSCEN_BUFFER_SIZE 1000
-Reftable<MatrixXd> readreftable_scen(string headerpath, string reftablepath, size_t sel_scen, size_t N, bool quiet) {
+Reftable<MatrixXd> readreftable_scen(std::string headerpath, std::string reftablepath, size_t sel_scen, size_t N, bool quiet) {
     ///////////////////////////////////////// read headers
-    if (!quiet) cout << "///////////////////////////////////////// read headers" << endl;
+    if (!quiet) std::cout << "///////////////////////////////////////// read headers" << std::endl;
     
-    ifstream headerStream(headerpath,ios::in);
+    std::ifstream headerStream(headerpath,std::ios::in);
     if (headerStream.fail()){
-        cout << "No header file, exiting" << endl;
+        std::cout << "No header file, exiting" << std::endl;
         exit(1);
     }
-    headerStream >> noskipws;
-    const std::string hS(istream_iterator<char>{headerStream}, {});
+    headerStream >> std::noskipws;
+    const std::string hS(std::istream_iterator<char>{headerStream}, {});
     
     const regex scen_re(R"#(\bscenario\s+(\d+)\s+.*?\n((?:(?!(?:scenario|\n)).*?\n)+))#");
-    sregex_token_iterator itscen(begin(hS), end(hS), scen_re, {1,2});
+    sregex_token_iterator itscen(std::begin(hS), end(hS), scen_re, {1,2});
     //    print(itscen, {});
 
     auto nscenh = distance(itscen, {})/2;
-    vector<string> scendesc(nscenh);
+    std::vector<std::string> scendesc(nscenh);
     sregex_token_iterator endregexp;
     
     auto it = itscen;
     while (it != endregexp) {
-        const string num(*it++);
-        const string desc(*it++);
+        const std::string num(*it++);
+        const std::string desc(*it++);
         scendesc[stoi(num)-1] = desc;
     }
-    //cout << scendesc[0];
+    //std::cout << scendesc[0];
     const regex nparamtot(R"#(historical parameters priors \((\d+)\D)#");
     smatch base_match;
-    regex_search(begin(hS), end(hS),base_match,nparamtot);
+    regex_search(std::begin(hS), end(hS),base_match,nparamtot);
     auto nparamtoth = stoi(base_match[1]);
-//    cout << nparamtoth << endl;
-    string reparamlistrestr = R"#(\bhistorical parameters priors.*?\n((?:\w+\W[^\n]*?\n){)#" + to_string(nparamtoth) + "})";
+//    std::cout << nparamtoth << std::endl;
+    std::string reparamlistrestr = R"#(\bhistorical parameters priors.*?\n((?:\w+\W[^\n]*?\n){)#" + std::to_string(nparamtoth) + "})";
     const regex reparamlist(reparamlistrestr);
     smatch base_match2;
-    regex_search(begin(hS), end(hS),base_match2,reparamlist);
-    //cout << base_match[1] << endl;
-    const string paramlistmatch = base_match2[1];
+    regex_search(std::begin(hS), end(hS),base_match2,reparamlist);
+    //std::cout << base_match[1] << std::endl;
+    const std::string paramlistmatch = base_match2[1];
     const regex reparam(R"#((\w+)\W+\w\W+\w\w\[((?:\d|\.)+?)\W*,((?:\d|\.)+?)(?:,.+?)?\]?\n)#");
-    sregex_token_iterator reparamit(begin(paramlistmatch),end(paramlistmatch), reparam, {1,2,3});
+    sregex_token_iterator reparamit(std::begin(paramlistmatch),std::end(paramlistmatch), reparam, {1,2,3});
     it = reparamit;
     size_t reali = 1;
-    map<string,size_t> paramdesc;
+    std::map<std::string,size_t> paramdesc;
     while (it != endregexp) {
-        const string param = *it++;
+        const std::string param = *it++;
         const double mini = stod(*it++);
         const double maxi = stod(*it++);
         if (maxi != 0.0) {
@@ -274,41 +275,41 @@ Reftable<MatrixXd> readreftable_scen(string headerpath, string reftablepath, siz
         }
     }
     size_t realparamtot = reali - 1;
-    vector<vector<size_t>> parambyscenh(nscenh);
+    std::vector<std::vector<size_t>> parambyscenh(nscenh);
     const regex splitre(R"#(\W)#");
     for(auto i = 0; i < nscenh; i++) {
-        sregex_token_iterator it(begin(scendesc[i]),end(scendesc[i]),splitre,-1);
+        sregex_token_iterator it(std::begin(scendesc[i]),std::end(scendesc[i]),splitre,-1);
         for(; it != endregexp; ++it) {
-            const string term = *it;
+            const std::string term = *it;
             if (paramdesc.count(term) > 0) {
                 const size_t nterm = paramdesc[term];
-                if (find(parambyscenh[i].begin(),parambyscenh[i].end(),nterm)  == parambyscenh[i].end())
+                if (find(std::begin(parambyscenh[i]),std::end(parambyscenh[i]),nterm)  == std::end(parambyscenh[i]))
                     parambyscenh[i].push_back(nterm);
             } 
         }
     }
     // for (auto scen : parambyscenh) {
-    //     for(auto p : scen) cout << p << " ";
-    //     cout << endl;       
+    //     for(auto p : scen) std::cout << p << " ";
+    //     std::cout << std::endl;       
     // }
     smatch base_match3;
     const regex restatsname(R"#(\n\s*\nscenario\s+)#");
-    regex_search(begin(hS), end(hS),base_match3,restatsname);
-    const string allstatsname = base_match3.suffix();
+    regex_search(std::begin(hS), end(hS),base_match3,restatsname);
+    const std::string allstatsname = base_match3.suffix();
     const regex splitre2(R"#(\s+)#");
-    vector<string> allcolspre;
-    for(sregex_token_iterator it(allstatsname.begin(),allstatsname.end(),splitre2,-1); it != endregexp; it++)
+    std::vector<std::string> allcolspre;
+    for(sregex_token_iterator it(std::begin(allstatsname),std::end(allstatsname),splitre2,-1); it != endregexp; it++)
         allcolspre.push_back(*it);
 
-    if (!quiet) cout << "read headers done." << endl;
+    if (!quiet) std::cout << "read headers done." << std::endl;
     headerStream.close();
      ///////////////////////////////////////// read reftable
-    if (!quiet) cout << "///////////////////////////////////////// read reftable" << endl;
+    if (!quiet) std::cout << "///////////////////////////////////////// read reftable" << std::endl;
 
 
-    ifstream reftableStream(reftablepath,ios::in|ios::binary);
+    std::ifstream reftableStream(reftablepath,std::ios::in|std::ios::binary);
     if (reftableStream.fail()){
-        cout << "No Reftable, exiting" << endl;
+        std::cout << "No Reftable, exiting" << std::endl;
         exit(1);
     }
     size_t realnrec = readAndCast<int,size_t>(reftableStream);
@@ -316,17 +317,17 @@ Reftable<MatrixXd> readreftable_scen(string headerpath, string reftablepath, siz
     if (N == 0) N = realnrec;
     size_t nrec = realnrec;
     size_t nscen = readAndCast<int,size_t>(reftableStream);
-    vector<size_t> nrecscen(nscen);
+    std::vector<size_t> nrecscen(nscen);
     for(auto& r : nrecscen) r = readAndCast<int,size_t>(reftableStream);
-    vector<size_t> nparam(nscen);
+    std::vector<size_t> nparam(nscen);
     for(auto& r : nparam) r = readAndCast<int,size_t>(reftableStream);
     size_t nstat = readAndCast<int,size_t>(reftableStream);
-    vector<string> params_names { allcolspre.begin(), allcolspre.begin() + (allcolspre.size() - nstat) };
-    vector<string> stats_names  { allcolspre.begin()+ (allcolspre.size() - nstat),  allcolspre.end() };
-    vector<double> scenarios(nrec);
+    std::vector<std::string> params_names { std::begin(allcolspre), std::begin(allcolspre) + (allcolspre.size() - nstat) };
+    std::vector<std::string> stats_names  { std::begin(allcolspre)+ (allcolspre.size() - nstat),  std::end(allcolspre) };
+    std::vector<double> scenarios(nrec);
     size_t nmutparams = params_names.size() - realparamtot;
     MatrixXd params = MatrixXd::Constant(0,params_names.size(),NAN);
-    // for(auto r : statsname) cout << r << endl;
+    // for(auto r : statsname) std::cout << r << std::endl;
     MatrixXd stats = MatrixXd::Constant(0,nstat,NAN);
     // DataDouble data(stats,statsname,nrec,nstat + 1);
     // bool hasError;
@@ -337,7 +338,8 @@ Reftable<MatrixXd> readreftable_scen(string headerpath, string reftablepath, siz
             if (isatty(fileno(stdin))) 
                 bar.progress(i,nrec);
             else 
-                cout << "read " << (i + 1) << "/" << nrec << std::endl;
+                if ((i + 1) % 500 == 0)
+                     std::cout << "read " << (i + 1) << "/" << nrec << std::endl;
         }
         size_t scen = readAndCast<int,size_t>(reftableStream);
 //        reftableStream.read(reinterpret_cast<char *>(&scen),4);
@@ -349,7 +351,7 @@ Reftable<MatrixXd> readreftable_scen(string headerpath, string reftablepath, siz
         scenarios[i] = static_cast<double>(scen);
         // data.set(nstat,i,static_cast<double>(scen),hasError);
         scen--;
-        vector<float> lparam(nparam[scen]);
+        std::vector<float> lparam(nparam[scen]);
         for(auto& r: lparam) {
             reftableStream.read(reinterpret_cast<char *>(&r),sizeof(r));
         }
@@ -370,8 +372,8 @@ Reftable<MatrixXd> readreftable_scen(string headerpath, string reftablepath, siz
     }
 
     reftableStream.close();
-    if (!quiet) cout << endl << "read reftable done. " << ncount << " samples of total " << nrec << ", " << N << " asked and " << nrecscen[sel_scen-1] << " avalaible." << endl;
-    if (!quiet && (N > nrecscen[sel_scen-1])) cout << "Warning : asked for more samples than available." << endl;
+    if (!quiet) std::cout << std::endl << "read reftable done. " << ncount << " samples of total " << nrec << ", " << N << " asked and " << nrecscen[sel_scen-1] << " avalaible." << std::endl;
+    if (!quiet && (N > nrecscen[sel_scen-1])) std::cout << "Warning : asked for more samples than available." << std::endl;
     stats.conservativeResize(ncount,NoChange);
     params.conservativeResize(ncount,NoChange);
    std::vector<size_t> uniqrec  = { nrecscen[sel_scen-1] };

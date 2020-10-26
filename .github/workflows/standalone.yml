@@ -54,10 +54,10 @@ jobs:
           - os: ubuntu-latest
             shortos: linux
             mkl-version: intel-mkl-64bit-2020.0-088
-            cmakeargs: '-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=TRUE -DMAKE_STATIC_EXE:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/mkl/lib/intel64 "-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group\;pthread\;m\;dl" "-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group\;pthread\;m\;dl" -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja'
+            cmakeargs: '-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=TRUE -DMAKE_STATIC_EXE:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/mkl/lib/intel64 \"-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group\;pthread\;m\;dl\" \"-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group\;pthread\;m\;dl\" -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja'
           - os: macos-latest
             shortos: macos
-            cmakeargs: '-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DPYBIND11_PYTHON_VERSION:STRING=3.7 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja' 
+            cmakeargs: -DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DPYBIND11_PYTHON_VERSION:STRING=3.7 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja'
     steps:
       - uses: actions/checkout@v1
         with:

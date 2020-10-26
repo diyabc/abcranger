@@ -69,7 +69,7 @@ jobs:
           path: /home/runner/.local/share/pmm
           key: unbuntu-vcpkg-${{ env.VCPKG_REVISION }}
         if: matrix.os == 'ubuntu-latest'
-      - name: restore/cache vcpkg/ubuntu
+      - name: restore/cache vcpkg/macos
         uses: actions/cache@v2
         with:
           path: /home/runner/.local/share/pmm

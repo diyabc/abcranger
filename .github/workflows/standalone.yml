@@ -77,7 +77,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /home/runner/.local/share/pmm
-          key: macos-vcpkg-${{ env.VCPKG_REVISION }}
+          key: macos-vcpkg2-${{ env.VCPKG_REVISION }}
         if: matrix.os == 'macos-latest'
       - name: restore/cache vcpkg/windows
         uses: actions/cache@v2
@@ -144,7 +144,7 @@ jobs:
           python -m pip install cibuildwheel==1.6.1
       - name: Build wheels
         env: 
-          CIBW_ENVIRONMENT: "CMAKE_CIWHEELARGS=${{ matrix.cmakeargs }}"
+          CIBW_ENVIRONMENT: CMAKE_CIWHEELARGS=${{ matrix.cmakeargs }}
         run: |
           python -m cibuildwheel --output-dir wheelhouse
 

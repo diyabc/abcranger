@@ -1,13 +1,15 @@
 from cmaketools import setup
 import sys
-from os import path
+from os import path, getenv
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 configure_opts = ["""--no-warn-unused-cli -DMAKE_STATIC_EXE:BOOL=TRUE -DUSE_MKL:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/mkl/lib/intel64 "-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group\;pthread\;m\;dl" "-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group\;pthread\;m\;dl" -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja ../"""]
-if(len(sys.argv) > 1 and sys.argv[1] == "sdist"):
-    configure_opts = ["""--no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja ../"""]
+if((len(sys.argv) > 1) and (sys.argv[1] == "sdist")):
+        configure_opts = ["""--no-warn-unused-cli -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja ../"""]
+elif(getenv("CMAKE_CIWHEELARGS")):
+        configure_opts = getenv("CMAKE_CIWHEELARGS")
 
 setup(
     name="pyabcranger",

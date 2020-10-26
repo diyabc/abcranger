@@ -6,6 +6,10 @@ on: [push]
 
 env:
   VCPKG_REVISION: "6185aa76504a5025f36754324abf307cc776f3da"
+  CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+  CIBW_SKIP: "cp27-* cp35-* pp*  *-manylinux_i686 *-win32"
+  CIBW_BEFORE_ALL_LINUX: bash presetup.sh
+  CIBW_BEFORE_BUILD: pip install cmaketools cmake ninja
 
 jobs:
   create_release:
@@ -127,6 +131,24 @@ jobs:
           buildWithCMake: true
           buildDirectory: ${{ runner.workspace }}/b/ninja/
           cmakeAppendedArgs: '${{ matrix.cmakeargs }}'
+      - uses: actions/setup-python@v2
+        name: Install Python
+        with:
+          python-version: '3.8'
+      - name: Minimal tests
+        run: pytest -s test/test.py --path ${{ runner.workspace }}/b/ninja/abcranger
+      - name: Install cibuildwheel
+        run: |
+          python -m pip install cibuildwheel==1.6.1
+      - name: Build wheels
+        env: 
+          CIBW_ENVIRONMENT: "CMAKE_CIWHEELARGS=${{ matrix.cmakeargs }}"
+        run: |
+          python -m cibuildwheel --output-dir wheelhouse
+
+      - uses: actions/upload-artifact@v2
+        with:
+          path: ./wheelhouse/*.whl
       - name: Failure
         if: failure() 
         uses: author/action-rollback@stable
@@ -162,15 +184,49 @@ jobs:
           asset_name: abcranger-${{ matrix.shortos }}-${{ needs.create_release.outputs.new_tag }}
           asset_content_type: application/octet-stream
         if: matrix.os != 'windows-latest'
-      - name: Upload Release Asset Windows
-        id: upload-release-asset-windows
+      - name: Upload wheels
+        id: upload-wheels
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ${{ runner.workspace }}/b/ninja/abcranger.exe
-          asset_name: abcranger-${{ matrix.shortos }}-${{ needs.create_release.outputs.new_tag }}.exe
+          asset_path: ./wheelhouse/*.whl
           asset_content_type: application/octet-stream
-        if: matrix.os == 'windows-latest'
-  
+  build_sdist:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        name: Install Python
+        with:
+          python-version: '3.8'
+
+      - name: Build sdist
+        run: |
+          pip install cmake ninja cmaketools wheel
+          python setup.py sdist
+
+      - uses: actions/upload-artifact@v2
+        with:
+          path: dist/*.tar.gz
+  upload_pypi:
+    needs: [job, build_sdist]
+    runs-on: ubuntu-latest
+    # upload to PyPI on every tag starting with 'v'
+    # if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
+    # alternatively, to publish when a GitHub Release is created, use the following rule:
+    # if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: artifact
+          path: dist
+
+      - uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.pypi_password }}
+          # repository_url: https://test.pypi.org/legacy/

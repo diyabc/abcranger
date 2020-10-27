@@ -17,8 +17,6 @@ elif sys.platform == "win32":
 else:
     exit(1)
 
-print("configure_opts : ", configure_opts[0])
-
 setup(
     name="pyabcranger",
     version="0.0.37",

@@ -9,7 +9,7 @@ env:
   CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
   CIBW_SKIP: "cp27-* cp35-* pp*  *-manylinux_i686 *-win32"
   CIBW_BEFORE_ALL_LINUX: bash presetup.sh
-  CIBW_BEFORE_BUILD: pip install cmaketools cmake ninja
+  CIBW_BEFORE_BUILD: pip install cmaketools cmake ninja vswhere
 
 jobs:
   create_release:
@@ -191,10 +191,6 @@ jobs:
       - name: Install cibuildwheel
         run: |
           python -m pip install cibuildwheel==1.6.3
-      - name: Install vswhere for windows
-        if: runner.os == 'Windows'
-        run: |
-          python -m pip install vswhere
       - name: Build wheels
         env:
           CIBW_ENVIRONMENT: "BUILDDIR=${{ runner.workspace }}/b/ninja CMAKEARGSFILE=${{ runner.workspace }}/cmakeargs.txt"

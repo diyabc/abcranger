@@ -13,6 +13,7 @@ env:
 
 jobs:
   create_release:
+    if: "! contains(toJSON(github.event.commits.*.message), '[skip-ci]')"
     runs-on: ubuntu-latest
     outputs:
         upload_url: ${{ steps.new_release.outputs.upload_url }}

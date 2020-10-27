@@ -102,7 +102,6 @@ jobs:
           fi
           echo "CC=gcc-10" >> $GITHUB_ENV
           echo "CXX=g++-10" >> $GITHUB_ENV
-          echo ${{ matrix.cmakeargs }} > ${{ github.workspace }}/cmakeargs.txt
         if: matrix.os == 'ubuntu-latest'
       - name: setup MacOS
         run: |
@@ -111,7 +110,6 @@ jobs:
           echo "CXXFLAGS=-static-libstdc++ -static-libgcc" >> $GITHUB_ENV
           echo "CC=gcc-9" >> $GITHUB_ENV
           echo "CXX=g++-9" >> $GITHUB_ENV
-          echo ${{ matrix.cmakeargs }} > ${{ github.workspace }}/cmakeargs.txt
         if: matrix.os == 'macos-latest'
       - name: Configure MSVC console (Windows)
         if: matrix.os == 'windows-latest'
@@ -121,7 +119,6 @@ jobs:
           # Set these env vars so cmake picks the correct compiler
           echo "CXX=cl.exe" | Out-File -Append -FilePath $env:GITHUB_ENV -Encoding utf8
           echo "CC=cl.exe" | Out-File -Append -FilePath $env:GITHUB_ENV -Encoding utf8
-          echo "${{ matrix.cmakeargs }}" | Out-File -Append -FilePath ${{ github.workspace }}/cmakeargs.txt -Encoding utf8
         if: matrix.os == 'windows-latest'
       - name: Run CMake+Ninja
         uses: lukka/run-cmake@v3
@@ -192,8 +189,6 @@ jobs:
         run: |
           python -m pip install cibuildwheel==1.6.3
       - name: Build wheels
-        env:
-          CIBW_ENVIRONMENT: "CMAKEARGSFILE=\"${{ runner.workspace }}/cmakeargs.txt\""
         run: |
           python -m cibuildwheel --output-dir wheelhouse
       - uses: actions/upload-artifact@v2

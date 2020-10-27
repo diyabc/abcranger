@@ -6,14 +6,18 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-if sys.platform == "linux":
-    configure_opts = ["""-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=TRUE -DMAKE_STATIC_EXE:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/mkl/lib/intel64 '-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' '-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja"""]
-elif sys.platform == "darwin":
-    configure_opts = ["""-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja"""]
-elif sys.platform == "win32":
-    configure_opts = ["""-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DMAKE_STATIC_EXE:BOOL=TRUE -DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja"""]
 if((len(sys.argv) > 1) and (sys.argv[1] == "sdist")):
     configure_opts = ["""-DCMAKE_BUILD_TYPE:STRING=Release -G Ninja ../"""]
+elif sys.platform == "linux":
+    configure_opts = ["""-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=TRUE  -DMAKE_STATIC_EXE:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/mkl/lib/intel64 '-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' '-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja"""]
+elif sys.platform == "darwin":
+    configure_opts = ["-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja"]
+elif sys.platform == "win32":
+    configure_opts = ["-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DMAKE_STATIC_EXE:BOOL=TRUE -DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja"]
+else:
+    exit(1)
+
+print("configure_opts : ", configure_opts[0])
 
 setup(
     name="pyabcranger",

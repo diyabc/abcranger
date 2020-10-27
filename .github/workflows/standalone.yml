@@ -76,8 +76,8 @@ jobs:
       - name: restore/cache vcpkg/macos
         uses: actions/cache@v2
         with:
-          path: /home/runner/.local/share/pmm
-          key: macos-vcpkg2-${{ env.VCPKG_REVISION }}
+          path: /Users/runner/.local/share/pmm
+          key: macos-vcpkg3-${{ env.VCPKG_REVISION }}
         if: matrix.os == 'macos-latest'
       - name: restore/cache vcpkg/windows
         uses: actions/cache@v2
@@ -121,7 +121,7 @@ jobs:
           # Set these env vars so cmake picks the correct compiler
           echo "CXX=cl.exe" | Out-File -Append -FilePath $env:GITHUB_ENV -Encoding utf8
           echo "CC=cl.exe" | Out-File -Append -FilePath $env:GITHUB_ENV -Encoding utf8
-          echo ${{ matrix.cmakeargs }} | Out-File -Append -FilePath ${{ github.workspace }}/cmakeargs.txt -Encoding utf8
+          echo "${{ matrix.cmakeargs }}" | Out-File -Append -FilePath ${{ github.workspace }}/cmakeargs.txt -Encoding utf8
         if: matrix.os == 'windows-latest'
       - name: Run CMake+Ninja
         uses: lukka/run-cmake@v3
@@ -193,7 +193,7 @@ jobs:
           python -m pip install cibuildwheel==1.6.3
       - name: Build wheels
         env:
-          CIBW_ENVIRONMENT: "BUILDDIR=${{ runner.workspace }}/b/ninja CMAKEARGSFILE=${{ runner.workspace }}/cmakeargs.txt"
+          CIBW_ENVIRONMENT: "CMAKEARGSFILE=\"${{ runner.workspace }}/cmakeargs.txt\""
         run: |
           python -m cibuildwheel --output-dir wheelhouse
       - uses: actions/upload-artifact@v2

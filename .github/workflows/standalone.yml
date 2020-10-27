@@ -191,10 +191,10 @@ jobs:
       - name: Install cibuildwheel
         run: |
           python -m pip install cibuildwheel==1.6.3
-      - name: Install Visual C++ for Python 2.7
+      - name: Install vswhere for windows
         if: runner.os == 'Windows'
         run: |
-          choco install vcpython27 -f -y
+          python -m pip install vswhere
       - name: Build wheels
         env:
           CIBW_ENVIRONMENT: "BUILDDIR=${{ runner.workspace }}/b/ninja CMAKEARGSFILE=${{ runner.workspace }}/cmakeargs.txt"

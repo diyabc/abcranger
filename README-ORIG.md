@@ -13,7 +13,6 @@ toc-depth: 1
 
 [![PyPI](https://img.shields.io/pypi/v/pyabcranger.svg)](https://pypi.python.org/pypi/pyabcranger)
 [![abcranger-build](https://github.com/diyabc/abcranger/workflows/abcranger-build/badge.svg)]()
-[![Build](https://github.com/diyabc/abcranger/workflows/Build%20and%20upload%20to%20PyPI/badge.svg)](https://github.com/diyabc/abcranger/actions?query=workflow%3ABuild+branch%3Amaster) 
 
 Random forests methodologies for :
 

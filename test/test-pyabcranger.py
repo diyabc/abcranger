@@ -10,8 +10,8 @@ import numpy as np
 f = h5py.File('reftable.h5','r')
 statobs = np.loadtxt('statobsRF.txt',skiprows=2)
 
-stats_mc = np.transpose(f['stats'])
-params_mc = np.transpose(f['params'])
+stats_mc = np.array(f['stats'])
+params_mc = np.array(f['params'])
 
 rf_mc = pyabcranger.reftable(
     f['nrec'][0],
@@ -24,6 +24,21 @@ rf_mc = pyabcranger.reftable(
     f['scenarios']
     )
 
+selected = np.array(f['scenarios']) == 3
+stats_ep = np.array(f['stats'][selected,:],)
+params_ep = np.array(f['params'][selected,:])
+
+rf_ep = pyabcranger.reftable(
+    np.sum(selected),
+    f['nrecscen'],
+    f['nparam'],
+    f['params'].attrs['params_names'],
+    f['stats'].attrs['stats_names'],
+    stats_ep,
+    params_ep,
+    f['scenarios']
+    )
+
 def test_modelchoice():
     """Run basic Model choice example
     """
@@ -32,21 +47,21 @@ def test_modelchoice():
     postres = pyabcranger.modelchoice(rf_mc, statobs,"",False)
     assert len(postres.votes) == 6
 
-# def test_estimparam(path):
-#     """Run basic Parameter estimation example
-#     """
-#     for filePath in glob.glob('estimparam_out.*'):
-#         os.remove(filePath)
-#     subprocess.call([path,"--parameter","ra","--chosenscen","3","--noob","50"])
+def test_estimparam(path):
+    """Run basic Parameter estimation example
+    """
+    for filePath in glob.glob('estimparam_out.*'):
+        os.remove(filePath)
+    pyabcranger.estimparam(rf_ep,statobs,"--parameter ra --chosenscen 3 --noob 50",False,False)
 
-# def test_parallel(path):
-#     """Check multithreaded performance
-#     """
-#     for filePath in glob.glob('estimparam_out.*'):
-#         os.remove(filePath)
-#     time1 = time.time()
-#     subprocess.call([path,"--parameter","ra","--chosenscen","3","--noob","50","-j","1"])
-#     time2 = time.time()
-#     subprocess.call([path,"--parameter","ra","--chosenscen","3","--noob","50","-j","8"])
-#     time3 = time.time()
-#     assert (time2-time1) > 1.5 * (time3 - time2)
+def test_parallel(path):
+    """Check multithreaded performance
+    """
+    for filePath in glob.glob('estimparam_out.*'):
+        os.remove(filePath)
+    time1 = time.time()
+    pyabcranger.estimparam(rf_ep,statobs,"--parameter ra --chosenscen 3 --noob 50 --threads 1",False,False)
+    time2 = time.time()
+    pyabcranger.estimparam(rf_ep,statobs,"--parameter ra --chosenscen 3 --noob 50 --threads 8",False,False)
+    time3 = time.time()
+    assert (time2-time1) > 1.5 * (time3 - time2)

@@ -138,7 +138,7 @@ void tqdm::progress(int curr, int tot)  {
         if (use_colors) std::cout << "\033[1m\033[31m";
         // if (use_colors) printf("\033[1m\033[31m");
 
-        fmt::fprintf(std::cout,"%4.1f%% ", pct); // TOCONVERT
+        std::cout << fmt::sprintf("%4.1f%% ", pct); // TOCONVERT
         if (use_colors) std::cout << "\033[34m";
         // if (use_colors) printf("\033[34m");
 
@@ -149,7 +149,7 @@ void tqdm::progress(int curr, int tot)  {
         } else if (avgrate > 1e3) {
             unit = "kHz"; div = 1.0e3;
         }
-        fmt::fprintf(std::cout,"[%4d/%4d | %3.1f %s | %.0fs<%.0fs] ", curr,tot,  avgrate/div, unit.c_str(), dt_tot, peta); // TOCONVERT
+        std::cout << fmt::sprintf("[%4d/%4d | %3.1f %s | %.0fs<%.0fs] ", curr,tot,  avgrate/div, unit.c_str(), dt_tot, peta); // TOCONVERT
         std::cout << label << " ";
         // printf("%s ", label.c_str());
         if (use_colors) std::cout << "\033[0m\033[32m\033[0m\015 ";

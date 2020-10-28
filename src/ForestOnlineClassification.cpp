@@ -171,9 +171,9 @@ void ForestOnlineClassification::calculateAfterGrow(size_t tree_idx, bool oob) {
         auto res = static_cast<size_t>(getTreePrediction(tree_idx, sample_idx));
         mutex_post.lock();
         ++class_counts[sampleID][res];
-        mutex_post.unlock();
         if (!class_counts[sampleID].empty())
           to_add += (mostFrequentValue(class_counts[sampleID], random_number_generator) == data->get(sampleID,dependent_varID)) ? 0.0 : 1.0;
+        mutex_post.unlock();
       }
       predictions[2][0][tree_idx] += to_add/static_cast<double>(numOOB);
     // for (size_t sample_idx = 0; sample_idx < num_samples; sample_idx++) {

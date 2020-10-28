@@ -12,7 +12,7 @@ env:
   CIBW_BEFORE_BUILD: pip install cmaketools cmake ninja vswhere
   CIBW_BEFORE_TEST: pip install pytest h5py
   CIBW_TEST_REQUIRES: pytest h5py
-  CIBW_TEST_COMMAND: pytest {project}/test/test-pyabcranger.py
+  CIBW_TEST_COMMAND: pytest {project}/test/test-pyabcranger.py -v
 
 jobs:
   create_release:

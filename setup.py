@@ -19,7 +19,7 @@ else:
 
 setup(
     name="pyabcranger",
-    version="0.0.37",
+    version="0.0.45",
     author="François-David Collin",
     author_email="fradav@gmail.com",
     description="ABC random forests for model choice and parameter estimation, python wrapper",
@@ -30,6 +30,7 @@ setup(
     src_dir="src",
     ext_module_hint=r"pybind11_add_module",
     generator="Ninja",
+    config="Release",
     has_package_data=False,
     packages=["pyabcranger"],
     configure_opts=configure_opts,

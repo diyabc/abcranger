@@ -19,7 +19,7 @@ else:
 
 setup(
     name="pyabcranger",
-    version="0.0.45",
+    version="0.0.46",
     author="François-David Collin",
     author_email="fradav@gmail.com",
     description="ABC random forests for model choice and parameter estimation, python wrapper",

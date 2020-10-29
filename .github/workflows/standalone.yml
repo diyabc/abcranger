@@ -132,6 +132,10 @@ jobs:
           buildWithCMake: true
           buildDirectory: ${{ runner.workspace }}/b/ninja/
           cmakeAppendedArgs: '${{ matrix.cmakeargs }}'
+      - uses: actions/setup-python@v2
+        name: Install Python
+        with:
+          python-version: '3.x'
       - name: Minimal tests
         run: |
           python -m pip install pytest

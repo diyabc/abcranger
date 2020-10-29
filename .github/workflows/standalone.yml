@@ -111,10 +111,6 @@ jobs:
       - name: setup MacOS
         run: |
           brew install ninja
-          echo "CFLAGS=-static-libgcc" >> $GITHUB_ENV
-          echo "CXXFLAGS=-static-libstdc++ -static-libgcc" >> $GITHUB_ENV
-          echo "CC=gcc-9" >> $GITHUB_ENV
-          echo "CXX=g++-9" >> $GITHUB_ENV
         if: matrix.os == 'macos-latest'
       - name: Configure MSVC console (Windows)
         if: matrix.os == 'windows-latest'

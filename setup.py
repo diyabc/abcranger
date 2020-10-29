@@ -14,7 +14,7 @@ if((len(sys.argv) > 1) and (sys.argv[1] == "sdist")):
 elif sys.platform == "linux":
     configure_opts = ["-DPYABCRANGER=TRUE","-DUSE_MKL:BOOL=TRUE","-DMAKE_STATIC_EXE:BOOL=TRUE","-DLAPACK_ROOT:STRING=/opt/intel/mkl/lib/intel64","-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl","-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl"]
 elif sys.platform == "darwin":
-    configure_opts = ["-DPYBIND11_PYTHON_VERSION="+pythonversion","-DPYABCRANGER=TRUE","-DUSE_MKL:BOOL=FALSE","-DCMAKE_BUILD_TYPE:STRING=Release"]
+    configure_opts = ["-DPYBIND11_PYTHON_VERSION="+pythonversion,"-DPYABCRANGER=TRUE","-DUSE_MKL:BOOL=FALSE","-DCMAKE_BUILD_TYPE:STRING=Release"]
 elif sys.platform == "win32":
     configure_opts = ["-DPYABCRANGER=TRUE","-DUSE_MKL:BOOL=FALSE","-DMAKE_STATIC_EXE:BOOL=TRUE","-DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static"]
 else:

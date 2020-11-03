@@ -439,35 +439,35 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
 
     // Pour Arnaud :
     // Mean_point_estimate    Median_point_estimate    5%_quantile        95%_quantile        global_prior_NMAE_from_Mean        global_prior_NMAE_from_Median        local_posterior_NMAE_from_Mean       local_posterior_NMAE_from_ Median     90%_COVERAGE
-    // std::ofstream mer_file;
-    // if (!quiet) {
-    //     const std::string& mer_filename = outfile + ".revision_MER";
+    std::ofstream mer_file;
+    if (!quiet) {
+        const std::string& mer_filename = outfile + ".revision_MER";
 
-    //     mer_file.open(mer_filename, std::ios::out);
-    //     if (!mer_file.good()) {
-    //         throw std::runtime_error("Could not write to MER file: " + mer_filename + ".");
-    //     }
-    //     mer_file << fmt::format("{:>33}","Mean_point_estimate");
-    //     mer_file << fmt::format("{:>33}","Median_point_estimate");
-    //     mer_file << fmt::format("{:>33}","5%_quantile");
-    //     mer_file << fmt::format("{:>33}","95%_quantile");
-    //     mer_file << fmt::format("{:>33}","global_prior_NMAE_from_Mean");
-    //     mer_file << fmt::format("{:>33}","global_prior_NMAE_from_Median");
-    //     mer_file << fmt::format("{:>33}","local_posterior_NMAE_from_Mean");
-    //     mer_file << fmt::format("{:>33}","local_posterior_NMAE_from_Median");
-    //     mer_file << fmt::format("{:>33}","90%_COVERAGE");
-    //     mer_file << endl;
-    //     mer_file << fmt::format("{:>33.6f}",expectation);
-    //     mer_file << fmt::format("{:>33.6f}",quants[1]);
-    //     mer_file << fmt::format("{:>33.6f}",quants[0]);
-    //     mer_file << fmt::format("{:>33.6f}",quants[2]);
-    //     mer_file << fmt::format("{:>33.6f}",res.errors["global"]["mean"]["NMAE"]);
-    //     mer_file << fmt::format("{:>33.6f}",res.errors["global"]["median"]["NMAE"]);
-    //     mer_file << fmt::format("{:>33.6f}",res.errors["local"]["mean"]["NMAE"]);
-    //     mer_file << fmt::format("{:>33.6f}",res.errors["local"]["median"]["NMAE"]);
-    //     mer_file << fmt::format("{:>33.6f}",res.errors["global"]["ci"]["cov"]);
-    //     mer_file << endl;        
-    // }
+        mer_file.open(mer_filename, std::ios::out);
+        if (!mer_file.good()) {
+            throw std::runtime_error("Could not write to MER file: " + mer_filename + ".");
+        }
+        mer_file << fmt::format("{:>33}","Mean_point_estimate");
+        mer_file << fmt::format("{:>33}","Median_point_estimate");
+        mer_file << fmt::format("{:>33}","5%_quantile");
+        mer_file << fmt::format("{:>33}","95%_quantile");
+        mer_file << fmt::format("{:>33}","global_prior_NMAE_from_Mean");
+        mer_file << fmt::format("{:>33}","global_prior_NMAE_from_Median");
+        mer_file << fmt::format("{:>33}","local_posterior_NMAE_from_Mean");
+        mer_file << fmt::format("{:>33}","local_posterior_NMAE_from_Median");
+        mer_file << fmt::format("{:>33}","90%_COVERAGE");
+        mer_file << endl;
+        mer_file << fmt::format("{:>33.6f}",expectation);
+        mer_file << fmt::format("{:>33.6f}",quants[1]);
+        mer_file << fmt::format("{:>33.6f}",quants[0]);
+        mer_file << fmt::format("{:>33.6f}",quants[2]);
+        mer_file << fmt::format("{:>33.6f}",res.errors["global"]["mean"]["NMAE"]);
+        mer_file << fmt::format("{:>33.6f}",res.errors["global"]["median"]["NMAE"]);
+        mer_file << fmt::format("{:>33.6f}",res.errors["local"]["mean"]["NMAE"]);
+        mer_file << fmt::format("{:>33.6f}",res.errors["local"]["median"]["NMAE"]);
+        mer_file << fmt::format("{:>33.6f}",res.errors["global"]["ci"]["cov"]);
+        mer_file << endl;        
+    }
 
     return res;
 }

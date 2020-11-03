@@ -247,29 +247,29 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
 
     // Pour Arnaud
     // Global_error_rate    Local_error rate*    Vote_S1   Vote_S2    Vote_S2    Vote_S3    Vote_S5    Vote_S6   Posterior_probability_S3(best)
-    // std::ofstream mer_file;
-    // if (!quiet) {
-    //     const std::string& mer_filename = outfile + ".revision_MER";
+    std::ofstream mer_file;
+    if (!quiet) {
+        const std::string& mer_filename = outfile + ".revision_MER";
 
-    //     mer_file.open(mer_filename, std::ios::out);
-    //     if (!mer_file.good()) {
-    //         throw std::runtime_error("Could not write to MER file: " + mer_filename + ".");
-    //     }
-    //     mer_file << fmt::format("Global_error_rate");
-    //     mer_file << fmt::format(" Local_error_rate");            
-    //     for(auto i = 0; i < votes.size(); i++) {
-    //         mer_file << fmt::format("{:>13}",fmt::format("Vote_S{0}",i+1));
-    //     }
-    //     mer_file << fmt::format("{:>32}\n",fmt::format("Posterior_probability_S{0}(best)",predicted_model + 1));
-    //     mer_file << fmt::format("{:17.3f}",res.ntree_oob_error[ntree-1]);
-    //     mer_file << fmt::format("{:17.3f}",1-res.post_proba);
-    //     for(auto i = 0; i < votes.size(); i++) {
-    //         mer_file << fmt::format("{:>13}",votes[i]);
-    //     }
-    //     mer_file << fmt::format("{:32.3f}\n",res.post_proba);
-    //     mer_file.flush();
-    //     mer_file.close();
-    // }
+        mer_file.open(mer_filename, std::ios::out);
+        if (!mer_file.good()) {
+            throw std::runtime_error("Could not write to MER file: " + mer_filename + ".");
+        }
+        mer_file << fmt::format("Global_error_rate");
+        mer_file << fmt::format(" Local_error_rate");            
+        for(auto i = 0; i < votes.size(); i++) {
+            mer_file << fmt::format("{:>13}",fmt::format("Vote_S{0}",i+1));
+        }
+        mer_file << fmt::format("{:>32}\n",fmt::format("Posterior_probability_S{0}(best)",predicted_model + 1));
+        mer_file << fmt::format("{:17.3f}",res.ntree_oob_error[ntree-1]);
+        mer_file << fmt::format("{:17.3f}",1-res.post_proba);
+        for(auto i = 0; i < votes.size(); i++) {
+            mer_file << fmt::format("{:>13}",votes[i]);
+        }
+        mer_file << fmt::format("{:32.3f}\n",res.post_proba);
+        mer_file.flush();
+        mer_file.close();
+    }
 
 
     return res;

@@ -226,6 +226,7 @@ jobs:
           path: dist/*.tar.gz
   upload_pypi:
     needs: [job, build_sdist]
+    if: "contains(toJSON(github.event.commits.*.message), '[pypi]')"
     runs-on: ubuntu-latest
     # upload to PyPI on every tag starting with 'v'
     # if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')

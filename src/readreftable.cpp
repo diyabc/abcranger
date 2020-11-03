@@ -153,14 +153,15 @@ Reftable<MatrixXd> readreftable(std::string headerpath, std::string reftablepath
             | ranges::views::split(';')
             | ranges::views::transform([](auto&& s) { return s 
                 | ranges::views::split(',') 
-                | ranges::views::transform([](auto&& si){ return si | ranges::to<std::string>; }); 
+                | ranges::views::transform([](auto&& si){ return std::stoi(si | ranges::to<std::string>); })
+                | ranges::to<std::vector>; 
                     }
                 )
             | ranges::views::enumerate
             | ranges::to<std::vector>;
         for(auto&& s: groupstr) 
             for(auto&& si: s.second)
-                groups[std::stoi(si)-1] = static_cast<double>(s.first + 1);
+                groups[si-1] = static_cast<double>(s.first + 1);
         
 
         std::vector<size_t> new_nrecscen = std::vector<size_t>(groupstr.size());

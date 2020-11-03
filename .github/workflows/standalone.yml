@@ -5,7 +5,7 @@ name: abcranger-build
 on: [push]
 
 env:
-  VCPKG_REVISION: "6185aa76504a5025f36754324abf307cc776f3da"
+  VCPKG_REVISION: "1be51cb4579e8f34317a0e53256095219ea85702"
   CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
   CIBW_SKIP: "cp27-* cp35-* cp39-* pp*  *-manylinux_i686 *-win32"
   CIBW_BEFORE_ALL_LINUX: bash presetup.sh
@@ -82,7 +82,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /Users/runner/.local/share/pmm
-          key: macos-vcpkg3-${{ env.VCPKG_REVISION }}
+          key: macos-vcpkg4-${{ env.VCPKG_REVISION }}
         if: matrix.os == 'macos-latest'
       - name: restore/cache vcpkg/windows
         uses: actions/cache@v2
@@ -111,10 +111,6 @@ jobs:
       - name: setup MacOS
         run: |
           brew install ninja
-          echo "CFLAGS=-static-libgcc" >> $GITHUB_ENV
-          echo "CXXFLAGS=-static-libstdc++ -static-libgcc" >> $GITHUB_ENV
-          echo "CC=gcc-9" >> $GITHUB_ENV
-          echo "CXX=g++-9" >> $GITHUB_ENV
         if: matrix.os == 'macos-latest'
       - name: Configure MSVC console (Windows)
         if: matrix.os == 'windows-latest'
@@ -139,12 +135,12 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.8'
+          python-version: '3.7'
       - name: Minimal tests
         run: |
           python -m pip install pytest
           pytest -s test/test.py --path ${{ runner.workspace }}/b/ninja/abcranger
-      - name: Failure
+      - name: Failure standalone
         if: failure() 
         uses: author/action-rollback@stable
         with:
@@ -196,6 +192,7 @@ jobs:
       - name: Build wheels
         run: |
           python -m cibuildwheel --output-dir wheelhouse
+      
       - uses: actions/upload-artifact@v2
         with:
           path: ./wheelhouse/*.whl
@@ -220,7 +217,10 @@ jobs:
         run: |
           pip install cmake ninja cmaketools wheel
           python setup.py sdist
-
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          path: dist/*.tar.gz
       - uses: actions/upload-artifact@v2
         with:
           path: dist/*.tar.gz

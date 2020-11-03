@@ -36,4 +36,6 @@ target_link_libraries(abcrangerlib fmt::fmt)
 #     generate_export_header(abcrangerlib)
 # endif()
 
-add_subdirectory(pyabcranger)
+if(PYABCRANGER)
+    add_subdirectory(pyabcranger)
+endif()

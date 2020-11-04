@@ -82,7 +82,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /Users/runner/.local/share/pmm
-          key: macos-vcpkg4-${{ env.VCPKG_REVISION }}
+          key: macos-vcpkg5-${{ env.VCPKG_REVISION }}
         if: matrix.os == 'macos-latest'
       - name: restore/cache vcpkg/windows
         uses: actions/cache@v2

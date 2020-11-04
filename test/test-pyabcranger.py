@@ -25,8 +25,8 @@ rf_mc = pyabcranger.reftable(
     )
 
 selected = np.array(f['scenarios']) == 3
-stats_ep = np.array(f['stats'][selected,:],)
-params_ep = np.array(f['params'][selected,:])
+stats_ep = np.array(stats_mc[selected,:])
+params_ep = np.array(params_mc[selected,:])
 
 rf_ep = pyabcranger.reftable(
     np.sum(selected),

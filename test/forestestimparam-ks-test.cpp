@@ -84,11 +84,11 @@ TEST_CASE("EstimParam KS distribution")
 
             auto res = EstimParam_fun(myread,statobs,opts,true);
             bar.progress(i,nrun);
-            expectations[i] = res.point_estimates["Expectation"];
-            variances[i] = res.point_estimates["Variance"];
-            quantiles1[i] = res.point_estimates["Quantile_0.05"];
-            quantiles2[i] = res.point_estimates["Median"];
-            quantiles3[i] = res.point_estimates["Quantile_0.95"];
+            expectations[i] = res.point_estimates[0]["Expectation"];
+            variances[i] = res.point_estimates[0]["Variance"];
+            quantiles1[i] = res.point_estimates[0]["Quantile_0.05"];
+            quantiles2[i] = res.point_estimates[0]["Median"];
+            quantiles3[i] = res.point_estimates[0]["Quantile_0.95"];
         }
         std::cout << std::endl;
 

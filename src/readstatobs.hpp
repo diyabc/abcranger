@@ -13,7 +13,7 @@ vector<double> readStatObs(const std::string &path) {
     ifstream statobsStream(path,ios::in);
     statobsStream >> noskipws;
     const std::string sS(istream_iterator<char>{statobsStream}, {});
-    const regex stat_re(R"#((-?\d+\.\d+)\w)#");    
+    const regex stat_re(R"#(\s(-?\d+\.\d+)\s)#");    
     sregex_token_iterator itstat(begin(sS), end(sS), stat_re, {1});
     vector<double> statobs;
     auto it = itstat;

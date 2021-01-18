@@ -13,7 +13,8 @@ add_definitions(-DRFTEST_TOLERANCE=${RFTEST_TOLERANCE})
 
 ### HDF5 et HighFive
 ### HDF5
-find_package(hdf5 CONFIG REQUIRED)
+# find_package(hdf5 CONFIG REQUIRED)
+find_package(HDF5 COMPONENTS CXX)
 find_package(HighFive CONFIG REQUIRED)
 
 find_package(Catch2 CONFIG REQUIRED)

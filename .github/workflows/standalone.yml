@@ -7,7 +7,7 @@ on: [push]
 env:
   VCPKG_REVISION: "1be51cb4579e8f34317a0e53256095219ea85702"
   CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-  CIBW_SKIP: "cp27-* cp35-* cp39-* pp*  *-manylinux_i686 *-win32"
+  CIBW_SKIP: "cp27-* cp35-* pp*  *-manylinux_i686 *-win32"
   CIBW_BEFORE_ALL_LINUX: bash presetup.sh
   CIBW_BEFORE_BUILD: pip install cmaketools cmake ninja vswhere
   CIBW_BEFORE_TEST: pip install pytest h5py

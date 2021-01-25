@@ -45,7 +45,7 @@ def test_modelchoice():
     for filePath in glob.glob('modelchoice_out.*'):
         os.remove(filePath)
     postres = pyabcranger.modelchoice(rf_mc, statobs,"",False)
-    assert len(postres.votes) == 6
+    assert len(postres.votes[0]) == 6
 
 def test_estimparam(path):
     """Run basic Parameter estimation example

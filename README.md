@@ -14,19 +14,23 @@
 
 Random forests methodologies for :
 
--   ABC model choice \[@pudlo2015reliable\]
--   ABC Bayesian parameter inference \[@raynal2016abc\]
+-   ABC model choice ([Pudlo et al. 2015](#ref-pudlo2015reliable))
+-   ABC Bayesian parameter inference ([Raynal et al.
+    2018](#ref-raynal2016abc))
 
 Libraries we use :
 
--   [Ranger](https://github.com/imbs-hl/ranger) \[@wright2015ranger\] :
-    we use our own fork and have tuned forests to do “online”[1]
-    computations (Growing trees AND making predictions in the same pass,
-    which removes the need of in-memory storage of the whole forest)[2].
--   [Eigen3](http://eigen.tuxfamily.org) \[@eigenweb\]
+-   [Ranger](https://github.com/imbs-hl/ranger) ([Wright and Ziegler
+    2015](#ref-wright2015ranger)) : we use our own fork and have tuned
+    forests to do “online”[1] computations (Growing trees AND making
+    predictions in the same pass, which removes the need of in-memory
+    storage of the whole forest)[2].
+-   [Eigen3](http://eigen.tuxfamily.org) ([Guennebaud, Jacob, and others
+    2010](#ref-eigenweb))
 
 As a mention, we use our own implementation of LDA and PLS from
-\[@friedman2001elements{81, 114}\].
+([Friedman, Hastie, and Tibshirani 2001, 1:81,
+114](#ref-friedman2001elements)).
 
 There is one set of binaries, which contains a Macos/Linux/Windows (x64
 only) binary for each platform. There are available within the
@@ -43,7 +47,7 @@ someone who might help you in those matters.
 The standalone is part of a specialized Population Genetics graphical
 interface [DIYABC-RF](https://diyabc.github.io/), with a (currently
 under review) submission to MER (Molecular Ecology Resources),
-\[@Collin\_2020\].
+([Francois David Collin et al. 2020](#ref-Collin_2020)).
 
 # Python
 
@@ -59,7 +63,8 @@ pip install pyabcranger
     ![MA(q)](https://latex.codecogs.com/png.latex?MA%28q%29 "MA(q)")](https://github.com/diyabc/abcranger/blob/master/notebooks/Toy%20example%20MA(q).ipynb)
 -   [Population genetics
     demo](https://github.com/diyabc/abcranger/blob/master/notebooks/Population%20genetics%20Demo.ipynb),
-    data from \[@Collin\_2020\], available
+    data from ([Francois David Collin et al. 2020](#ref-Collin_2020)),
+    available
     [there](https://github.com/diyabc/diyabc/tree/master/diyabc-tests/MER/modelchoice/IndSeq)
 
 # Usage
@@ -181,10 +186,10 @@ The median global/local statistics and confidence intervals (global)
 measures for parameter estimation need a number of OOB samples
 (`--noob`) to be reliable (typlially 30% of the size of the dataset is
 sufficient). Be aware than computing the whole set (i.e. assigning
-`--noob` the same than for `--nref`) for weights predictions
-\[@raynal2016abc\] could be very costly, memory and cpu-wise, if your
-dataset is large in number of samples, so it could be adviseable to
-compute them for only choose a subset of size `noob`.
+`--noob` the same than for `--nref`) for weights predictions ([Raynal et
+al. 2018](#ref-raynal2016abc)) could be very costly, memory and
+cpu-wise, if your dataset is large in number of samples, so it could be
+adviseable to compute them for only choose a subset of size `noob`.
 
 ## Example (parameter estimation)
 
@@ -258,7 +263,8 @@ if pls enabled :
     than ranger
 -   Make functional tests for the two methodologies
 -   Possible to use mondrian forests for online batches ? See
-    \[@lakshminarayanan2014mondrian\]
+    ([Lakshminarayanan, Roy, and Teh
+    2014](#ref-lakshminarayanan2014mondrian))
 
 # References
 
@@ -266,10 +272,85 @@ This have been the subject of a proceedings in [JOBIM
 2020](https://jobim2020.sciencesconf.org/),
 [PDF](https://hal.archives-ouvertes.fr/hal-02910067v2) and
 [video](https://relaiswebcasting.mediasite.com/mediasite/Play/8ddb4e40fc88422481f1494cf6af2bb71d?catalog=e534823f0c954836bf85bfa80af2290921)
-(in french), \[@collin:hal-02910067\].
+(in french), ([François-David Collin et al.
+2020](#ref-collin:hal-02910067)).
+
+<div id="refs" class="references csl-bib-body hanging-indent">
+
+<div id="ref-Collin_2020" class="csl-entry">
+
+Collin, Francois David, Ghislain Durif, Louis Raynal, Eric Lombaert,
+Mathieu Gautier, Renaud Vitalis, Jean Michel Marin, and Arnaud Estoup.
+2020. “Extending Approximate Bayesian Computation with Supervised
+Machine Learning to Infer Demographic History from Genetic Polymorphisms
+Using DIYABC Random Forest,” July.
+<https://doi.org/10.22541/au.159480722.26357192>.
+
+</div>
+
+<div id="ref-collin:hal-02910067" class="csl-entry">
+
+Collin, François-David, Arnaud Estoup, Jean-Michel Marin, and Louis
+Raynal. 2020. “<span class="nocase">Bringing ABC inference to the
+machine learning realm : AbcRanger, an optimized random forests library
+for ABC</span>.” In *JOBIM 2020*, 2020:66. JOBIM. Montpellier, France.
+<https://hal.archives-ouvertes.fr/hal-02910067>.
+
+</div>
+
+<div id="ref-friedman2001elements" class="csl-entry">
+
+Friedman, Jerome, Trevor Hastie, and Robert Tibshirani. 2001. *The
+Elements of Statistical Learning*. Vol. 1. 10. Springer series in
+statistics New York, NY, USA:
+
+</div>
+
+<div id="ref-eigenweb" class="csl-entry">
+
+Guennebaud, Gaël, Benoît Jacob, and others. 2010. “Eigen V3.”
+http://eigen.tuxfamily.org.
+
+</div>
+
+<div id="ref-lakshminarayanan2014mondrian" class="csl-entry">
+
+Lakshminarayanan, Balaji, Daniel M Roy, and Yee Whye Teh. 2014.
+“Mondrian Forests: Efficient Online Random Forests.” In *Advances in
+Neural Information Processing Systems*, 3140–48.
+
+</div>
+
+<div id="ref-pudlo2015reliable" class="csl-entry">
+
+Pudlo, Pierre, Jean-Michel Marin, Arnaud Estoup, Jean-Marie Cornuet,
+Mathieu Gautier, and Christian P Robert. 2015. “Reliable ABC Model
+Choice via Random Forests.” *Bioinformatics* 32 (6): 859–66.
+
+</div>
+
+<div id="ref-raynal2016abc" class="csl-entry">
+
+Raynal, Louis, Jean-Michel Marin, Pierre Pudlo, Mathieu Ribatet,
+Christian P Robert, and Arnaud Estoup. 2018. “<span class="nocase">ABC
+random forests for Bayesian parameter inference</span>.”
+*Bioinformatics* 35 (10): 1720–28.
+<https://doi.org/10.1093/bioinformatics/bty867>.
+
+</div>
+
+<div id="ref-wright2015ranger" class="csl-entry">
+
+Wright, Marvin N, and Andreas Ziegler. 2015. “Ranger: A Fast
+Implementation of Random Forests for High Dimensional Data in c++ and
+r.” *arXiv Preprint arXiv:1508.04409*.
+
+</div>
+
+</div>
 
 [1] The term “online” there and in the code has not the usual meaning it
-has, as coined in “online machine learning”. We still need the entire
+has, as coined in “online machine learning.” We still need the entire
 training data set at once. Our implementation is an “online” one not by
 the sequential order of the input data, but by the sequential order of
 computation of the trees in random forests, sequentially computed and

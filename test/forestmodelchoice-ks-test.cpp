@@ -64,7 +64,7 @@ TEST_CASE("ModelChoice KS test")
             bar.progress(i,nrun);
 
             auto res = ModelChoice_fun(myread,statobs,opts,true);
-            postprobas[i] = res.post_proba;
+            postprobas[i] = res.post_proba[0];
         }
         std::cout << std::endl;
         double D, pvalue;

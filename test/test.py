@@ -10,12 +10,26 @@ def test_modelchoice(path):
         os.remove(filePath)
     subprocess.run(path)
 
+def test_modelchoice_multi(path):
+    """Run basic multi target Model choice example
+    """
+    for filePath in glob.glob('modelchoice_out.*'):
+        os.remove(filePath)
+    subprocess.call([path,"-b","statobsRF2.txt"])
+
 def test_estimparam(path):
     """Run basic Parameter estimation example
     """
     for filePath in glob.glob('estimparam_out.*'):
         os.remove(filePath)
     subprocess.call([path,"--parameter","ra","--chosenscen","3","--noob","50"])
+
+def test_estimparam_multi(path):
+    """Run basic multi target Parameter estimation example
+    """
+    for filePath in glob.glob('estimparam_out.*'):
+        os.remove(filePath)
+    subprocess.call([path,"-b","statobsRF2.txt","--parameter","ra","--chosenscen","3","--noob","50"])
 
 def test_parallel(path):
     """Check multithreaded performance

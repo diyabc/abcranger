@@ -24,6 +24,16 @@ using namespace Eigen;
 using namespace std;
 using namespace ranges;
 
+template<class Derived>
+std::vector<size_t> filterConstantVars(const MatrixBase<Derived>& xr) {
+    auto meanr = xr.colwise().mean();
+    auto stdr = ((xr.rowwise() - meanr).array().square().colwise().sum() / (xr.rows() - 1)).sqrt();;
+    std::vector<size_t> validvars;
+    for(size_t i = 0; i< xr.cols(); i++) {
+        if (stdr(i) >= 1.0e-8) validvars.push_back(i);
+    }
+    return validvars;
+}
 
 template<class Derived, class OtherDerived>
 VectorXd pls(const MatrixBase<Derived>& x,

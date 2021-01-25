@@ -179,7 +179,7 @@ endif()
 
 if(TEST)
   add_subdirectory(test)
-  add_subdirectory(testpy)
+#  add_subdirectory(testpy)
 else()
   message("Skipping tests")
 endif()

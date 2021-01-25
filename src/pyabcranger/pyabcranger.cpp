@@ -62,14 +62,29 @@ ModelChoiceResults ModelChoice_fun_py(Reftable<py::EigenDRef<MatrixXd>> &reftabl
     return ModelChoice_fun(reftable,statobs,parseopt(options),quiet);
 }
 
+ModelChoiceResults ModelChoice_multi_fun_py(Reftable<py::EigenDRef<MatrixXd>> &reftable,
+                                   MatrixXd& statobs,
+                                   std::string options,
+                                   bool quiet = false) {
+    return ModelChoice_fun(reftable,statobs,parseopt(options),quiet);
+}
+
+EstimParamResults EstimParam_multi_fun_py(Reftable<py::EigenDRef<MatrixXd>> &reftable,
+                                   MatrixXd& statobs,
+                                   std::string options,
+                                   bool quiet = false,
+                                   bool weights = false) {
+    return EstimParam_fun(reftable,statobs,parseopt(options),quiet,weights);
+}
+
 EstimParamResults EstimParam_fun_py(Reftable<py::EigenDRef<MatrixXd>> &reftable,
                                    std::vector<double> statobs,
                                    std::string options,
                                    bool quiet = false,
                                    bool weights = false) {
     return EstimParam_fun(reftable,statobs,parseopt(options),quiet,weights);
-}
- 
+} 
+
 using namespace Eigen;
 
 PYBIND11_MODULE(pyabcranger, m) { 
@@ -101,7 +116,9 @@ PYBIND11_MODULE(pyabcranger, m) {
         .def_readwrite("errors",&EstimParamResults::errors);
 
     m.def("modelchoice", &ModelChoice_fun_py, py::call_guard<py::scoped_ostream_redirect,py::gil_scoped_release>());
+    m.def("modelchoice_multi", &ModelChoice_multi_fun_py, py::call_guard<py::scoped_ostream_redirect,py::gil_scoped_release>());
     m.def("estimparam", &EstimParam_fun_py, py::call_guard<py::scoped_ostream_redirect,py::gil_scoped_release>());
+    m.def("estimparam_multi", &EstimParam_multi_fun_py, py::call_guard<py::scoped_ostream_redirect,py::gil_scoped_release>());
     m.def("forestQuantiles_b", [](const std::vector<double>& obs, 
         const std::vector<std::vector<double>>& weights,
         const std::vector<double>& asked){

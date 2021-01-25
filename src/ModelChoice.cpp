@@ -21,7 +21,7 @@ using namespace ranges;
 
 template<class MatrixType>
 ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
-                                   std::vector<double> obs,
+                                   MatrixXd statobs,
                                    const cxxopts::ParseResult opts,
                                    bool quiet)
 {
@@ -43,12 +43,11 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
     std::vector<double> samplefract{std::min(1e5,static_cast<double>(myread.nrec))/static_cast<double>(myread.nrec)};
     auto nstat = myread.stats_names.size();
     size_t K = myread.nrecscen.size();
-    MatrixXd statobs(1, nstat);
     MatrixXd emptyrow(1,0);
+    size_t num_samples = statobs.rows();
 
     size_t n = myread.nrec;
 
-    statobs = Map<MatrixXd>(obs.data(), 1, nstat);
 
     MatrixXd data_extended(n,0);
 
@@ -92,7 +91,7 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
     for(auto i = 0; i < varwithouty.size(); i++) varwithouty[i] = myread.stats_names[i];
 
 
-    auto datastatobs = unique_cast<DataDense<MatrixXd>, Data>(std::make_unique<DataDense<MatrixXd>>(statobs, emptyrow, varwithouty, 1, varwithouty.size()));
+    auto datastatobs = unique_cast<DataDense<MatrixXd>, Data>(std::make_unique<DataDense<MatrixXd>>(statobs, emptyrow, varwithouty, num_samples, varwithouty.size()));
     auto datastats = unique_cast<DataDense<MatrixType>, Data>(std::make_unique<DataDense<MatrixType>>(myread.stats, data_extended, myread.stats_names, myread.nrec, myread.stats_names.size()));
     ForestOnlineClassification forestclass;
     forestclass.init("Y",                       // dependant variable
@@ -143,12 +142,13 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
     res.ntree_oob_error =  preds[2][0];
     if (!quiet) forestclass.writeOOBErrorFile();
 
-    vector<size_t> votes(K);
-    for(auto& tree_pred : preds[1][0]) votes[static_cast<size_t>(tree_pred-1)]++;
-    res.votes = votes;
-
-    size_t predicted_model = std::distance(votes.begin(),std::max_element(votes.begin(),votes.end()));
-    res.predicted_model = predicted_model;
+    size_t nobs = statobs.rows();
+    res.votes = std::vector<std::vector<size_t>>(num_samples,std::vector<size_t>(K));
+    res.predicted_model = std::vector<size_t>(num_samples);
+    for(auto i = 0; i <  num_samples; i++) {
+        for(auto& tree_pred : preds[1][i]) res.votes[i][static_cast<size_t>(tree_pred-1)]++;
+        res.predicted_model[i] = std::distance(res.votes[i].begin(),std::max_element(res.votes[i].begin(),res.votes[i].end()));
+    }
 
     size_t ycol = data_extended.cols() - 1;
 
@@ -219,20 +219,26 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
     myread.stats_names.resize(nstat);
 
     auto predserr = forestreg.getPredictions();
-    res.post_proba = predserr[1][0][0];
+    res.post_proba = std::vector<double>(num_samples);
+    for(auto i = 0; i < num_samples; i++) res.post_proba[i] = predserr[1][0][i];
     const std::string& predict_filename = outfile + ".predictions";
 
     std::ostringstream os;
-    for(auto i = 0; i < votes.size(); i++) {
+    if (num_samples > 1) os << fmt::format("{:>14}", "Target n°");
+    for(auto i = 0; i < K; i++) {
         os << fmt::format("{:>14}",fmt::format("votes model{0}",i+1));
     }
     os << fmt::format(" selected model");
-    os << fmt::format(" post proba\n");
-    for(auto i = 0; i < votes.size(); i++) {
-        os << fmt::format("{:>14}",votes[i]);
+    os << fmt::format("  post proba\n");
+    for (auto j = 0; j < num_samples; j++) {
+        if (num_samples > 1)
+            os << fmt::format("{:>14}", j + 1);
+        for(auto i = 0; i < K; i++) {
+            os << fmt::format(" {:>13}",res.votes[j][i]);
+        }
+        os << fmt::format("{:>15}", res.predicted_model[j] + 1);
+        os << fmt::format("{:12.3f}\n",res.post_proba[j]);
     }
-    os << fmt::format("{:>15}", predicted_model + 1);
-    os << fmt::format("{:11.3f}\n",res.post_proba);
     if (!quiet) std::cout << os.str();
     std::cout.flush();
 
@@ -276,6 +282,30 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
 
     return res;
 }
+
+template<class MatrixType>
+ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
+                                   std::vector<double> origobs,
+                                   const cxxopts::ParseResult opts,
+                                   bool quiet)
+{
+    auto nstat = myread.stats_names.size();
+    MatrixXd statobs(1, nstat);
+    statobs = Map<MatrixXd>(origobs.data(), 1, nstat);
+    return ModelChoice_fun(myread,statobs,opts,quiet);
+}
+
+template 
+ModelChoiceResults ModelChoice_fun(Reftable<MatrixXd> &myread,
+                                   MatrixXd obs,
+                                   const cxxopts::ParseResult opts,
+                                   bool quiet);
+
+template 
+ModelChoiceResults ModelChoice_fun(Reftable<Eigen::Ref<MatrixXd, 0, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>> &myread,
+                                   MatrixXd obs,
+                                   const cxxopts::ParseResult opts,
+                                   bool quiet);
 
 template 
 ModelChoiceResults ModelChoice_fun(Reftable<MatrixXd> &myread,

@@ -64,13 +64,27 @@ int main(int argc, char* argv[]) {
             chosenscen = static_cast<double>(opts["chosenscen"].as<size_t>());
 
             auto myread = readreftable_scen(headerfile, reftablefile, chosenscen, nref);
-            const auto statobs = readStatObs(statobsfile);
+            auto origobs = readStatObs(statobsfile);
+            size_t nstat = myread.stats_names.size();
+            size_t num_samples = origobs.size() / nstat;
+            if (((origobs.size() % nstat) != 0) || (num_samples < 1)) {
+                std::cout << "wrong number of summary statistics in statobs file." << std::endl;
+                exit(1);           
+            }       
+            MatrixXd statobs = Map<MatrixXd>(origobs.data(),nstat,num_samples).transpose();
             auto res = EstimParam_fun(myread, statobs, opts);
         } else {
             std::cout << "> Model Choice <" << std::endl;
             
             auto myread = readreftable(headerfile, reftablefile, nref, false, opts.count("g") > 0 ? opts["g"].as<std::string>() : "");
-            const auto statobs = readStatObs(statobsfile);
+            auto origobs = readStatObs(statobsfile);
+            size_t nstat = myread.stats_names.size();
+            size_t num_samples = origobs.size() / nstat;
+            if (((origobs.size() % nstat) != 0) || (num_samples < 1)) {
+                std::cout << "wrong number of summary statistics in statobs file." << std::endl;
+                exit(1);           
+            }       
+            MatrixXd statobs = Map<MatrixXd>(origobs.data(),nstat,num_samples).transpose();
             auto res = ModelChoice_fun(myread,statobs,opts);
 
         }

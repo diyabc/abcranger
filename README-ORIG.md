@@ -6,10 +6,7 @@ toc: true
 toc-depth: 1
 ---
 
-<!-- pandoc -f markdown README-ORIG.md -t gfm -o README.md --bibliography=ref.bib -s --toc --toc-depth=1 -->
-<!-- pandoc --atx-headers -f markdown README-ORIG.md -t gfm -o README.md --bibliography=ref.bib -s --toc --toc-depth=1 --webtex=https://latex.codecogs.com/png.latex? -->
-
-<!-- [![Build Status](https://travis-ci.com/fradav/abcranger.svg)](https://travis-ci.com/fradav/abcranger) -->
+<!-- pandoc -f markdown README-ORIG.md -t gfm -o README.md --citeproc -s --toc --toc-depth=1 --webtex -->
 
 [![PyPI](https://img.shields.io/pypi/v/pyabcranger.svg)](https://pypi.python.org/pypi/pyabcranger)
 [![abcranger-build](https://github.com/diyabc/abcranger/workflows/abcranger-build/badge.svg)](https://github.com/diyabc/abcranger/actions?query=workflow%3Aabcranger-build+branch%3Amaster)

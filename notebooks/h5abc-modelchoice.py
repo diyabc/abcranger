@@ -9,7 +9,6 @@ import numpy as np
 f = h5py.File('modelchoice-reftable.h5','r')
 statobs = np.loadtxt('modelchoice-statobs.txt',skiprows=2)
 
-
 # %%
 stats = np.transpose(f['stats'])
 params = np.transpose(f['params'])
@@ -29,4 +28,4 @@ rf = pyabcranger.reftable(
 # %%
 ntree = 500
 
-postres = pyabcranger.modelchoice(rf, statobs,"--ntree "+str(ntree),False)
+postres = pyabcranger.modelchoice(rf, statobs,"",False)

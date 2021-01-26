@@ -5,9 +5,7 @@
 -   [TODO](#todo)
 -   [References](#references)
 
-<!-- pandoc -f markdown README-ORIG.md -t gfm -o README.md --bibliography=ref.bib -s --toc --toc-depth=1 -->
-<!-- pandoc --atx-headers -f markdown README-ORIG.md -t gfm -o README.md --bibliography=ref.bib -s --toc --toc-depth=1 --webtex=https://latex.codecogs.com/png.latex? -->
-<!-- [![Build Status](https://travis-ci.com/fradav/abcranger.svg)](https://travis-ci.com/fradav/abcranger) -->
+<!-- pandoc -f markdown README-ORIG.md -t gfm -o README.md --citeproc -s --toc --toc-depth=1 --webtex -->
 
 [![PyPI](https://img.shields.io/pypi/v/pyabcranger.svg)](https://pypi.python.org/pypi/pyabcranger)
 [![abcranger-build](https://github.com/diyabc/abcranger/workflows/abcranger-build/badge.svg)](https://github.com/diyabc/abcranger/actions?query=workflow%3Aabcranger-build+branch%3Amaster)
@@ -46,8 +44,8 @@ someone who might help you in those matters.
 
 The standalone is part of a specialized Population Genetics graphical
 interface [DIYABC-RF](https://diyabc.github.io/), with a (currently
-under review) submission to MER (Molecular Ecology Resources),
-([Francois David Collin et al. 2020](#ref-Collin_2020)).
+under review) submission to MER (Molecular Ecology Resources), ([Collin,
+Durif, et al. 2020](#ref-Collin_2020)).
 
 # Python
 
@@ -63,7 +61,7 @@ pip install pyabcranger
     ![MA(q)](https://latex.codecogs.com/png.latex?MA%28q%29 "MA(q)")](https://github.com/diyabc/abcranger/blob/master/notebooks/Toy%20example%20MA(q).ipynb)
 -   [Population genetics
     demo](https://github.com/diyabc/abcranger/blob/master/notebooks/Population%20genetics%20Demo.ipynb),
-    data from ([Francois David Collin et al. 2020](#ref-Collin_2020)),
+    data from ([Collin, Durif, et al. 2020](#ref-Collin_2020)),
     available
     [there](https://github.com/diyabc/diyabc/tree/master/diyabc-tests/MER/modelchoice/IndSeq)
 
@@ -272,14 +270,13 @@ This have been the subject of a proceedings in [JOBIM
 2020](https://jobim2020.sciencesconf.org/),
 [PDF](https://hal.archives-ouvertes.fr/hal-02910067v2) and
 [video](https://relaiswebcasting.mediasite.com/mediasite/Play/8ddb4e40fc88422481f1494cf6af2bb71d?catalog=e534823f0c954836bf85bfa80af2290921)
-(in french), ([François-David Collin et al.
-2020](#ref-collin:hal-02910067)).
+(in french), ([Collin, Estoup, et al. 2020](#ref-collin:hal-02910067)).
 
 <div id="refs" class="references csl-bib-body hanging-indent">
 
 <div id="ref-Collin_2020" class="csl-entry">
 
-Collin, Francois David, Ghislain Durif, Louis Raynal, Eric Lombaert,
+Collin, François-David, Ghislain Durif, Louis Raynal, Eric Lombaert,
 Mathieu Gautier, Renaud Vitalis, Jean Michel Marin, and Arnaud Estoup.
 2020. “Extending Approximate Bayesian Computation with Supervised
 Machine Learning to Infer Demographic History from Genetic Polymorphisms

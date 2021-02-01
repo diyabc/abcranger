@@ -20,8 +20,8 @@ public:
   void writeOOBErrorFile();   
   void writeWeightsFile();
   void writeConfusionFile() override;
-  std::vector<std::pair<double,double>> getWeights();
-  // subset of oob for predictions
+  std::vector<std::pair<double,std::vector<double>>> getWeights();
+  // subset of oob for predictionsS
   std::map<size_t,size_t> oob_subset;
 
 private:

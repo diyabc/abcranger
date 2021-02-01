@@ -11,7 +11,7 @@ struct EstimParamResults
     std::vector<std::pair<std::string, double>> plsweights;
     std::vector<std::pair<std::string, double>> variable_importance;
     std::vector<double> ntree_oob_error;
-    std::vector<std::pair<double, double>> values_weights;
+    std::vector<std::pair<double, std::vector<double>>> values_weights;
     std::map<size_t, size_t> oob_map;
     Eigen::MatrixXd oob_weights;
     std::vector<std::map<std::string, double>> point_estimates;

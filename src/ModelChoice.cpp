@@ -79,7 +79,7 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
             toprint << ldastatobs, data_extended;
             toprint.conservativeResize(toprint.rows(), toprint.cols()+1);
             toprint.block(0,K-1,num_samples,1) = MatrixXd::Zero(num_samples,1);
-            for(auto i = 0; i < n; i++) toprint(num_samples+i,K-1) = myread.scenarios[i] + 1;  
+            for(auto i = 0; i < n; i++) toprint(num_samples+i,K-1) = myread.scenarios[i];  
             lda_file.open(lda_filename, std::ios::out);
             lda_file << "# First lines (" << num_samples << ") are observed data" << std::endl;
             lda_file << toprint << std::endl;

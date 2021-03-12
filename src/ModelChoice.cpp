@@ -19,7 +19,7 @@ using namespace ranger;
 using namespace Eigen;
 using namespace ranges;
 
-template<class MatrixType>
+template <class MatrixType>
 ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
                                    MatrixXd statobs,
                                    const cxxopts::ParseResult opts,
@@ -27,7 +27,7 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
 {
     size_t ntree, nthreads, noisecols, seed, minnodesize;
     std::string outfile;
-    bool lda,seeded;
+    bool lda, seeded;
 
     ntree = opts["t"].as<size_t>();
     nthreads = opts["j"].as<size_t>();
@@ -36,50 +36,55 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
     if (seeded)
         seed = opts["s"].as<size_t>();
     minnodesize = opts["m"].as<size_t>();
-    lda =  opts.count("nolinear") == 0;
+    lda = opts.count("nolinear") == 0;
     outfile = (opts.count("output") == 0) ? "modelchoice_out" : opts["o"].as<std::string>();
 
-
-    std::vector<double> samplefract{std::min(1e5,static_cast<double>(myread.nrec))/static_cast<double>(myread.nrec)};
+    std::vector<double> samplefract{std::min(1e5, static_cast<double>(myread.nrec)) / static_cast<double>(myread.nrec)};
     auto nstat = myread.stats_names.size();
     size_t K = myread.nrecscen.size();
-    MatrixXd emptyrow(1,0);
+    MatrixXd emptyrow(1, 0);
     size_t num_samples = statobs.rows();
 
     size_t n = myread.nrec;
 
+    MatrixXd data_extended(n, 0);
 
-    MatrixXd data_extended(n,0);
-
-    if (!quiet) {
-        const std::string& settings_filename = outfile + ".settings";
+    if (!quiet)
+    {
+        const std::string &settings_filename = outfile + ".settings";
         std::ofstream settings_file;
         settings_file.open(settings_filename, std::ios::out);
 
         settings_file << "Model choice analyses proceeded using: " << std::endl;
+        if (opts.count("g") > 0)
+            settings_file << "- Compared scenarios: " << opts["g"].as<std::string>() << std::endl;
         settings_file << "- " << myread.nrec << " simulated datasets" << std::endl;
         settings_file << "- " << ntree << " trees" << std::endl;
-        settings_file << "- " << "Minimum node size of " << (minnodesize == 0 ? 1 : minnodesize) << std::endl;
+        settings_file << "- "
+                      << "Minimum node size of " << (minnodesize == 0 ? 1 : minnodesize) << std::endl;
         settings_file << "- " << myread.stats.cols() << " summary statistics" << std::endl;
-        if (lda) {
+        if (lda)
+        {
             settings_file << "- " << (K - 1) << " axes of summary statistics LDA linear combination" << std::endl;
         }
         settings_file << "- " << noisecols << " noise variables" << std::endl;
         settings_file.close();
     }
 
-
-    if (lda) {
+    if (lda)
+    {
         addLda(myread, data_extended, statobs);
-        const std::string& lda_filename = outfile + ".lda";
+        const std::string &lda_filename = outfile + ".lda";
         std::ofstream lda_file;
-        if (!quiet) {
-            MatrixXd ldastatobs = statobs(all,lastN(K-1));
-            MatrixXd toprint(n+num_samples,K-1);
+        if (!quiet)
+        {
+            MatrixXd ldastatobs = statobs(all, lastN(K - 1));
+            MatrixXd toprint(n + num_samples, K - 1);
             toprint << ldastatobs, data_extended;
-            toprint.conservativeResize(toprint.rows(), toprint.cols()+1);
-            toprint.block(0,K-1,num_samples,1) = MatrixXd::Zero(num_samples,1);
-            for(auto i = 0; i < n; i++) toprint(num_samples+i,K-1) = myread.scenarios[i];  
+            toprint.conservativeResize(toprint.rows(), toprint.cols() + 1);
+            toprint.block(0, K - 1, num_samples, 1) = MatrixXd::Zero(num_samples, 1);
+            for (auto i = 0; i < n; i++)
+                toprint(num_samples + i, K - 1) = myread.scenarios[i];
             lda_file.open(lda_filename, std::ios::out);
             lda_file << "# First lines (" << num_samples << ") are observed data" << std::endl;
             lda_file << toprint << std::endl;
@@ -89,10 +94,10 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
 
     addNoise(myread, data_extended, statobs, noisecols);
 
-    addScen(myread,data_extended);
-    std::vector<string> varwithouty(myread.stats_names.size()-1);
-    for(auto i = 0; i < varwithouty.size(); i++) varwithouty[i] = myread.stats_names[i];
-
+    addScen(myread, data_extended);
+    std::vector<string> varwithouty(myread.stats_names.size() - 1);
+    for (auto i = 0; i < varwithouty.size(); i++)
+        varwithouty[i] = myread.stats_names[i];
 
     auto datastatobs = unique_cast<DataDense<MatrixXd>, Data>(std::make_unique<DataDense<MatrixXd>>(statobs, emptyrow, varwithouty, num_samples, varwithouty.size()));
     auto datastats = unique_cast<DataDense<MatrixType>, Data>(std::make_unique<DataDense<MatrixType>>(myread.stats, data_extended, myread.stats_names, myread.nrec, myread.stats_names.size()));
@@ -102,20 +107,20 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
                      std::move(datastats),      // data
                      std::move(datastatobs),    // predict
                      0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
-                     outfile,        // output file name prefix
+                     outfile,                   // output file name prefix
                      ntree,                     // number of trees
-                     (seeded ? seed : r()),                    // seed rd()
+                     (seeded ? seed : r()),     // seed rd()
                      nthreads,                  // number of threads
                      ranger::IMP_GINI,          // Default IMP_NONE
-                     minnodesize,                         // default min node size (classif = 1, regression 5)
+                     minnodesize,               // default min node size (classif = 1, regression 5)
                      "",                        // status variable name, only for survival
                      false,                     // prediction mode (true = predict)
                      true,                      // replace
                      std::vector<string>(0),    // unordered variables names
                      false,                     // memory_saving_splitting
                      DEFAULT_SPLITRULE,         // gini for classif variance for  regression
-                     true,                     // predict_all
-                     samplefract,   // sample_fraction 1 if replace else 0.632
+                     true,                      // predict_all
+                     samplefract,               // sample_fraction 1 if replace else 0.632
                      DEFAULT_ALPHA,             // alpha
                      DEFAULT_MINPROP,           // miniprop
                      false,                     // holdout
@@ -125,7 +130,8 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
                      DEFAULT_MAXDEPTH);         // max_depth
 
     ModelChoiceResults res;
-    if (!quiet) {
+    if (!quiet)
+    {
         forestclass.verbose_out = &std::cout;
         std::cout << "///////////////////////////////////////// First forest (training on ABC output)" << std::endl;
     }
@@ -137,33 +143,38 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
     res.oob_error = forestclass.getOverallPredictionError();
     // Confusion Matrix
     res.confusion_matrix = forestclass.getConfusion();
-    if (!quiet) forestclass.writeConfusionFile();
+    if (!quiet)
+        forestclass.writeConfusionFile();
     // Variable Importance
     res.variable_importance = forestclass.getImportance();
-    if (!quiet) forestclass.writeImportanceFile();
+    if (!quiet)
+        forestclass.writeImportanceFile();
     // OOB error by number of trees;
-    res.ntree_oob_error =  preds[2][0];
-    if (!quiet) forestclass.writeOOBErrorFile();
+    res.ntree_oob_error = preds[2][0];
+    if (!quiet)
+        forestclass.writeOOBErrorFile();
 
     size_t nobs = statobs.rows();
-    res.votes = std::vector<std::vector<size_t>>(num_samples,std::vector<size_t>(K));
+    res.votes = std::vector<std::vector<size_t>>(num_samples, std::vector<size_t>(K));
     res.predicted_model = std::vector<size_t>(num_samples);
-    for(auto i = 0; i <  num_samples; i++) {
-        for(auto& tree_pred : preds[1][i]) res.votes[i][static_cast<size_t>(tree_pred-1)]++;
-        res.predicted_model[i] = std::distance(res.votes[i].begin(),std::max_element(res.votes[i].begin(),res.votes[i].end()));
+    for (auto i = 0; i < num_samples; i++)
+    {
+        for (auto &tree_pred : preds[1][i])
+            res.votes[i][static_cast<size_t>(tree_pred - 1)]++;
+        res.predicted_model[i] = std::distance(res.votes[i].begin(), std::max_element(res.votes[i].begin(), res.votes[i].end()));
     }
 
     size_t ycol = data_extended.cols() - 1;
 
-    for(size_t i = 0; i < preds[0][0].size(); i++) 
+    for (size_t i = 0; i < preds[0][0].size(); i++)
         if (!std::isnan(preds[0][0][i]))
-            data_extended(i,ycol) = preds[0][0][i] == myread.scenarios[i] ? 1.0 : 0.0;
+            data_extended(i, ycol) = preds[0][0][i] == myread.scenarios[i] ? 1.0 : 0.0;
 
     // bool machin = false;
     auto dataptr = forestclass.releaseData();
-    auto& datareleased = static_cast<DataDense<MatrixType>&>(*dataptr.get());
+    auto &datareleased = static_cast<DataDense<MatrixType> &>(*dataptr.get());
     // size_t ycol = datareleased.getNumCols() - 1;
-    
+
     // for(size_t i = 0; i < preds[0][0].size(); i++) {
     //     if (!std::isnan(preds[0][0][i]))
     //         datareleased.set(ycol,i,preds[0][0][i] == myread.scenarios[i] ? 1.0 : 0.0, machin);
@@ -179,41 +190,42 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
     auto statobsreleased = forestclass.releasePred();
     ForestOnlineRegression forestreg;
 
+    forestreg.init("Y",                        // dependant variable
+                   MemoryMode::MEM_DOUBLE,     // memory mode double or float
+                   std::move(dataptr),         // data
+                   std::move(statobsreleased), // predict
+                   0,                          // mtry, if 0 sqrt(m -1) but should be m/3 in regression
+                   outfile,                    // output file name prefix
+                   ntree,                      // number of trees
+                   (seeded ? seed : r()),      // seed rd()
+                   nthreads,                   // number of threads
+                   DEFAULT_IMPORTANCE_MODE,    // Default IMP_NONE
+                   5,                          // default min node size (classif = 1, regression 5)
+                   "",                         // status variable name, only for survival
+                   false,                      // prediction mode (true = predict)
+                   true,                       // replace
+                   std::vector<string>(0),     // unordered variables names
+                   false,                      // memory_saving_splitting
+                   DEFAULT_SPLITRULE,          // gini for classif variance for  regression
+                   false,                      // predict_all
+                   samplefract,                // sample_fraction 1 if replace else 0.632
+                   DEFAULT_ALPHA,              // alpha
+                   DEFAULT_MINPROP,            // miniprop
+                   false,                      // holdout
+                   DEFAULT_PREDICTIONTYPE,     // prediction type
+                   DEFAULT_NUM_RANDOM_SPLITS,  // num_random_splits
+                   false,                      //order_snps
+                   DEFAULT_MAXDEPTH);
 
-    forestreg.init("Y",                       // dependant variable
-                     MemoryMode::MEM_DOUBLE,    // memory mode double or float
-                     std::move(dataptr),    // data
-                     std::move(statobsreleased),  // predict
-                     0,                         // mtry, if 0 sqrt(m -1) but should be m/3 in regression
-                     outfile,              // output file name prefix
-                     ntree,                     // number of trees
-                     (seeded ? seed : r()),                    // seed rd()
-                     nthreads,                  // number of threads
-                     DEFAULT_IMPORTANCE_MODE,  // Default IMP_NONE
-                     5,                         // default min node size (classif = 1, regression 5)
-                     "",                        // status variable name, only for survival
-                     false,                     // prediction mode (true = predict)
-                     true,                      // replace
-                     std::vector<string>(0),        // unordered variables names
-                     false,                     // memory_saving_splitting
-                     DEFAULT_SPLITRULE,         // gini for classif variance for  regression
-                     false,                     // predict_all
-                     samplefract,   // sample_fraction 1 if replace else 0.632
-                     DEFAULT_ALPHA,             // alpha
-                     DEFAULT_MINPROP,           // miniprop
-                     false,                     // holdout
-                     DEFAULT_PREDICTIONTYPE,    // prediction type
-                     DEFAULT_NUM_RANDOM_SPLITS, // num_random_splits
-                     false,                     //order_snps
-                     DEFAULT_MAXDEPTH);   
-
-    if (!quiet) forestreg.verbose_out = &std::cout;
-    if (!quiet) {
+    if (!quiet)
+        forestreg.verbose_out = &std::cout;
+    if (!quiet)
+    {
         forestclass.verbose_out = &std::cout;
         std::cout << "///////////////////////////////////////// Second forest (training on error)" << std::endl;
     }
 
-    forestreg.run(!quiet,true);
+    forestreg.run(!quiet, true);
 
     // auto dataptr2 = forestreg.releaseData();
     // auto& datareleased2 = static_cast<DataDense&>(*dataptr2.get());
@@ -223,32 +235,40 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
 
     auto predserr = forestreg.getPredictions();
     res.post_proba = std::vector<double>(num_samples);
-    for(auto i = 0; i < num_samples; i++) res.post_proba[i] = predserr[1][0][i];
-    const std::string& predict_filename = outfile + ".predictions";
+    for (auto i = 0; i < num_samples; i++)
+        res.post_proba[i] = predserr[1][0][i];
+    const std::string &predict_filename = outfile + ".predictions";
 
     std::ostringstream os;
-    if (num_samples > 1) os << fmt::format("{:>14}", "Target n°");
-    for(auto i = 0; i < K; i++) {
-        os << fmt::format("{:>14}",fmt::format("votes model{0}",i+1));
+    if (num_samples > 1)
+        os << fmt::format("{:>14}", "Target n°");
+    for (auto i = 0; i < K; i++)
+    {
+        os << fmt::format("{:>14}", fmt::format("votes model{0}", i + 1));
     }
     os << fmt::format(" selected model");
     os << fmt::format("  post proba\n");
-    for (auto j = 0; j < num_samples; j++) {
+    for (auto j = 0; j < num_samples; j++)
+    {
         if (num_samples > 1)
             os << fmt::format("{:>14}", j + 1);
-        for(auto i = 0; i < K; i++) {
-            os << fmt::format(" {:>13}",res.votes[j][i]);
+        for (auto i = 0; i < K; i++)
+        {
+            os << fmt::format(" {:>13}", res.votes[j][i]);
         }
         os << fmt::format("{:>15}", res.predicted_model[j] + 1);
-        os << fmt::format("{:12.3f}\n",res.post_proba[j]);
+        os << fmt::format("{:12.3f}\n", res.post_proba[j]);
     }
-    if (!quiet) std::cout << os.str();
+    if (!quiet)
+        std::cout << os.str();
     std::cout.flush();
 
     std::ofstream predict_file;
-    if (!quiet) {
+    if (!quiet)
+    {
         predict_file.open(predict_filename, std::ios::out);
-        if (!predict_file.good()) {
+        if (!predict_file.good())
+        {
             throw std::runtime_error("Could not write to prediction file: " + predict_filename + ".");
         }
         predict_file << os.str();
@@ -267,7 +287,7 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
     //         throw std::runtime_error("Could not write to MER file: " + mer_filename + ".");
     //     }
     //     mer_file << fmt::format("Global_error_rate");
-    //     mer_file << fmt::format(" Local_error_rate");            
+    //     mer_file << fmt::format(" Local_error_rate");
     //     for(auto i = 0; i < votes.size(); i++) {
     //         mer_file << fmt::format("{:>13}",fmt::format("Vote_S{0}",i+1));
     //     }
@@ -282,11 +302,10 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
     //     mer_file.close();
     // }
 
-
     return res;
 }
 
-template<class MatrixType>
+template <class MatrixType>
 ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
                                    std::vector<double> origobs,
                                    const cxxopts::ParseResult opts,
@@ -295,29 +314,25 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
     auto nstat = myread.stats_names.size();
     MatrixXd statobs(1, nstat);
     statobs = Map<MatrixXd>(origobs.data(), 1, nstat);
-    return ModelChoice_fun(myread,statobs,opts,quiet);
+    return ModelChoice_fun(myread, statobs, opts, quiet);
 }
 
-template 
-ModelChoiceResults ModelChoice_fun(Reftable<MatrixXd> &myread,
-                                   MatrixXd obs,
-                                   const cxxopts::ParseResult opts,
-                                   bool quiet);
+template ModelChoiceResults ModelChoice_fun(Reftable<MatrixXd> &myread,
+                                            MatrixXd obs,
+                                            const cxxopts::ParseResult opts,
+                                            bool quiet);
 
-template 
-ModelChoiceResults ModelChoice_fun(Reftable<Eigen::Ref<MatrixXd, 0, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>> &myread,
-                                   MatrixXd obs,
-                                   const cxxopts::ParseResult opts,
-                                   bool quiet);
+template ModelChoiceResults ModelChoice_fun(Reftable<Eigen::Ref<MatrixXd, 0, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>> &myread,
+                                            MatrixXd obs,
+                                            const cxxopts::ParseResult opts,
+                                            bool quiet);
 
-template 
-ModelChoiceResults ModelChoice_fun(Reftable<MatrixXd> &myread,
-                                   std::vector<double> obs,
-                                   const cxxopts::ParseResult opts,
-                                   bool quiet);
+template ModelChoiceResults ModelChoice_fun(Reftable<MatrixXd> &myread,
+                                            std::vector<double> obs,
+                                            const cxxopts::ParseResult opts,
+                                            bool quiet);
 
-template 
-ModelChoiceResults ModelChoice_fun(Reftable<Eigen::Ref<MatrixXd, 0, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>> &myread,
-                                   std::vector<double> obs,
-                                   const cxxopts::ParseResult opts,
-                                   bool quiet);
+template ModelChoiceResults ModelChoice_fun(Reftable<Eigen::Ref<MatrixXd, 0, Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>>> &myread,
+                                            std::vector<double> obs,
+                                            const cxxopts::ParseResult opts,
+                                            bool quiet);

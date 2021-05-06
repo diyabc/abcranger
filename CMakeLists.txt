@@ -52,14 +52,9 @@ else()
   target_link_libraries(ranger Threads::Threads)
 endif()
 
-
 project(abcranger VERSION 1.0.5 LANGUAGES CXX C)
 
 include(pmm.cmake)
-
-# if(MSVC)
-#   set(BOOSTREGEX "boost-regex")
-# endif()
 
 if(MSVC AND MAKE_STATIC_EXE)
   set(VCPKG_TARGET_TRIPLET "x64-windows-static")
@@ -84,9 +79,8 @@ pmm(
     # VERBOSE
     # DEBUG
     VCPKG
-        # REVISION e37cc662ee29852f45e85961124f62d91acb488a
-        REVISION 1be51cb4579e8f34317a0e53256095219ea85702
-        # REVISION 6185aa76504a5025f36754324abf307cc776f3da
+        # REVISION 1be51cb4579e8f34317a0e53256095219ea85702
+        REVISION ed54efbb16ae8a457296c7a7e1462a9f54571e94
         TRIPLET ${VCPKG_TARGET_TRIPLET}
         REQUIRES range-v3 catch2 cxxopts fmt  eigen3-head pybind11 ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"

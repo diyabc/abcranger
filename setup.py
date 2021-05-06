@@ -7,7 +7,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 python_version = str(sys.version_info.major) + "." + str(sys.version_info.minor)
-print("FUCKING PYTHON VERSION : " + python_version)
+print("PYTHON VERSION : " + python_version)
 
 if((len(sys.argv) > 1) and (sys.argv[1] == "sdist")):
     configure_opts = []

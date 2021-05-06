@@ -1,0 +1,13 @@
+  
+Package: rabcranger
+Type: Package
+Title: R-abcranger
+Version: 0.0.1
+Date: 2021-05-06
+Author: François-David Collin
+Maintainer: François-David Collin <Francois-David.Collin@umontpellier.fr>
+Description: R interface for abcranger methodologies 
+License: MIT
+Packaged: 2021-05-06 00:00:00 UTC;
+LinkingTo: Rcpp
+Depends: Rcpp

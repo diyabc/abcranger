@@ -39,3 +39,5 @@ target_link_libraries(abcrangerlib fmt::fmt)
 if(PYABCRANGER)
     add_subdirectory(pyabcranger)
 endif()
+
+add_subdirectory(rabcranger)

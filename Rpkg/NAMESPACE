@@ -1,0 +1,3 @@
+importFrom(Rcpp, loadModule)
+useDynLib(rabcranger)
+exportPattern("^[[:alpha:]]+")

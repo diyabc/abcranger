@@ -1,0 +1,15 @@
+set -x
+set -e
+
+which cmake
+
+cmake -H. -B_builds \
+    -DCMAKE_VERBOSE_MAKEFILE=ON \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=_install \
+    -DCMAKE_SHARED_LIBRARY_PREFIX_CXX=""
+
+cmake --build _build --target install --config Release
+
+cp _install/lib/rabcranger.so src/ || echo "Failed: rabcranger.so -> src"
+cp _install/lib/rabcranger.dylib src/rabcranger.so || echo "Failed: rabcranger.dylib -> src"

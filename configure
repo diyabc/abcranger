@@ -3,7 +3,7 @@ set -e
 
 which cmake
 
-cmake -H. -B_builds \
+cmake -H. -B_build \
     -DCMAKE_VERBOSE_MAKEFILE=ON \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=_install \

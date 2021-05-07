@@ -9,7 +9,11 @@ cmake -H. -B_build \
     -DCMAKE_INSTALL_PREFIX=_install \
     -DCMAKE_SHARED_LIBRARY_PREFIX_CXX=""
 
-cmake --build _build --target install --config Release
+cmake --build _build --target rabcranger --config Release
+cd _build/src/rabcranger
+make install
+cd ../../../
 
-cp _install/lib/rabcranger.so src/ || echo "Failed: rabcranger.so -> src"
+cp _install/lib/rabcranger.so src/rabcranger.so || echo "Failed: rabcranger.so -> src"
 cp _install/lib/rabcranger.dylib src/rabcranger.so || echo "Failed: rabcranger.dylib -> src"
+

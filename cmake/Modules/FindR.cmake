@@ -29,8 +29,10 @@
 
 set(TEMP_CMAKE_FIND_APPBUNDLE ${CMAKE_FIND_APPBUNDLE})
 set(CMAKE_FIND_APPBUNDLE "NEVER")
-find_program(R_COMMAND R DOC "R executable.")
+set(CMAKE_IGNORE_PATH ".")
+find_program(R_COMMAND R DOC "R executable." NO_SYSTEM_ENVIRONMENT_PATH)
 set(CMAKE_FIND_APPBUNDLE ${TEMP_CMAKE_FIND_APPBUNDLE})
+message("R_COMMAND : ${R_COMMAND}")
 
 if(NOT R_LIB_ARCH)
   set(R_LIB_ARCH "ThisPathNotExists")
@@ -41,6 +43,7 @@ if(R_COMMAND)
                   COMMAND ${R_COMMAND} RHOME
                   OUTPUT_VARIABLE R_ROOT_DIR
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message("R_ROOT_DIR : ${R_ROOT_DIR}")
   # deprecated
   if(VTK_R_HOME)
     set(R_HOME ${VTK_R_HOME} CACHE PATH "R home directory obtained from R RHOME")

@@ -1,4 +1,3 @@
-  
 Package: rabcranger
 Type: Package
 Title: R-abcranger
@@ -11,3 +10,6 @@ License: MIT
 Packaged: 2021-05-06 00:00:00 UTC;
 LinkingTo: Rcpp
 Depends: Rcpp
+Encoding: UTF-8
+Suggests: 
+    testthat

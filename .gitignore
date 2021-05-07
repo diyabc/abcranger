@@ -410,3 +410,5 @@ dist/
 .ipynb_checkpoints
 *-checkpoint.ipynb
 *.egg-info/
+_build/
+_library/

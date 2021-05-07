@@ -10,6 +10,6 @@ void foo_cpp_function(SEXP a, SEXP b) {
   UNPROTECT(2);
 }
 
-RCPP_MODULE(foomodule) {
+RCPP_MODULE(rabcranger) {
    Rcpp::function("foo_r_function", &foo_cpp_function) ;
 }

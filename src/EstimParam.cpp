@@ -25,6 +25,17 @@ using namespace ranger;
 using namespace Eigen;
 using namespace ranges;
 
+/**
+ * @brief Main parameter estimation
+ * 
+ * @tparam MatrixType 
+ * @param myread input reftable 
+ * @param statobs osbserved (possibly multiple)
+ * @param opts command line options
+ * @param quiet mute output
+ * @param weights if we should give weights
+ * @return EstimParamResults structured results
+ */
 template <class MatrixType>
 EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
                                  MatrixXd statobs,
@@ -100,7 +111,9 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
         MatrixXd Projection;
         RowVectorXd mean, std;
         size_t nComposante_sel;
-
+        if (!quiet) {
+            std::cout << "Computing PLS axis" << std::endl;
+        }
         const std::string &pls_filename = outfile + ".plsvar";
         std::ofstream pls_file;
         if (!quiet)
@@ -109,7 +122,9 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
         auto validvars = filterConstantVars(myread.stats);
         if (plsmaxvar == 0.0)
         {
-            std::cout << "Using elbow method for selecting PLS axes" << std::endl;
+            if (!quiet) {
+                std::cout << "Using elbow method for selecting PLS axes" << std::endl;
+            }
             VectorXd percentYvar = pls(myread.stats(all,validvars),
                                        y,
                                        (ncomp_total - (nstat - validvars.size())), Projection, mean, std, true);
@@ -138,7 +153,7 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
             }
 
         if (!quiet)
-            std::cout << "Selecting only " << nComposante_sel << " pls components." << std::endl;
+            std::cout << std::endl << "Selecting only " << nComposante_sel << " pls components." << std::endl;
 
         double sumPlsweights = Projection.col(0).array().abs().sum();
         auto weightedPlsfirst = Projection.col(0) / sumPlsweights;

@@ -25,6 +25,13 @@ using namespace Eigen;
 using namespace std;
 using namespace ranges;
 
+/**
+ * @brief filters out constant variables
+ * 
+ * @tparam Derived 
+ * @param xr table to filter
+ * @return std::vector<size_t> indexes of valid vars
+ */
 template<class Derived>
 std::vector<size_t> filterConstantVars(const MatrixBase<Derived>& xr) {
     RowVectorXd meanr = xr.colwise().mean();
@@ -34,10 +41,24 @@ std::vector<size_t> filterConstantVars(const MatrixBase<Derived>& xr) {
     for(size_t i = 0; i< xr.cols(); i++) {
         if (stdr(i) >= 1.0e-8) validvars[m++] = i;
     }
-    validvars.resize(m-1);
+    validvars.resize(m);
     return validvars;
 }
 
+/**
+ * @brief Apply PLS on x regarding y
+ * 
+ * @tparam Derived 
+ * @tparam OtherDerived 
+ * @param x input
+ * @param y output
+ * @param ncomp number of components expected
+ * @param Projection the projection matrix
+ * @param mean mean of variables in x
+ * @param std standard deviation of variables in x
+ * @param stopping elbow heuristic enabled
+ * @return VectorXd explained variance for each computed components
+ */
 template<class Derived, class OtherDerived>
 VectorXd pls(const MatrixBase<Derived>& x,
          const MatrixBase<OtherDerived>& y,
@@ -66,20 +87,21 @@ VectorXd pls(const MatrixBase<Derived>& x,
     double SSTO = (y.array() - ymean).array().square().sum();
     int m = 0;
     tqdm bar;
-    
+
     while (m < ncomp)
     {
         bar.progress(m,ncomp);
         // $w_{k}=\frac{X_{k-1}^{T} y_{k-1}}{\left\|X_{k-1}^{T} y_{k-1}\right\|}$ 
         w_k = X.transpose() * y;   //  (p)   
         w_k /= sqrt((w_k.transpose()*w_k)(0,0));
+        // $\mathbf{W}^{*}_{p \times K} = [w_1, \ldots, w_K]$
         Wstar.col(m) = w_k;
         // $t_{k}=X_{k-1}w_{k}$
         t_k = X * w_k; // (n)
         double t_k_s = (t_k.transpose() * t_k)(0,0);
         // $p_{k}=\frac{X_{k-1}^{T} t_{k}}{t_{k}^{T} t_{k}}$
         p_k = (X.transpose() * t_k) / t_k_s; // (p)
-        // $\widetilde{\mathbf{P}}_{K \times p}=\mathbf{t}\left[\widetilde{p}_{1}, \ldots, \widetilde{p}_{K}\right]$
+        // $\widetilde{\mathbf{P}}_{K \times p}=\mathbf{t}\left[p_{1}, \ldots, p_{K}\right]$
         Ptilde.row(m) = p_k.transpose();
         // $q_{k}=\frac{y_{k-1}^{T} t_{k}}{t_{k}^{T} t_{k}}$
         double q_k = (y_k.transpose() * t_k)(0,0) / t_k_s; //(n,n)
@@ -87,7 +109,12 @@ VectorXd pls(const MatrixBase<Derived>& x,
         y_k -= q_k * t_k;
         // $X_{k}=X_{k-1}-t_{k} p_{k}^{T}$
         X -= (t_k * p_k.transpose());
+
+        // $$Yvar^m = \frac{\sum_{i=1}^{N}{(\hat{y}^{m}_{i}-\bar{y})^2}}{\sum_{i=1}^{N}{(y_{i}-\hat{y})^2}}$$
         res(m) = 1 - (y_k.array() - ymean).array().square().sum() / SSTO;
+
+        // Elbow heuristic
+        // $$Yvar^m = \frac{\sum_{i=1}^{N}{(\hat{y}^{m}_{i}-\bar{y})^2}}{\sum_{i=1}^{N}{(y_{i}-\hat{y})^2}}$$
         if ((m >= 2) && stopping) {
             auto lastdiff = res(m) - res(m-1);
             auto lastmean = (res(m) + res(m-1))/2.0;
@@ -106,7 +133,8 @@ VectorXd pls(const MatrixBase<Derived>& x,
     }
 
     // $\mathbf{W}=\mathbf{W}^{*}\left(\widetilde{\mathbf{P}} \mathbf{W}^{*}\right)^{-1}$
-    Projection = Wstar*(Ptilde*Wstar).inverse();
+    auto solver = (Ptilde*Wstar).completeOrthogonalDecomposition();
+    Projection = Wstar*solver.pseudoInverse();
     return res;
 }
 

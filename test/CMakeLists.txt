@@ -40,12 +40,13 @@ target_sources(parse_parexpr-test PRIVATE ${ABCRANGER_SOURCE_DIR}/parse_parexpr.
 target_sources(quantile-test PRIVATE ${ABCRANGER_SOURCE_DIR}/forestQuantiles.cpp)
 target_sources(forestestimparam-ks-test PRIVATE ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp)
 target_sources(forestmodelchoice-ks-test PRIVATE ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp)
-
+target_sources(pls-eigen-test PRIVATE ${ABCRANGER_SOURCE_DIR}/tqdm.cpp)
 
 target_link_libraries(readreftable-test ${TBBLIB} ${BOOSTLIBS} HighFive hdf5::hdf5_cpp-static fmt::fmt)
 target_link_libraries(forestestimparam-ks-test ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt)
 target_link_libraries(forestmodelchoice-ks-test ${TBBLIB} cxxopts::cxxopts abcrangerlib fmt::fmt)
 target_link_libraries(cxxopts-test cxxopts::cxxopts)
+target_link_libraries(pls-eigen-test ${TBBLIB} fmt::fmt)
 
 target_sources(forestclass-test PRIVATE ${RANGER_SOURCE_DIR}/ForestClassification.cpp)
 target_sources(forestreg-test PRIVATE ${RANGER_SOURCE_DIR}/ForestRegression.cpp)

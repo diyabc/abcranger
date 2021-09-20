@@ -80,7 +80,7 @@ pmm(
     # DEBUG
     VCPKG
 #        REVISION 0bf3923f9fab4001c00f0f429682a0853b5749e0
-        REVISION 4428702c1c56fdb7cb779584efdcba254d7b57ca
+        REVISION 5568f110b509a9fd90711978a7cb76bae75bb092
         TRIPLET ${VCPKG_TARGET_TRIPLET}
         REQUIRES range-v3 catch2 cxxopts fmt  eigen3-head pybind11 ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"

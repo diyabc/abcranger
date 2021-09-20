@@ -75,6 +75,10 @@ if(TEST)
   set(TESTDEPS hdf5[cpp] highfive)
 endif()
 
+if(PYABCRANGER)
+    set(PYBIND11PKG pybind11)
+endif()
+
 pmm(
     # VERBOSE
     # DEBUG
@@ -82,7 +86,7 @@ pmm(
 #        REVISION 0bf3923f9fab4001c00f0f429682a0853b5749e0
         REVISION 5568f110b509a9fd90711978a7cb76bae75bb092
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt  eigen3-head pybind11 ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
+        REQUIRES range-v3 catch2 cxxopts fmt  eigen3-head ${PYBIND11PKG} ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
         PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
 )
 

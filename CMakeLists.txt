@@ -131,7 +131,8 @@ endif()
 add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING 
                 -D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING 
                 -D_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING
-                -D_CRT_SECURE_NO_WARNINGS)
+                -D_CRT_SECURE_NO_WARNINGS
+                -DNOMINMAX)
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 ### C++ Threads (required by ranger)

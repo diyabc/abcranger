@@ -7,7 +7,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 python_version = str(sys.version_info.major) + "." + str(sys.version_info.minor)
-print("FUCKING PYTHON VERSION : " + python_version)
+print("PYTHON VERSION : " + python_version)
 
 if((len(sys.argv) > 1) and (sys.argv[1] == "sdist")):
     configure_opts = []
@@ -22,7 +22,7 @@ else:
 
 setup(
     name="pyabcranger",
-    version="0.0.51",
+    version="0.0.52",
     author="François-David Collin",
     author_email="fradav@gmail.com",
     description="ABC random forests for model choice and parameter estimation, python wrapper",

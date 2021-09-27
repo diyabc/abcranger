@@ -1,4 +1,3 @@
-#define NOMINMAX
 #include "tqdm.hpp"
 #include <fmt/format.h>
 #include <fmt/printf.h>

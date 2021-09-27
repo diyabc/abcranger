@@ -7,7 +7,7 @@ on: [push]
 env:
   VCPKG_REVISION: "9d892ff9270f2d2fe3b8e490471f0a7dfa78981e"
   CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-  CIBW_SKIP: "cp27-* cp35-* cp36-macosx* pp*  *-manylinux_i686 *-win32"
+  CIBW_SKIP: "cp27-* cp35-* pp*  *-manylinux_i686 *-win32"
   CIBW_BEFORE_ALL_LINUX: bash presetup.sh
   CIBW_BEFORE_BUILD: pip install cmaketools cmake ninja vswhere
   CIBW_BEFORE_TEST: pip install pytest h5py
@@ -51,7 +51,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-11, windows-latest]
         include:
           - os: windows-latest
             shortos: windows
@@ -60,7 +60,7 @@ jobs:
             shortos: linux
             mkl-version: intel-mkl-64bit-2020.0-088
             cmakeargs: "-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=TRUE -DMAKE_STATIC_EXE:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/mkl/lib/intel64 '-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' '-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja"
-          - os: macos-latest
+          - os: macos-11
             shortos: macos
             cmakeargs: -DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja
     steps:
@@ -83,7 +83,7 @@ jobs:
         with:
           path: /Users/runner/.local/share/pmm
           key: macos-vcpkg5-${{ env.VCPKG_REVISION }}
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-11'
       - name: restore/cache vcpkg/windows
         uses: actions/cache@v2
         with:
@@ -110,8 +110,13 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
       - name: setup MacOS
         run: |
-          brew install ninja
-        if: matrix.os == 'macos-latest'
+          brew install ninja llvm
+          echo "CC=/usr/local/opt/llvm/bin/clang" >> $GITHUB_ENV
+          echo "CXX=/usr/local/opt/llvm/bin/clang++" >> $GITHUB_ENV
+          echo "LDFLAGS=\"-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib\"" >> $GITHUB_ENV
+          echo  "CPPFLAGS=-I/usr/local/opt/llvm/include" >> $GITHUB_ENV
+          echo  "CXXFLAGS=-stdlib=libc++" >> $GITHUB_ENV        
+        if: matrix.os == 'macos-11'
       - name: Configure MSVC console (Windows)
         if: matrix.os == 'windows-latest'
         uses: ilammy/msvc-dev-cmd@v1.4.1
@@ -135,7 +140,8 @@ jobs:
       - uses: actions/setup-python@v2
         name: Install Python
         with:
-          python-version: '3.7'
+          python-version: [ '3.6', '3.7', '3.8', '3.9' ]
+        if: matrix.os != 'ubuntu-latest'
       - name: Minimal tests
         run: |
           python -m pip install pytest
@@ -188,7 +194,7 @@ jobs:
         if: matrix.os == 'windows-latest'
       - name: Install cibuildwheel
         run: |
-          python -m pip install cibuildwheel==1.6.3
+          python -m pip install cibuildwheel
       - name: Build wheels
         run: |
           python -m cibuildwheel --output-dir wheelhouse

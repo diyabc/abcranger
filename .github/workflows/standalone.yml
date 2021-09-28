@@ -137,8 +137,6 @@ jobs:
           cmakeAppendedArgs: '${{ matrix.cmakeargs }}'
       - uses: actions/setup-python@v2
         name: Install Python
-        with:
-          python-version: "3.6, 3.7, 3.8, 3.9"
         if: matrix.os != 'ubuntu-latest'
       - name: Minimal tests
         run: |

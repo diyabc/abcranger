@@ -72,21 +72,25 @@ if(LAPACK_ROOT)
 endif()
 
 if(TEST)
-  set(TESTDEPS hdf5[cpp] highfive)
+  set(TESTDEPS hdf5[cpp] highfive[core])
 endif()
 
 if(PYABCRANGER)
+  if(UNIX AND NOT APPLE)
+    set(PYBIND11PKG pybind11)
+  else()
     set(PYBIND11PKG pybind11-nodep)
+  endif()
 endif()
 
 pmm(
     VERBOSE
     DEBUG
     VCPKG
-        REVISION 5568f110b509a9fd90711978a7cb76bae75bb092
+        REVISION ba5844bb05ed7da802a206ec0ed88ed069a0c623
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt  eigen3-head ${PYBIND11PKG} ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
-        PORTS "${PROJECT_SOURCE_DIR}/eigen3-head" "${PROJECT_SOURCE_DIR}/pybind11-nodep"
+        REQUIRES range-v3 catch2 cxxopts fmt  eigen3 ${PYBIND11PKG} ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
+        PORTS "${PROJECT_SOURCE_DIR}/pybind11-nodep"
 )
 
 if(MAKE_STATIC_EXE)

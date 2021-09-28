@@ -76,7 +76,7 @@ if(TEST)
 endif()
 
 if(PYABCRANGER)
-    set(PYBIND11PKG pybind11)
+    set(PYBIND11PKG pybind11-nodep)
 endif()
 
 pmm(
@@ -86,7 +86,7 @@ pmm(
         REVISION 5568f110b509a9fd90711978a7cb76bae75bb092
         TRIPLET ${VCPKG_TARGET_TRIPLET}
         REQUIRES range-v3 catch2 cxxopts fmt  eigen3-head ${PYBIND11PKG} ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
-        PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
+        PORTS "${PROJECT_SOURCE_DIR}/eigen3-head" "${PROJECT_SOURCE_DIR}/pybind11-nodep"
 )
 
 if(MAKE_STATIC_EXE)

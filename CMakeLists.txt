@@ -84,9 +84,10 @@ if(PYABCRANGER)
 endif()
 
 pmm(
-    VERBOSE
-    DEBUG
+    # VERBOSE
+    # DEBUG
     VCPKG
+        # https://github.com/microsoft/vcpkg/pull/19665
         REVISION ba5844bb05ed7da802a206ec0ed88ed069a0c623
         TRIPLET ${VCPKG_TARGET_TRIPLET}
         REQUIRES range-v3 catch2 cxxopts fmt  eigen3 ${PYBIND11PKG} ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}

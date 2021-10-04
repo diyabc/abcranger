@@ -5,7 +5,7 @@ name: abcranger-build
 on: [push]
 
 env:
-  VCPKG_REVISION: "5568f110b509a9fd90711978a7cb76bae75bb092"
+  VCPKG_REVISION: "ba5844bb05ed7da802a206ec0ed88ed069a0c623"
   CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
   CIBW_SKIP: "cp27-* cp35-* cp310-* pp*  *-manylinux_i686 *-win32"
   CIBW_BEFORE_ALL_LINUX: bash presetup.sh

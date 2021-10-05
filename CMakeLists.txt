@@ -84,8 +84,6 @@ if(PYABCRANGER)
 endif()
 
 pmm(
-    # VERBOSE
-    # DEBUG
     VCPKG
         # https://github.com/microsoft/vcpkg/pull/19665
         REVISION 35c98ef06265660f036a3156d7615c735a10087c

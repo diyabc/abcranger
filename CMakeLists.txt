@@ -72,19 +72,24 @@ if(LAPACK_ROOT)
 endif()
 
 if(TEST)
-  set(TESTDEPS hdf5[cpp] highfive)
+  set(TESTDEPS hdf5[cpp] highfive[core])
+endif()
+
+if(PYABCRANGER)
+  if(UNIX AND NOT APPLE)
+    set(PYBIND11PKG pybind11)
+  else()
+    set(PYBIND11PKG pybind11-nodep)
+  endif()
 endif()
 
 pmm(
-    # VERBOSE
-    # DEBUG
     VCPKG
-        # REVISION 1be51cb4579e8f34317a0e53256095219ea85702
-        # REVISION ed54efbb16ae8a457296c7a7e1462a9f54571e94
-        REVISION 5568f110b509a9fd90711978a7cb76bae75bb092
+        # https://github.com/microsoft/vcpkg/pull/19665
+        REVISION 35c98ef06265660f036a3156d7615c735a10087c
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt  eigen3-head pybind11 ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
-        PORTS "${PROJECT_SOURCE_DIR}/eigen3-head"
+        REQUIRES range-v3 catch2 cxxopts fmt  eigen3 ${PYBIND11PKG} ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
+        PORTS "${PROJECT_SOURCE_DIR}/pybind11-nodep"
 )
 
 if(MAKE_STATIC_EXE)
@@ -129,7 +134,8 @@ endif()
 add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING 
                 -D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING 
                 -D_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING
-                -D_CRT_SECURE_NO_WARNINGS)
+                -D_CRT_SECURE_NO_WARNINGS
+                -DNOMINMAX)
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 ### C++ Threads (required by ranger)

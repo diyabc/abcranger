@@ -145,15 +145,16 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
         }
 
         //res.plsvar = std::vector<double>(percentYvar.size());
-        for (auto p : res.plsvar)
-            if (!quiet)
-            {
-                pls_file << p << std::endl;
-                pls_file.close();
-            }
+        if (!quiet) {
+            const std::string &pls_filename = outfile + ".plsvar";
+            std::ofstream pls_file;
+            pls_file.open(pls_filename, std::ios::out);
+            for (auto p : res.plsvar) pls_file << p << std::endl;
+            pls_file.close();
 
-        if (!quiet)
             std::cout << std::endl << "Selecting only " << nComposante_sel << " pls components." << std::endl;
+
+        }
 
         double sumPlsweights = Projection.col(0).array().abs().sum();
         auto weightedPlsfirst = Projection.col(0) / sumPlsweights;
@@ -460,39 +461,41 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
                     normalize = (m != "mean") ? ntest : nref;
                 else
                     normalize = (m == "median") ? sumw[j] : 1;
-                if (m != "ci")
-                {
-                    os << mean_median_ci[m] << std::endl;
-                    for (auto n : computed)
-                    {
-                        res.errors[g_l.first][j][m][n] /= static_cast<double>(normalize);
-                        os << fmt::format("{:>25} : {:<13}", n, res.errors[g_l.first][j][m][n]) << std::endl;
-                    }
-                }
-                else
-                {
-                    if (g_l.first == "global")
+                if (normalize > 0.0) {
+                    if (m != "ci")
                     {
                         os << mean_median_ci[m] << std::endl;
-                        for (auto c : ci)
+                        for (auto n : computed)
                         {
-                            if (c.first == "cov")
+                            res.errors[g_l.first][j][m][n] /= static_cast<double>(normalize);
+                            os << fmt::format("{:>25} : {:<13}", n, res.errors[g_l.first][j][m][n]) << std::endl;
+                        }
+                    }
+                    else
+                    {
+                        if (g_l.first == "global")
+                        {
+                            os << mean_median_ci[m] << std::endl;
+                            for (auto c : ci)
                             {
-                                acc = res.errors[g_l.first][j][m][c.first] / static_cast<double>(normalize);
+                                if (c.first == "cov")
+                                {
+                                    acc = res.errors[g_l.first][j][m][c.first] / static_cast<double>(normalize);
+                                }
+                                else
+                                {
+                                    if (c.first == "meanCI")
+                                        acc = ranges::accumulate(rCI, 0.0) / static_cast<double>(normalize);
+                                    else if (c.first == "meanRCI")
+                                        acc = ranges::accumulate(relativeCI, 0.0) / static_cast<double>(normalize);
+                                    else if (c.first == "medianCI")
+                                        acc = median(rCI);
+                                    else if (c.first == "medianRCI")
+                                        acc = median(relativeCI);
+                                }
+                                res.errors[g_l.first][j][m][c.first] = acc;
+                                os << fmt::format("{:>25} : {:<13}", c.second, acc) << std::endl;
                             }
-                            else
-                            {
-                                if (c.first == "meanCI")
-                                    acc = ranges::accumulate(rCI, 0.0) / static_cast<double>(normalize);
-                                else if (c.first == "meanRCI")
-                                    acc = ranges::accumulate(relativeCI, 0.0) / static_cast<double>(normalize);
-                                else if (c.first == "medianCI")
-                                    acc = median(rCI);
-                                else if (c.first == "medianRCI")
-                                    acc = median(relativeCI);
-                            }
-                            res.errors[g_l.first][j][m][c.first] = acc;
-                            os << fmt::format("{:>25} : {:<13}", c.second, acc) << std::endl;
                         }
                     }
                 }

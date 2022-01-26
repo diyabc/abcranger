@@ -611,7 +611,7 @@ void ForestOnline::growTreesInThread(uint thread_idx, std::vector<double>* varia
         #ifdef PYTHON_OUTPUT
           bar.progress(progress,num_trees);
         #else
-          if (isatty(fileno(stdin))) 
+          if (isatty(fileno(stdout))) 
            bar.progress(progress,num_trees);
           else 
             *verbose_out << "computed_" << !predict_all << " " << progress << "/" << num_trees << std::endl;

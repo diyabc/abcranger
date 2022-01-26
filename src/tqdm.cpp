@@ -1,4 +1,3 @@
-#define NOMINMAX
 #include "tqdm.hpp"
 #include <fmt/format.h>
 #include <fmt/printf.h>
@@ -30,6 +29,13 @@ tqdm::tqdm()  {
     } else if (in_tmux) {
         color_transition = false;
     }
+#ifdef PYTHON_OUTPUT
+    py::gil_scoped_acquire acquire;
+    if (py::module::import("sys").attr("modules").contains("IPython")
+        && !py::module::import("sys").attr("modules")["IPython"].is_none()
+        && !py::module::import("IPython").attr("get_ipython")().is_none()) is_tty = true;
+    py::gil_scoped_release release;
+#endif
 }
 
 void tqdm::hsv_to_rgb(float h, float s, float v, int& r, int& g, int& b) {

@@ -37,7 +37,7 @@ class tqdm {
 
         bool in_screen = std::getenv("STY") != nullptr;
         bool in_tmux = std::getenv("TMUX") != nullptr;
-        bool is_tty = isatty(1);
+        bool is_tty = isatty(fileno(stdout));
         bool use_colors = true;
         bool color_transition = true;
         int width = 40;

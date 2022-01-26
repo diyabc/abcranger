@@ -175,7 +175,7 @@ Reftable<MatrixXd> readreftable(std::string headerpath, std::string reftablepath
     for(auto i = 0; i < nrec; i++) {
         bool to_skip = false;
         if (!quiet) {
-            if (isatty(fileno(stdin))) 
+            if (isatty(fileno(stdout))) 
                 bar.progress(i,nrec);
             else 
                 if ((i + 1) % 500 == 0)
@@ -336,7 +336,7 @@ Reftable<MatrixXd> readreftable_scen(std::string headerpath, std::string reftabl
     tqdm bar;
     for(auto i = 0; (i < nrec) && (ncount < N); i++) {
         if (!quiet) {
-            if (isatty(fileno(stdin))) 
+            if (isatty(fileno(stdout))) 
                 bar.progress(i,nrec);
             else 
                 if ((i + 1) % 500 == 0)

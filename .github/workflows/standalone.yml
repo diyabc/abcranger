@@ -27,7 +27,7 @@ jobs:
           fetch-depth: '0'
       - name: Bump version and push tag
         id: bump_version
-        uses: anothrNick/github-tag-action@1.26.0
+        uses: anothrNick/github-tag-action@1.39.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
@@ -117,7 +117,7 @@ jobs:
         if: matrix.os == 'macos-11'
       - name: Configure MSVC console (Windows)
         if: matrix.os == 'windows-latest'
-        uses: ilammy/msvc-dev-cmd@v1.4.1
+        uses: ilammy/msvc-dev-cmd@v1.10.0
       - name: setup windows
         run: |
           # Set these env vars so cmake picks the correct compiler

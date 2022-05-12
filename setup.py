@@ -2,6 +2,7 @@ from cmaketools import setup
 import sys
 from os import path
 
+REQUIRED = ["cmaketools", "wheels"]
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
@@ -37,5 +38,6 @@ setup(
     has_package_data=False,
     packages=["pyabcranger"],
     configure_opts=configure_opts,
-    build_opts=["--target","pyabcranger"]
+    build_opts=["--target","pyabcranger"],
+    install_requires=REQUIRED
 )

@@ -5,9 +5,9 @@ name: abcranger-build
 on: [push]
 
 env:
-  VCPKG_REVISION: "35c98ef06265660f036a3156d7615c735a10087c"
+  VCPKG_REVISION: "14e7bb4ae24616ec54ff6b2f6ef4e8659434ea44"
   CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-  CIBW_SKIP: "cp27-* cp35-* pp*  *-manylinux_i686 *-win32"
+  CIBW_SKIP: "cp27-* cp35-* cp36-* pp*  *-manylinux_i686 *-win32"
   CIBW_BEFORE_ALL_LINUX: bash presetup.sh
   CIBW_BEFORE_BUILD: pip install cmaketools cmake ninja vswhere
   CIBW_BEFORE_TEST: pip install pytest h5py

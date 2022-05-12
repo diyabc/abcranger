@@ -1,5 +1,3 @@
-lines (25 sloc)  1.08 KB
-   
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO pybind/pybind11

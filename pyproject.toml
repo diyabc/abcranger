@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=40.8.0", "wheel","cmaketools","cmake","ninja","vswhere"]
+
+[tool.cibuildwheel]
+manylinux-x86_64-image = "manylinux2014"
+skip = "cp27-* cp35-* pp*  *-manylinux_i686 *-win32"
+test-command = "pytest {project}/test/test-pyabcranger.py -v"
+before-test = "pip install pytest h5py"
+test-requires = ["pytest", "h5py"]
+environment = { VERBOSE = "1"}
+
+[tool.cibuildwheel.linux]
+before-all = "bash presetup.sh"

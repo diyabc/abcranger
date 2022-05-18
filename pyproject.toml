@@ -1,9 +1,9 @@
 [build-system]
-requires = ["setuptools>=40.8.0", "wheel","cmaketools","cmake","ninja"]
+requires = ["setuptools>=40.8.0", "wheel","cmaketools","cmake","ninja","vswhere"]
 
 [tool.cibuildwheel]
 manylinux-x86_64-image = "manylinux_2_24"
-skip = "cp27-* cp35-* cp36-* pp*  *-manylinux_i686 *-win32"
+skip = "cp27-* cp35-* pp*  *-manylinux_i686 *-win32"
 test-command = "pytest {project}/test/test-pyabcranger.py -v"
 before-test = "pip install pytest h5py"
 test-requires = ["pytest", "h5py"]

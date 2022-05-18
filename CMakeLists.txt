@@ -76,12 +76,11 @@ if(TEST)
 endif()
 
 if(PYABCRANGER)
-  set(PYBIND11PKG pybind11-nodep)
-  # if(UNIX AND NOT APPLE)
-  #   set(PYBIND11PKG pybind11)
-  # else()
-  #   set(PYBIND11PKG pybind11-nodep)
-  # endif()
+  if(UNIX AND NOT APPLE)
+    set(PYBIND11PKG pybind11)
+  else()
+    set(PYBIND11PKG pybind11-nodep)
+  endif()
 endif()
 
 pmm(

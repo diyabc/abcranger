@@ -86,7 +86,7 @@ endif()
 pmm(
     VCPKG
         # https://github.com/microsoft/vcpkg/pull/19665
-        REVISION 14e7bb4ae24616ec54ff6b2f6ef4e8659434ea44
+        REVISION dcedc95761b447059926fb6dd8da993ba97ecb4a
         TRIPLET ${VCPKG_TARGET_TRIPLET}
         REQUIRES range-v3 catch2 cxxopts fmt  eigen3 ${PYBIND11PKG} ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
         PORTS "${PROJECT_SOURCE_DIR}/pybind11-nodep"

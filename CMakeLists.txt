@@ -75,21 +75,12 @@ if(TEST)
   set(TESTDEPS hdf5[cpp] highfive[core])
 endif()
 
-if(PYABCRANGER)
-  if(UNIX AND NOT APPLE)
-    set(PYBIND11PKG pybind11)
-  else()
-    set(PYBIND11PKG pybind11-nodep)
-  endif()
-endif()
-
 pmm(
     VCPKG
         # https://github.com/microsoft/vcpkg/pull/19665
         REVISION dcedc95761b447059926fb6dd8da993ba97ecb4a
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt  eigen3 ${PYBIND11PKG} ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
-        PORTS "${PROJECT_SOURCE_DIR}/pybind11-nodep"
+        REQUIRES range-v3 catch2 cxxopts fmt  eigen3 pybind11 ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
 )
 
 if(MAKE_STATIC_EXE)

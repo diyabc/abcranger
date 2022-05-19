@@ -75,12 +75,16 @@ if(TEST)
   set(TESTDEPS hdf5[cpp] highfive[core])
 endif()
 
+if(PYABCRANGER)
+ set(PYBIND11PKG pybind11-nodep)endif()
+
 pmm(
     VCPKG
         # https://github.com/microsoft/vcpkg/pull/19665
         REVISION dcedc95761b447059926fb6dd8da993ba97ecb4a
         TRIPLET ${VCPKG_TARGET_TRIPLET}
-        REQUIRES range-v3 catch2 cxxopts fmt  eigen3 pybind11 ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
+        REQUIRES range-v3 catch2 cxxopts fmt  eigen3 ${PYBIND11PKG} ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
+        PORTS "${PROJECT_SOURCE_DIR}/pybind11-nodep"
 )
 
 if(MAKE_STATIC_EXE)

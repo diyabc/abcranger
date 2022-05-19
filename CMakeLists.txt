@@ -76,7 +76,8 @@ if(TEST)
 endif()
 
 if(PYABCRANGER)
- set(PYBIND11PKG pybind11-nodep)endif()
+  set(PYBIND11PKG pybind11-nodep)
+endif()
 
 pmm(
     VCPKG

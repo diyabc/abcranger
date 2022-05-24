@@ -2,7 +2,7 @@
 requires = ["setuptools>=40.8.0", "wheel","cmaketools","cmake","ninja","vswhere"]
 
 [tool.cibuildwheel]
-manylinux-x86_64-image = "manylinux2014_mkl-2020.0-088"
+manylinux-x86_64-image = "manylinux_2_28_mkl-2020.0-088"
 skip = "cp27-* cp35-* cp36-* pp*  *-manylinux_i686 *-win32"
 test-command = "pytest {project}/test/test-pyabcranger.py -v"
 # before-build = "pip install cmaketools cmake ninja vswhere"

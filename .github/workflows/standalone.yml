@@ -5,7 +5,7 @@ name: abcranger-build
 on: [push]
 
 env:
-  VCPKG_REVISION: "14e7bb4ae24616ec54ff6b2f6ef4e8659434ea44"
+  VCPKG_REVISION: "a69b65229b3956b7f45abd81671b7330114bcaad"
 
 jobs:
   create_release:

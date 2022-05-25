@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12.0)
+cmake_minimum_required(VERSION 3.15...3.19)
 cmake_policy(SET CMP0074 NEW)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -76,11 +76,8 @@ if(TEST)
 endif()
 
 if(PYABCRANGER)
-  if(UNIX AND NOT APPLE)
-    set(PYBIND11PKG pybind11)
-  else()
-    set(PYBIND11PKG pybind11-nodep)
-  endif()
+  find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+  set(PYBIND11PKG pybind11)
 endif()
 
 pmm(

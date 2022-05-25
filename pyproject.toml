@@ -1,15 +1,16 @@
 [build-system]
-requires = ["setuptools>=40.8.0", "wheel","cmaketools","cmake","ninja","vswhere"]
+requires = ["setuptools>=40.8.0", "wheel","cmaketools","cmake >= 3.19","ninja","vswhere"]
 
 [tool.cibuildwheel]
 manylinux-x86_64-image = "manylinux2014_mkl-2020.0-088"
 skip = "cp27-* cp35-* cp36-* pp*  *-manylinux_i686 *-win32"
 test-command = "pytest {project}/test/test-pyabcranger.py -v"
 test-requires = ["pytest", "h5py"]
-build-verbosity = 1
+build-verbosity = 3
+test-skip = "*"
 
-# [tool.cibuildwheel.linux]
-# before-all = "bash presetup.sh"
+[tool.cibuildwheel.linux]
+before-all = "bash presetup.sh"
 
 # [tool.cibuildwheel.windows]
 # before-build = "pip install cmaketools cmake ninja vswhere"

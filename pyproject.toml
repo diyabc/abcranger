@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=40.8.0", "wheel","cmaketools","cmake >= 3.18", "ninja"]
+requires = ["setuptools>=40.8.0", "wheel","cmaketools","cmake >= 3.18", "ninja", "vswhere"]
 
 [tool.cibuildwheel]
 manylinux-x86_64-image = "manylinux2014_mkl-2020.0-088"
@@ -13,4 +13,4 @@ build-verbosity = 3
 before-all = "bash presetup.sh"
 
 [tool.cibuildwheel.windows]
-before-build = "del /f {project}\\build\\CMakeCache.txt;pip install vswhere"
+before-build = "del /f {project}\\build\\CMakeCache.txt"

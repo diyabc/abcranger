@@ -13,4 +13,4 @@ build-verbosity = 3
 before-all = "bash presetup.sh"
 
 [tool.cibuildwheel.windows]
-before-build = "pip install cmake;del /f {project}\\build\\CMakeCache.txt"
+before-build = "pip install cmake & del /f {project}\\build\\CMakeCache.txt"

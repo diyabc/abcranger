@@ -13,4 +13,4 @@ build-verbosity = 3
 before-all = "bash presetup.sh"
 
 [tool.cibuildwheel.windows]
-before-build = "del /f {project}\build\CMakeCache.txt;pip install vswhere"
+before-build = "del /f {project}\\build\\CMakeCache.txt;pip install vswhere"

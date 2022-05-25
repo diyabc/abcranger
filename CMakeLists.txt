@@ -77,7 +77,7 @@ endif()
 
 if(PYABCRANGER)
   find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
-  set(PYBIND11PKG pybind11)
+  set(PYBIND11PKG pybind11-nodep)
 endif()
 
 pmm(

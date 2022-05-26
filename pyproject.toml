@@ -16,4 +16,4 @@ before-build = "rm -f {project}/build/CMakeCache.txt"
 before-build = "rm -f {project}/build/CMakeCache.txt"
 
 [tool.cibuildwheel.windows]
-before-build = "IF EXIST {project}\\build\\CMakeCache.txt DEL /F {project}\\build\\CMakeCache.txt"
+before-build = "pip install cmake & IF EXIST {project}\\build\\CMakeCache.txt DEL /F {project}\\build\\CMakeCache.txt"

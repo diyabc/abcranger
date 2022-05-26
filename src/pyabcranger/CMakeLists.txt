@@ -6,6 +6,7 @@ find_package(pybind11 CONFIG REQUIRED)
 pybind11_add_module(pyabcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp pyabcranger.cpp ${PROJECT_abcranger_SRCS})
 
 target_link_libraries(pyabcranger PRIVATE ${TBBLIB} fmt::fmt cxxopts::cxxopts)
+set_property(TARGET pyabcranger PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 target_compile_definitions(pyabcranger PRIVATE PYTHON_OUTPUT=1)
 # if (USES_LIBCXX)
 #     target_link_options(pyabcranger PRIVATE -nodefaultlibs)

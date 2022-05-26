@@ -92,18 +92,11 @@ pmm(
 if(MAKE_STATIC_EXE)
   message("Static generation ACTIVATED")
   if(MSVC)
-    set(CompilerFlags
-    CMAKE_CXX_FLAGS
-    CMAKE_CXX_FLAGS_DEBUG
-    CMAKE_CXX_FLAGS_RELEASE
-    CMAKE_C_FLAGS
-    CMAKE_C_FLAGS_DEBUG
-    CMAKE_C_FLAGS_RELEASE
-    )
-    foreach(CompilerFlag ${CompilerFlags})
-    string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
-    endforeach()
-    set(MAKE_STATIC_FLAG_EXE "")
+      # add_compile_options(
+      #   $<$<CONFIG:>:/MT> #---------|
+      #   $<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
+      #   $<$<CONFIG:Release>:/MT> #--|
+      # )
   else()
     set(MAKE_STATIC_FLAG_EXE "-static")
 
@@ -169,6 +162,7 @@ include_directories(src)
 add_subdirectory(src)
 
 add_executable(abcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp abcranger.cpp)
+set_property(TARGET abcranger PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 target_link_libraries(abcranger ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} ${BOOSTLIBS} cxxopts::cxxopts abcrangerlib)
 
 if(USE_LIBCXX)

@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=40.8.0", "wheel","cmaketools","cmake >= 3.18", "ninja", "vswhere"]
+
+[tool.cibuildwheel]
+manylinux-x86_64-image = "manylinux2014"
+skip = "cp27-* cp35-* cp36-* pp*  *-musllinux* *-manylinux_i686 *-win32"
+test-command = "pytest {project}/test/test-pyabcranger.py -v"
+test-requires = ["pytest", "h5py"]
+build-verbosity = 3
+
+[tool.cibuildwheel.linux]
+before-all = "bash presetup.sh"
+before-build = "rm -f {project}/build/CMakeCache.txt"
+
+[tool.cibuildwheel.macos]
+before-build = "rm -f {project}/build/CMakeCache.txt"
+
+[tool.cibuildwheel.windows]
+before-build = "pip install cmake & IF EXIST {project}\\build\\CMakeCache.txt DEL /F {project}\\build\\CMakeCache.txt"

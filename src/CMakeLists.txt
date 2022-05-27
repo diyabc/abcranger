@@ -24,6 +24,7 @@ ${ABCRANGER_SOURCE_DIR}/tqdm.cpp
 )
 
 add_library(abcrangerlib STATIC ${PROJECT_abcranger_SRCS} ${ABCRANGER_SOURCE_DIR}/readreftable.cpp)
+set_property(TARGET abcrangerlib PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 target_link_libraries(abcrangerlib fmt::fmt)
 
 # if(MSVC)

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12.0)
+cmake_minimum_required(VERSION 3.15...3.19)
 cmake_policy(SET CMP0074 NEW)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -76,17 +76,14 @@ if(TEST)
 endif()
 
 if(PYABCRANGER)
-  if(UNIX AND NOT APPLE)
-    set(PYBIND11PKG pybind11)
-  else()
-    set(PYBIND11PKG pybind11-nodep)
-  endif()
+  find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+  set(PYBIND11PKG pybind11-nodep)
 endif()
 
 pmm(
     VCPKG
         # https://github.com/microsoft/vcpkg/pull/19665
-        REVISION 35c98ef06265660f036a3156d7615c735a10087c
+        REVISION a69b65229b3956b7f45abd81671b7330114bcaad
         TRIPLET ${VCPKG_TARGET_TRIPLET}
         REQUIRES range-v3 catch2 cxxopts fmt  eigen3 ${PYBIND11PKG} ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
         PORTS "${PROJECT_SOURCE_DIR}/pybind11-nodep"
@@ -95,18 +92,11 @@ pmm(
 if(MAKE_STATIC_EXE)
   message("Static generation ACTIVATED")
   if(MSVC)
-    set(CompilerFlags
-    CMAKE_CXX_FLAGS
-    CMAKE_CXX_FLAGS_DEBUG
-    CMAKE_CXX_FLAGS_RELEASE
-    CMAKE_C_FLAGS
-    CMAKE_C_FLAGS_DEBUG
-    CMAKE_C_FLAGS_RELEASE
-    )
-    foreach(CompilerFlag ${CompilerFlags})
-    string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
-    endforeach()
-    set(MAKE_STATIC_FLAG_EXE "")
+      # add_compile_options(
+      #   $<$<CONFIG:>:/MT> #---------|
+      #   $<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
+      #   $<$<CONFIG:Release>:/MT> #--|
+      # )
   else()
     set(MAKE_STATIC_FLAG_EXE "-static")
 
@@ -172,6 +162,7 @@ include_directories(src)
 add_subdirectory(src)
 
 add_executable(abcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp abcranger.cpp)
+set_property(TARGET abcranger PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 target_link_libraries(abcranger ${MAKE_STATIC_FLAG_EXE} ${TBBLIB} ${BOOSTLIBS} cxxopts::cxxopts abcrangerlib)
 
 if(USE_LIBCXX)

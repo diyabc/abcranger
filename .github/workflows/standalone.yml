@@ -5,14 +5,7 @@ name: abcranger-build
 on: [push]
 
 env:
-  VCPKG_REVISION: "35c98ef06265660f036a3156d7615c735a10087c"
-  CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-  CIBW_SKIP: "cp27-* cp35-* cp310-* pp*  *-manylinux_i686 *-win32"
-  CIBW_BEFORE_ALL_LINUX: bash presetup.sh
-  CIBW_BEFORE_BUILD: pip install cmaketools cmake ninja vswhere
-  CIBW_BEFORE_TEST: pip install pytest h5py
-  CIBW_TEST_REQUIRES: pytest h5py
-  CIBW_TEST_COMMAND: pytest {project}/test/test-pyabcranger.py -v
+  VCPKG_REVISION: "a69b65229b3956b7f45abd81671b7330114bcaad"
 
 jobs:
   create_release:
@@ -27,7 +20,7 @@ jobs:
           fetch-depth: '0'
       - name: Bump version and push tag
         id: bump_version
-        uses: anothrNick/github-tag-action@1.26.0
+        uses: anothrNick/github-tag-action@1.39.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
@@ -117,13 +110,16 @@ jobs:
         if: matrix.os == 'macos-11'
       - name: Configure MSVC console (Windows)
         if: matrix.os == 'windows-latest'
-        uses: ilammy/msvc-dev-cmd@v1.4.1
+        uses: ilammy/msvc-dev-cmd@v1.10.0
       - name: setup windows
         run: |
           # Set these env vars so cmake picks the correct compiler
           echo "CXX=cl.exe" | Out-File -Append -FilePath $env:GITHUB_ENV -Encoding utf8
           echo "CC=cl.exe" | Out-File -Append -FilePath $env:GITHUB_ENV -Encoding utf8
         if: matrix.os == 'windows-latest'
+      - uses: actions/setup-python@v2
+        name: Install Python
+        if: matrix.os != 'ubuntu-latest'
       - name: Run CMake+Ninja
         uses: lukka/run-cmake@v3
         id: runcmake_cmd
@@ -135,9 +131,6 @@ jobs:
           buildWithCMake: true
           buildDirectory: ${{ runner.workspace }}/b/ninja/
           cmakeAppendedArgs: '${{ matrix.cmakeargs }}'
-      - uses: actions/setup-python@v2
-        name: Install Python
-        if: matrix.os != 'ubuntu-latest'
       - name: Minimal tests
         run: |
           python -m pip install pytest
@@ -188,13 +181,8 @@ jobs:
           asset_name: abcranger-${{ matrix.shortos }}-${{ needs.create_release.outputs.new_tag }}.exe
           asset_content_type: application/octet-stream
         if: matrix.os == 'windows-latest'
-      - name: Install cibuildwheel
-        run: |
-          python -m pip install cibuildwheel
       - name: Build wheels
-        run: |
-          python -m cibuildwheel --output-dir wheelhouse
-      
+        uses: pypa/cibuildwheel@v2.5.0
       - uses: actions/upload-artifact@v2
         with:
           path: ./wheelhouse/*.whl

@@ -83,6 +83,7 @@ endif()
 pmm(
     VCPKG
         # https://github.com/microsoft/vcpkg/pull/19665
+        # REVISION a69b65229b3956b7f45abd81671b7330114bcaad
         REVISION 6f7ffeb18f99796233b958aaaf14ec7bd4fb64b2
         TRIPLET ${VCPKG_TARGET_TRIPLET}
         REQUIRES range-v3 catch2 cxxopts fmt  eigen3 ${PYBIND11PKG} ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
@@ -154,7 +155,7 @@ find_package(cxxopts CONFIG REQUIRED)
 ## TBBLI8
 if(MAKE_STATIC_EXE AND USE_MKL)
   find_package(TBB CONFIG REQUIRED)
-  set(TBBLIB TBB::tbb)
+  set(TBBLIB TBB::tbb TBB::tbbmalloc)
 endif()
 
 include_directories(src)

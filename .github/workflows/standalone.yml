@@ -11,7 +11,7 @@ env:
 jobs:
   create_release:
     if: "! contains(toJSON(github.event.commits.*.message), '[skip-ci]')"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
         upload_url: ${{ steps.new_release.outputs.upload_url }}
         new_tag: ${{ steps.bump_version.outputs.new_tag }}
@@ -45,12 +45,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-11, windows-latest]
+        os: [ubuntu-22.04, macos-11, windows-latest]
         include:
           - os: windows-latest
             shortos: windows
             cmakeargs: -DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DMAKE_STATIC_EXE:BOOL=TRUE -DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             shortos: linux
             mkl-version: intel-mkl-64bit-2020.0-088
             cmakeargs: "-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=TRUE -DMAKE_STATIC_EXE:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/mkl/lib/intel64 '-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' '-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja"
@@ -71,7 +71,7 @@ jobs:
         with:
           path: /home/runner/.local/share/pmm
           key: ubuntu-vcpkg-${{ env.PMM_VERSION }}-${{ env.VCPKG_REVISION }}
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
       - name: restore/cache vcpkg/macos
         uses: actions/cache@v2
         with:
@@ -89,7 +89,7 @@ jobs:
         with:
           path: /opt/intel
           key: ${{ matrix.mkl-version }}
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
       - name: setup x64-linux
         run: |
           if [ ! -d /opt/intel/lib/intel64 ]; then
@@ -99,9 +99,9 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y ${{ matrix.mkl-version }}
           fi
-          echo "CC=gcc-11" >> $GITHUB_ENV
-          echo "CXX=g++-11" >> $GITHUB_ENV
-        if: matrix.os == 'ubuntu-latest'
+          echo "CC=gcc-12" >> $GITHUB_ENV
+          echo "CXX=g++-12" >> $GITHUB_ENV
+        if: matrix.os == 'ubuntu-22.04'
       - name: setup MacOS
         run: |
           brew install ninja
@@ -120,7 +120,7 @@ jobs:
         if: matrix.os == 'windows-latest'
       - uses: actions/setup-python@v2
         name: Install Python
-        if: matrix.os != 'ubuntu-latest'
+        if: matrix.os != 'ubuntu-22.04'
       - name: Run CMake+Ninja
         uses: lukka/run-cmake@v3
         id: runcmake_cmd
@@ -190,7 +190,7 @@ jobs:
   build_sdist:
     needs: [job]
     name: Build source distribution
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
 
@@ -216,7 +216,7 @@ jobs:
   upload_pypi:
     needs: [job, build_sdist]
     if: "contains(toJSON(github.event.commits.*.message), '[pypi]')"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     # upload to PyPI on every tag starting with 'v'
     # if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
     # alternatively, to publish when a GitHub Release is created, use the following rule:

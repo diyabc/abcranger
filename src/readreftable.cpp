@@ -197,8 +197,8 @@ Reftable<MatrixXd> readreftable(std::string headerpath, std::string reftablepath
         if (!to_skip) {
             for(auto j = 0; j < parambyscenh[scen].size(); j++)
                 params(rcount,parambyscenh[scen][j] - 1) = lparam[j];
-            for(auto j = nparam[scen] - nmutparams; j < nparam[scen]; j++)
-                params(rcount,j) = lparam[j];
+            for(auto j = 0; j < nmutparams; j++)
+                params(rcount,params_names.size()-nmutparams+j) = lparam[nparam[scen] - nmutparams + j];
         }
         for(auto j = 0; j < nstat; j++) {
             float r;
@@ -359,8 +359,8 @@ Reftable<MatrixXd> readreftable_scen(std::string headerpath, std::string reftabl
         if (matched) {
             for(auto j = 0; j < parambyscenh[scen].size(); j++)
                 params(ncount,parambyscenh[scen][j] - 1) = lparam[j];
-            for(auto j = nparam[scen] - nmutparams; j < nparam[scen]; j++)
-                params(ncount,j) = lparam[j];
+            for(auto j = 0; j < nmutparams; j++)
+                params(ncount,params_names.size()-nmutparams+j) = lparam[nparam[scen] - nmutparams + j];
         }
         for(auto j = 0; j < nstat; j++) {
             float r;

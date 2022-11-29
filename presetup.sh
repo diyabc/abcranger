@@ -1,8 +1,16 @@
 #!/bin/bash
+tee > /tmp/oneAPI.repo << EOF
+[oneAPI]
+name=Intel® oneAPI repository
+baseurl=https://yum.repos.intel.com/oneapi
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+EOF
 if [ -x "$(command -v yum-config-manager)" ]; then
-    yum-config-manager --add-repo https://yum.repos.intel.com/mkl/setup/intel-mkl.repo
-    rpm --import https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
-    yum install -y intel-mkl-64bit-2020.0-088 zip
+    mv /tmp/oneAPI.repo /etc/yum.repos.d
+    yum install -y intel-oneapi-mkl-devel-2022.2.1 zip
 fi
 # cd /tmp
 # apt-get update

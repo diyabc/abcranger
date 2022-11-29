@@ -52,8 +52,8 @@ jobs:
             cmakeargs: -DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DMAKE_STATIC_EXE:BOOL=TRUE -DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja
           - os: ubuntu-22.04
             shortos: linux
-            mkl-version: intel-mkl-64bit-2020.0-088
-            cmakeargs: "-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=TRUE -DMAKE_STATIC_EXE:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/mkl/lib/intel64 '-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' '-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/mkl/lib/intel64/libmkl_intel_lp64.a /opt/intel/mkl/lib/intel64/libmkl_tbb_thread.a /opt/intel/mkl/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja"
+            mkl-version: intel-oneapi-mkl-devel-2022.2.1
+            cmakeargs: "-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=TRUE -DMAKE_STATIC_EXE:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/oneapi/mkl/latest/lib '-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_tbb_thread.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' '-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_tbb_thread.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja"
           - os: macos-11
             shortos: macos
             cmakeargs: -DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja
@@ -93,9 +93,8 @@ jobs:
       - name: setup x64-linux
         run: |
           if [ ! -d /opt/intel/lib/intel64 ]; then
-            wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
-            sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
-            sudo sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list'
+            wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+            echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
             sudo apt-get update
             sudo apt-get install -y ${{ matrix.mkl-version }}
           fi

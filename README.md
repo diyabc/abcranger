@@ -68,7 +68,9 @@ pip install pyabcranger
 ## Notebooks examples
 
 - On a [toy example with
-  ![MA(q)](https://latex.codecogs.com/png.image?%5Cbg_black&space;MA%28q%29 "MA(q)")](https://github.com/diyabc/abcranger/blob/master/notebooks/Toy%20example%20MA(q).ipynb)
+  ![MA(q)](https://latex.codecogs.com/png.image?%5Cbg_black&space;MA%28q%29 "MA(q)")](https://github.com/diyabc/abcranger/blob/master/notebooks/Toy%20example%20MA(q).ipynb),
+  using ([Lintusaari et al. 2018](#ref-JMLR:v19:17-374)) as
+  graph-powered engine.
 - [Population genetics
   demo](https://github.com/diyabc/abcranger/blob/master/notebooks/Population%20genetics%20Demo.ipynb),
   data from ([Collin et al. 2021](#ref-Collin_2021)), available
@@ -369,6 +371,16 @@ http://eigen.tuxfamily.org.
 Lakshminarayanan, Balaji, Daniel M Roy, and Yee Whye Teh. 2014.
 “Mondrian Forests: Efficient Online Random Forests.” In *Advances in
 Neural Information Processing Systems*, 3140–48.
+
+</div>
+
+<div id="ref-JMLR:v19:17-374" class="csl-entry">
+
+Lintusaari, Jarno, Henri Vuollekoski, Antti Kangasrääsiö, Kusti Skytén,
+Marko Järvenpää, Pekka Marttinen, Michael U. Gutmann, Aki Vehtari, Jukka
+Corander, and Samuel Kaski. 2018. “ELFI: Engine for Likelihood-Free
+Inference.” *Journal of Machine Learning Research* 19 (16): 1–7.
+<http://jmlr.org/papers/v19/17-374.html>.
 
 </div>
 

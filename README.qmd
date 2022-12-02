@@ -46,7 +46,7 @@ The standalone is part of a specialized Population Genetics graphical interface 
 
 ## Notebooks examples
 
-- On a [toy example with $MA(q)$](https://github.com/diyabc/abcranger/blob/master/notebooks/Toy%20example%20MA(q).ipynb)
+- On a [toy example with $MA(q)$](https://github.com/diyabc/abcranger/blob/master/notebooks/Toy%20example%20MA(q).ipynb), using [@JMLR:v19:17-374] as graph-powered engine.
 - [Population genetics demo](https://github.com/diyabc/abcranger/blob/master/notebooks/Population%20genetics%20Demo.ipynb), data from [@Collin_2021], available [there](https://github.com/diyabc/diyabc/tree/master/diyabc-tests/MER/modelchoice/IndSeq)
 
 # Usage

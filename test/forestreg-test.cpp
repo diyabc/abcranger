@@ -1,5 +1,5 @@
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
 
 #include "ForestRegression.h"
 #include "readstatobs.hpp"
@@ -54,6 +54,6 @@ TEST_CASE("Standard Ranger Regresser")
                      DEFAULT_MAXDEPTH);         // max_depth
     forestreg.run(true,true);
     auto oob_prior_error = forestreg.getOverallPredictionError();
-    CHECK(oob_prior_error == Approx(0.148368).margin(RFTEST_TOLERANCE));
+    CHECK(oob_prior_error == Catch::Approx(0.148368).margin(RFTEST_TOLERANCE));
 
 }

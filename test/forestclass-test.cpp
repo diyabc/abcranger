@@ -1,5 +1,5 @@
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
 
 #include "ForestClassification.h"
 #include "readstatobs.hpp"
@@ -79,5 +79,5 @@ TEST_CASE( "Standard Ranger classifier" )
 //    auto preds = forestclass.getPredictions();
     auto oob_prior_error = forestclass.getOverallPredictionError();
     std::cout << "OOB error : " << oob_prior_error << endl;
-    CHECK(oob_prior_error == Approx(0.231833).margin(RFTEST_TOLERANCE));
+    CHECK(oob_prior_error == Catch::Approx(0.231833).margin(RFTEST_TOLERANCE));
 }

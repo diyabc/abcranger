@@ -1,7 +1,6 @@
 #define _HAS_ITERATOR_DEBUGGING 0
 #define _REGEX_MAX_STACK_COUNT 5000
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <regex>
 #include <string>

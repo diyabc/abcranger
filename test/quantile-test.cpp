@@ -1,6 +1,5 @@
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
-
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
 
 #include "forestQuantiles.hpp"
 #include "csv-eigen.hpp"
@@ -16,5 +15,5 @@ TEST_CASE("Meinsheuser's quantiles") {
     std::vector<double> quants = forestQuantiles(obs,weights,std::vector<double>{0.05,0.5,0.95});
     std::vector<double> values{0.06682934,0.1994667,0.8464229};
     for(auto i = 0; i < values.size(); i++)
-        CHECK(quants[i] == Approx(values[i]).epsilon(1e-6));
+        CHECK(quants[i] == Catch::Approx(values[i]).epsilon(1e-6));
 }

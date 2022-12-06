@@ -1,5 +1,5 @@
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "ks.hpp"
 
@@ -29,6 +29,6 @@ TEST_CASE( "Kolmogorov-Smirnoff test of uniform")
 {
     auto D = KSTest(x,y);
     auto pvalue = 1-psmirnov2x(D,x.size(),y.size());
-    CHECK_THAT( D,  Catch::WithinULP(0.24,1));
-    CHECK_THAT(pvalue, Catch::WithinULP(0.11238524845512376515,1));
+    CHECK_THAT( D,  Catch::Matchers::WithinULP(0.24,1));
+    CHECK_THAT(pvalue, Catch::Matchers::WithinULP(0.11238524845512376515,1));
 }

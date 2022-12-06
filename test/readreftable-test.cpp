@@ -1,5 +1,5 @@
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
 
 #include <random>
 #include <iostream>
@@ -54,9 +54,9 @@ TEST_CASE("Read Column Names from h5 file")
     auto myread = readreftable("headerRF.txt", "reftableRF.bin");
     auto file = H5::H5File("reftable.h5", H5F_ACC_RDONLY);
     auto dataset_stats = file.openDataSet("/stats");
-    CHECK_THAT(myread.stats_names, Catch::Equals(readcolnames(dataset_stats, "stats_names")));
+    CHECK_THAT(myread.stats_names, Catch::Matchers::Equals(readcolnames(dataset_stats, "stats_names")));
     auto dataset_params = file.openDataSet("/params");
-    CHECK_THAT(myread.params_names, Catch::Equals(readcolnames(dataset_params, "params_names")));
+    CHECK_THAT(myread.params_names, Catch::Matchers::Equals(readcolnames(dataset_params, "params_names")));
 }
 
 template <typename T>

@@ -1,5 +1,4 @@
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include "matutils.hpp"
 #include "readreftable.hpp"
@@ -11,7 +10,6 @@
 // #include <boost/accumulators/statistics/variance.hpp>
 // using namespace boost::accumulators;
 
-
 // BOOST_AUTO_TEST_CASE(UnifDistrib, * boost::unit_test::tolerance(0.01)) {
 //     accumulator_set<double,stats<tag::mean, tag::variance>> acc;
 //     for(auto i = 0; i < 10000; i++) acc(dis(rng));
@@ -19,22 +17,24 @@
 //     BOOST_TEST( variance(acc) == 1.0/12.0);
 // }
 
-TEST_CASE("Matutils : add linear Combination") {
-    MatrixXi m1(2,3);
-    MatrixXi m2(3,2);
-    MatrixXi m3(2,5);
+TEST_CASE("Matutils : add linear Combination")
+{
+      MatrixXi m1(2, 3), m1c(3,2);
+      MatrixXi m2(3, 2), m2c(3, 2);
+      MatrixXi m3(2, 5);
 
-    m1 << 1, 2, 3,
+      m1 << 1, 2, 3,
           4, 5, 6;
+      m1c = m1;
 
-    m2 << 1, 2,
-          3, 4, 
-          5, 6; 
+      m2 << 1, 2,
+          3, 4,
+          5, 6;
 
-    m3 << 1, 2, 3, 22, 28, 
+      m3 << 1, 2, 3, 22, 28,
           4, 5, 6, 49, 64;
-    addLinearComb(m1,m1,m2);
-    CHECK( (m3 - m1).lpNorm<Infinity>() == 0 );
+      addLinearComb(m1c, m1, m2);
+      CHECK((m3 - m1).lpNorm<Infinity>() == 0);
 }
 
 // TEST_CASE(NoiseNames) {
@@ -51,4 +51,3 @@ TEST_CASE("Matutils : add linear Combination") {
 //     // BOOST_TEST( myread.stats.size() == (oldsize + noisecols * nrow) );
 //     // BOOST_TEST( myread.stats_names == stats_names );
 // }
-

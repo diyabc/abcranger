@@ -1,5 +1,5 @@
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
 
 #include "ForestOnlineClassification.hpp"
 #include "readstatobs.hpp"
@@ -83,6 +83,6 @@ TEST_CASE("Online Ranger classifier")
     forestclass.run(true, true);
     auto preds = forestclass.getPredictions();
     auto oob_prior_error = forestclass.getOverallPredictionError();
-    CHECK(oob_prior_error == Approx(0.231833).margin(RFTEST_TOLERANCE));
+    CHECK(oob_prior_error == Catch::Approx(0.231833).margin(RFTEST_TOLERANCE));
     CHECK(preds[1][0][0] == 3.0);
 }

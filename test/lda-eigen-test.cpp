@@ -1,5 +1,5 @@
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
 
 #include <iostream>
 #include <Eigen/Dense>
@@ -210,7 +210,7 @@ TEST_CASE("LDA with Eigen")
     auto LdPlus = Ld + LdMass;
     auto LdMinus = Ld - LdMass;
     for(auto c = 0; c < K - 1; c++) {
-        CHECK(std::min(LdPlus.col(c).lpNorm<Infinity>(),LdMinus.col(c).lpNorm<Infinity>()) == Approx(0.0).margin(1e-13));
+        CHECK(std::min(LdPlus.col(c).lpNorm<Infinity>(),LdMinus.col(c).lpNorm<Infinity>()) == Catch::Approx(0.0).margin(1e-13));
     }
 }
 
@@ -263,6 +263,6 @@ TEST_CASE("LDA with Eigen and constant variable")
     auto LdPlus = Ld + LdMass;
     auto LdMinus = Ld - LdMass;
     for(auto c = 0; c < K - 1; c++) {
-        CHECK(std::min(LdPlus.col(c).lpNorm<Infinity>(),LdMinus.col(c).lpNorm<Infinity>()) == Approx(0.0).margin(1e-13));
+        CHECK(std::min(LdPlus.col(c).lpNorm<Infinity>(),LdMinus.col(c).lpNorm<Infinity>()) == Catch::Approx(0.0).margin(1e-13));
     }
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <catch2/catch.hpp>
+#include <catch2/matchers/catch_matchers_vector.hpp>
 #include <range/v3/all.hpp>
 
 namespace Catch
@@ -103,7 +103,7 @@ namespace Catch
                 }
 
                 Rng1 const &m_comparator;
-                mutable ::Catch::Detail::Approx approx;
+                mutable ::Catch::Approx approx;
             };
 
             template <typename Rng1, typename Rng2>

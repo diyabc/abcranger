@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
 
 #include "globals.h"
 #include "ForestOnline.hpp"

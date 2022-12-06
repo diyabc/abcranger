@@ -1,5 +1,5 @@
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
 
 #include "readreftable.hpp"
 
@@ -68,7 +68,7 @@ TEST_CASE("Online Ranger Regressor")
     forestreg.run(true,true);
     auto preds = forestreg.getPredictions();
     auto oob_prior_error = forestreg.getOverallPredictionError();
-    CHECK(oob_prior_error == Approx(0.148368).margin(RFTEST_TOLERANCE));
+    CHECK(oob_prior_error == Catch::Approx(0.148368).margin(RFTEST_TOLERANCE));
 }
 
 TEST_CASE("Online Ranger Regressor Distribution")

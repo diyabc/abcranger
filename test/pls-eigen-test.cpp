@@ -1,5 +1,5 @@
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -25,10 +25,10 @@ TEST_CASE("PLS with eigen") {
            0.9826665,
            0.9867306,
            0.9890077;
-    CHECK((res - exp).lpNorm<Infinity>() == Approx(0.0).margin(1e-7));
-    CHECK((Projection-R).lpNorm<Infinity>() == Approx(0.0).margin(1e-10));
+    CHECK((res - exp).lpNorm<Infinity>() == Catch::Approx(0.0).margin(1e-7));
+    CHECK((Projection-R).lpNorm<Infinity>() == Catch::Approx(0.0).margin(1e-10));
     MatrixXd Scores = ((X.array().rowwise()-mean.array()).rowwise()/std.array()).matrix() * Projection;
-    CHECK((Scores - S).lpNorm<Infinity>() == Approx(0.0).margin(1e-10));
+    CHECK((Scores - S).lpNorm<Infinity>() == Catch::Approx(0.0).margin(1e-10));
 }
 
 TEST_CASE("PLS with eigen and constant feature") {
@@ -48,8 +48,8 @@ TEST_CASE("PLS with eigen and constant feature") {
            0.9826665,
            0.9867306,
            0.9890077;
-    CHECK((res - exp).lpNorm<Infinity>() == Approx(0.0).margin(1e-7));
-    CHECK((Projection-R).lpNorm<Infinity>() == Approx(0.0).margin(1e-10));
+    CHECK((res - exp).lpNorm<Infinity>() == Catch::Approx(0.0).margin(1e-7));
+    CHECK((Projection-R).lpNorm<Infinity>() == Catch::Approx(0.0).margin(1e-10));
     MatrixXd Scores = ((X.array().rowwise()-mean.array()).rowwise()/std.array()).matrix() * Projection;
-    CHECK((Scores - S).lpNorm<Infinity>() == Approx(0.0).margin(1e-10));
+    CHECK((Scores - S).lpNorm<Infinity>() == Catch::Approx(0.0).margin(1e-10));
 }

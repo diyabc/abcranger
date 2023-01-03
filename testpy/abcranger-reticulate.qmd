@@ -23,7 +23,7 @@ Hdf5 format will be the format used to store the data in the future.
 If you don't have required packages, install them:
 
 ```{r}
-# install.packages(c("hdf5r", "ggplot2", "tidyverse", "reticulate"))
+install.packages(c("hdf5r", "ggplot2", "tidyverse", "reticulate"))
 ```
 
 Now we need to install (once) python packages in the current R session:
@@ -31,8 +31,8 @@ Now we need to install (once) python packages in the current R session:
 ```{r}
 library(reticulate)
 
-# py_install("numpy")
-# py_install("pyabcranger", pip = TRUE)
+py_install("numpy")
+py_install("pyabcranger", pip = TRUE)
 ```
 
 ::: {.callout-tip}

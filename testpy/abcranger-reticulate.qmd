@@ -1,6 +1,5 @@
 ---
 title: "A demo of abcranger python package in R"
-author: "François-David Collin"
 format:
     gfm: default
 execute:
@@ -25,16 +24,16 @@ Hdf5 format will be the format used to store the data in the future.
 If you don't have required packages, install them:
 
 ```{r}
+#| eval = FALSE
 install.packages(c("hdf5r", "ggplot2", "tidyverse", "reticulate"))
 ```
 
 Now we need to install (once) python packages in the current R session:
 
 ```{r}
-library(reticulate)
-
-py_install("numpy")
-py_install("pyabcranger", pip = TRUE)
+#| eval = FALSE
+reticulate::py_install("numpy")
+reticulate::py_install("pyabcranger", pip = TRUE)
 ```
 
 ::: {.callout-tip}
@@ -44,6 +43,8 @@ If you have custom python environment (conda or virtualenv), you may need to spe
 Now we can import the python packages:
 
 ```{r}
+library(reticulate)
+
 abcranger <- import("pyabcranger")
 np <- import("numpy", convert = FALSE)
 ```

@@ -1,6 +1,5 @@
 A demo of abcranger python package in R
 ================
-François-David Collin
 
 The following demo needs hdf5r, ggplot2, tidyverse and reticulate
 packages.
@@ -37,18 +36,9 @@ install.packages(c("hdf5r", "ggplot2", "tidyverse", "reticulate"))
 Now we need to install (once) python packages in the current R session:
 
 ``` r
-library(reticulate)
-
-py_install("numpy")
+reticulate::py_install("numpy")
+reticulate::py_install("pyabcranger", pip = TRUE)
 ```
-
-    Using virtual environment '/home/fradav/.virtualenvs/r-reticulate' ...
-
-``` r
-py_install("pyabcranger", pip = TRUE)
-```
-
-    Using virtual environment '/home/fradav/.virtualenvs/r-reticulate' ...
 
 <div>
 
@@ -63,6 +53,8 @@ py_install("pyabcranger", pip = TRUE)
 Now we can import the python packages:
 
 ``` r
+library(reticulate)
+
 abcranger <- import("pyabcranger")
 np <- import("numpy", convert = FALSE)
 ```
@@ -128,13 +120,13 @@ print(paste("Predicted model  :", postres$predicted_model + 1))
 print(paste("votes :", postres$votes))
 ```
 
-    [1] "votes : c(4, 56, 402, 9, 19, 10)"
+    [1] "votes : c(2, 57, 400, 8, 19, 14)"
 
 ``` r
 print(paste("Posterior probability : ", postres$post_proba))
 ```
 
-    [1] "Posterior probability :  0.717166666666667"
+    [1] "Posterior probability :  0.7789"
 
 Let’s plot the confusion matrix:
 

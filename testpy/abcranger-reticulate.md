@@ -34,9 +34,6 @@ If you don’t have required packages, install them:
 install.packages(c("hdf5r", "ggplot2", "tidyverse", "reticulate"))
 ```
 
-    Installing packages into '/home/fradav/R/x86_64-pc-linux-gnu-library/4.2'
-    (as 'lib' is unspecified)
-
 Now we need to install (once) python packages in the current R session:
 
 ``` r
@@ -45,38 +42,13 @@ library(reticulate)
 py_install("numpy")
 ```
 
-    Warning in poetry_config(required_module): This project appears to use Poetry for Python dependency management.
-    However, the 'poetry' command line tool is not available.
-    reticulate will be unable to activate this project.
-    Please ensure that 'poetry' is available on the PATH.
-
-    Using Python: /usr/bin/python3.10
-    Creating virtual environment '~/.virtualenvs/r-reticulate' ... 
-
-    + '/usr/bin/python3.10' -m venv '/home/fradav/.virtualenvs/r-reticulate'
-
-    Done!
-    Installing packages: 'pip', 'wheel', 'setuptools', 'numpy'
-
-    + '/home/fradav/.virtualenvs/r-reticulate/bin/python' -m pip install --upgrade --no-user 'pip' 'wheel' 'setuptools' 'numpy'
-
-    Virtual environment '~/.virtualenvs/r-reticulate' successfully created.
-    Using virtual environment '~/.virtualenvs/r-reticulate' ...
-
-    + '/home/fradav/.virtualenvs/r-reticulate/bin/python' -m pip install --upgrade --no-user 'numpy'
+    Using virtual environment '/home/fradav/.virtualenvs/r-reticulate' ...
 
 ``` r
 py_install("pyabcranger", pip = TRUE)
 ```
 
-    Warning in poetry_config(required_module): This project appears to use Poetry for Python dependency management.
-    However, the 'poetry' command line tool is not available.
-    reticulate will be unable to activate this project.
-    Please ensure that 'poetry' is available on the PATH.
-
     Using virtual environment '/home/fradav/.virtualenvs/r-reticulate' ...
-
-    + '/home/fradav/.virtualenvs/r-reticulate/bin/python' -m pip install --upgrade --no-user 'pyabcranger'
 
 <div>
 
@@ -92,14 +64,6 @@ Now we can import the python packages:
 
 ``` r
 abcranger <- import("pyabcranger")
-```
-
-    Warning in poetry_config(required_module): This project appears to use Poetry for Python dependency management.
-    However, the 'poetry' command line tool is not available.
-    reticulate will be unable to activate this project.
-    Please ensure that 'poetry' is available on the PATH.
-
-``` r
 np <- import("numpy", convert = FALSE)
 ```
 
@@ -164,32 +128,20 @@ print(paste("Predicted model  :", postres$predicted_model + 1))
 print(paste("votes :", postres$votes))
 ```
 
-    [1] "votes : c(1, 53, 401, 11, 26, 8)"
+    [1] "votes : c(4, 56, 402, 9, 19, 10)"
 
 ``` r
 print(paste("Posterior probability : ", postres$post_proba))
 ```
 
-    [1] "Posterior probability :  0.707266666666667"
+    [1] "Posterior probability :  0.717166666666667"
 
 Let’s plot the confusion matrix:
 
 ``` r
 library(ggplot2)
 library(tidyverse)
-```
 
-    ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
-    ✔ tibble  3.1.8      ✔ dplyr   1.0.10
-    ✔ tidyr   1.2.1      ✔ stringr 1.5.0 
-    ✔ readr   2.1.3      ✔ forcats 0.5.2 
-    ✔ purrr   0.3.5      
-    ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-    ✖ dplyr::filter()     masks stats::filter()
-    ✖ purrr::flatten_df() masks hdf5r::flatten_df()
-    ✖ dplyr::lag()        masks stats::lag()
-
-``` r
 cm <- do.call(rbind, postres$confusion_matrix)
 
 cm %>%
@@ -218,8 +170,6 @@ oob %>%
     geom_point() +
     stat_smooth(span = 0.1)
 ```
-
-    `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
 
 ![](abcranger-reticulate_files/figure-commonmark/unnamed-chunk-11-1.png)
 
@@ -336,8 +286,5 @@ ggplot(dfw, aes(x = ra)) +
     ) +
     ggtitle("Posterior distribution of ra (true value = 0.3)")
 ```
-
-    Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-    ℹ Please use `linewidth` instead.
 
 ![](abcranger-reticulate_files/figure-commonmark/unnamed-chunk-16-1.png)

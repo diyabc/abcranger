@@ -3,6 +3,8 @@ title: "A demo of abcranger python package in R"
 author: "François-David Collin"
 format:
     gfm: default
+execute:
+    warning: false
 ---
 
 The following demo needs hdf5r, ggplot2, tidyverse and reticulate packages.

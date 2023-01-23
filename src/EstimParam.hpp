@@ -19,6 +19,8 @@ struct EstimParamResults
                          std::vector<std::map<std::string, // Mean/Median/CI
                                   std::map<std::string, double>>>>
         errors;
+    std::vector<double> predicted_oob;
+    std::vector<double> predicted_nonoob;
 };
 
 template <class MatrixType>

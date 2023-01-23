@@ -256,7 +256,7 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
         forestreg.writeWeightsFile();
 
     res.predicted_oob = preds[0][0];
-    res.predicted_nonoob = preds[1][0];
+    res.predicted_nonoob = preds[6][0];
 
     //    auto dataptr2 = forestreg.releaseData();
     //    auto& datareleased2 = static_cast<DataDense<MatrixType>&>(*dataptr2.get());

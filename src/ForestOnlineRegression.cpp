@@ -58,9 +58,11 @@ thread_local std::vector<size_t> samples_terminalnodes;
 void ForestOnlineRegression::allocatePredictMemory()
 {
   size_t num_prediction_samples = predict_data->getNumRows();
-  predictions = std::vector<std::vector<std::vector<double>>>(6);
+  predictions = std::vector<std::vector<std::vector<double>>>(7);
   /// predictions oob
   predictions[0] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples,NAN));
+  /// predictions non oob
+  predictions[6] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples,NAN));
     // OOB square error on n-trees (cumulative)
   predictions[2] = std::vector<std::vector<double>>(1,std::vector<double>(num_trees,0.0));
   // tree predictions
@@ -165,6 +167,7 @@ void ForestOnlineRegression::calculateAfterGrow(size_t tree_idx, bool oob)
   for (size_t sample_idx = 0; sample_idx < num_samples; sample_idx++) {
     double value = getTreePrediction(tree_idx, sample_idx);
     size_t node = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
+    predictions[6][0][sample_idx] += value;
     auto nb = inbag_count[sample_idx];
     if (nb == 0) { // OOB
       mutex_samples[sample_idx].lock();
@@ -225,6 +228,7 @@ void ForestOnlineRegression::computePredictionErrorInternal()
   overall_prediction_error = 0;
   for (size_t i = 0; i < predictions[0][0].size(); ++i)
   {
+    predictions[6][0][i] /= (double)num_samples;
     if (samples_oob_count[i] > 0)
     {
       ++num_predictions;

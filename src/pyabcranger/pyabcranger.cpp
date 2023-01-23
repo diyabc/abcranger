@@ -114,8 +114,8 @@ PYBIND11_MODULE(pyabcranger, m) {
         .def_readwrite("oob_weights",&EstimParamResults::oob_weights)
         .def_readwrite("point_estimates",&EstimParamResults::point_estimates)
         .def_readwrite("errors",&EstimParamResults::errors)
-        .def_readwrite("predict_oob",&EstimParamResults::predict_oob)
-        .def_readwrite("predice_nonoob",&EstimParamResults::predict_nonoob);
+        .def_readwrite("predicted_oob",&EstimParamResults::predicted_oob)
+        .def_readwrite("predicted_nonoob",&EstimParamResults::predicted_nonoob);
 
 
     m.def("modelchoice", &ModelChoice_fun_py, py::call_guard<py::scoped_ostream_redirect,py::gil_scoped_release>());

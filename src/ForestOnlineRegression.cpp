@@ -62,7 +62,7 @@ void ForestOnlineRegression::allocatePredictMemory()
   /// predictions oob
   predictions[0] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples,NAN));
   /// predictions non oob
-  predictions[6] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples,NAN));
+  predictions[6] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples,0.0));
     // OOB square error on n-trees (cumulative)
   predictions[2] = std::vector<std::vector<double>>(1,std::vector<double>(num_trees,0.0));
   // tree predictions

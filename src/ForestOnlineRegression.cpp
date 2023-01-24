@@ -228,7 +228,7 @@ void ForestOnlineRegression::computePredictionErrorInternal()
   overall_prediction_error = 0;
   for (size_t i = 0; i < predictions[0][0].size(); ++i)
   {
-    predictions[6][0][i] /= (double)num_samples;
+    predictions[6][0][i] /= (double)num_trees;
     if (samples_oob_count[i] > 0)
     {
       ++num_predictions;

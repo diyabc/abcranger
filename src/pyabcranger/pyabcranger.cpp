@@ -104,7 +104,8 @@ PYBIND11_MODULE(pyabcranger, m) {
         .def_readwrite("ntree_oob_error",&ModelChoiceResults::ntree_oob_error)
         .def_readwrite("predicted_model",&ModelChoiceResults::predicted_model)
         .def_readwrite("votes",&ModelChoiceResults::votes)
-        .def_readwrite("post_proba",&ModelChoiceResults::post_proba);
+        .def_readwrite("post_proba",&ModelChoiceResults::post_proba)
+        .def_readwrite("post_proba_all",&ModelChoiceResults::post_proba_all);
     py::class_<EstimParamResults>(m,"estimparam_results")
         .def_readwrite("plsvar",&EstimParamResults::plsvar)
         .def_readwrite("plsweights",&EstimParamResults::plsweights)

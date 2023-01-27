@@ -241,7 +241,7 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
         res.post_proba_all = std::vector<std::vector<double>>(num_samples, std::vector<double>(K));
 
 
-        ForestOnlineRegression forestregK[K];
+        auto forestregK = std::vector<ForestOnlineRegression>(K);
         for (auto c = 1; c < K + 1; c++) {
             auto nsampled = 0;
             auto sum = 0.0;

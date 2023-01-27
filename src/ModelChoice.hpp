@@ -13,6 +13,7 @@ struct ModelChoiceResults
     std::vector<size_t> predicted_model;
     std::vector<std::vector<size_t>> votes;
     std::vector<double> post_proba;
+    std::vector<std::vector<double>> post_proba_all;
 };
 
 template<class MatrixType>

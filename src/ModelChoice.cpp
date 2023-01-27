@@ -27,7 +27,7 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
 {
     size_t ntree, nthreads, noisecols, seed, minnodesize;
     std::string outfile;
-    bool lda, seeded;
+    bool lda, seeded, postproba_all;
 
     ntree = opts["t"].as<size_t>();
     nthreads = opts["j"].as<size_t>();
@@ -37,6 +37,8 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
         seed = opts["s"].as<size_t>();
     minnodesize = opts["m"].as<size_t>();
     lda = opts.count("nolinear") == 0;
+    postproba_all = opts.count("allpost") != 0;
+
     outfile = (opts.count("output") == 0) ? "modelchoice_out" : opts["o"].as<std::string>();
 
     std::vector<double> samplefract{std::min(1e5, static_cast<double>(myread.nrec)) / static_cast<double>(myread.nrec)};
@@ -168,7 +170,7 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
 
     for (size_t i = 0; i < preds[0][0].size(); i++)
         if (!std::isnan(preds[0][0][i]))
-            data_extended(i, ycol) = preds[0][0][i] == myread.scenarios[i] ? 1.0 : 0.0;
+            data_extended(i, ycol) = preds[0][0][i] == myread.scenarios[i] ? 0.0 : 1.0;
 
     // bool machin = false;
     auto dataptr = forestclass.releaseData();
@@ -217,6 +219,7 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
                    false,                      //order_snps
                    DEFAULT_MAXDEPTH);
 
+
     if (!quiet)
         forestreg.verbose_out = &std::cout;
     if (!quiet)
@@ -227,24 +230,95 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
 
     forestreg.run(!quiet, true);
 
+    auto predserr = forestreg.getPredictions();
+    res.post_proba = std::vector<double>(num_samples);
+    for (auto i = 0; i < num_samples; i++)
+        res.post_proba[i] = 1.0 - predserr[1][0][i];
+    const std::string &predict_filename = outfile + ".predictions";
+
+    auto norm = std::vector<double>(num_samples, 0.0);
+    if (postproba_all) {
+        res.post_proba_all = std::vector<std::vector<double>>(num_samples, std::vector<double>(K));
+
+
+        ForestOnlineRegression forestregK[K];
+        for (auto c = 1; c < K + 1; c++) {
+            auto nsampled = 0;
+            auto sum = 0.0;
+            for (size_t i = 0; i < preds[0][0].size(); i++)
+                if (!std::isnan(preds[0][0][i])) {
+                    nsampled++;
+                    auto indic = (preds[0][0][i] == c) == (myread.scenarios[i] == c) ? 0.0 : 1.0;
+                    data_extended(i, ycol) = indic;
+                    sum += (preds[0][0][i] == c) ? 0.0 : 1.0;
+                    // data_extended(i, ycol) += (myread.scenarios[i] != c) && (preds[0][0][i] != myread.scenarios[i]) ? 1.0/(double)(K-1) : 0.0;
+                }
+
+            
+            if (c == 1) {
+                dataptr = forestreg.releaseData();
+                statobsreleased = forestreg.releasePred();
+            } else {
+                dataptr = forestregK[c-2].releaseData();
+                statobsreleased = forestregK[c-2].releasePred();
+            }
+            forestregK[c-1].init("Y",                        // dependant variable
+                        MemoryMode::MEM_DOUBLE,     // memory mode double or float
+                        std::move(dataptr),         // data
+                        std::move(statobsreleased), // predict
+                        0,                          // mtry, if 0 sqrt(m -1) but should be m/3 in regression
+                        outfile,                    // output file name prefix
+                        ntree,                      // number of trees
+                        (seeded ? seed : r()),      // seed rd()
+                        nthreads,                   // number of threads
+                        DEFAULT_IMPORTANCE_MODE,    // Default IMP_NONE
+                        5,                          // default min node size (classif = 1, regression 5)
+                        "",                         // status variable name, only for survival
+                        false,                      // prediction mode (true = predict)
+                        true,                       // replace
+                        std::vector<string>(0),     // unordered variables names
+                        false,                      // memory_saving_splitting
+                        DEFAULT_SPLITRULE,          // gini for classif variance for  regression
+                        false,                      // predict_all
+                        samplefract,                // sample_fraction 1 if replace else 0.632
+                        DEFAULT_ALPHA,              // alpha
+                        DEFAULT_MINPROP,            // miniprop
+                        false,                      // holdout
+                        DEFAULT_PREDICTIONTYPE,     // prediction type
+                        DEFAULT_NUM_RANDOM_SPLITS,  // num_random_splits
+                        false,                      //order_snps
+                        DEFAULT_MAXDEPTH);
+
+            forestregK[c-1].run(!quiet, true);
+
+            auto predserr = forestregK[c-1].getPredictions();
+            for (auto i = 0; i < num_samples; i++) {
+                auto frac = sum / (double)nsampled;
+                res.post_proba_all[i][c - 1] = (res.predicted_model[i] == (c-1)) ?  1.0 - predserr[1][0][i] : predserr[1][0][i];
+                norm[i] += res.post_proba_all[i][c - 1];
+            }
+
+
+        }
+        for (auto c = 1; c < K + 1; c++) {
+            for (auto i = 0; i < num_samples; i++) {
+                res.post_proba_all[i][c - 1] /= norm[i];
+            }
+        }
+    }
+
     // auto dataptr2 = forestreg.releaseData();
     // auto& datareleased2 = static_cast<DataDense&>(*dataptr2.get());
     // datareleased2.data.conservativeResize(NoChange,nstat);
     // myread.stats = std::move(datareleased2.data);
     myread.stats_names.resize(nstat);
 
-    auto predserr = forestreg.getPredictions();
-    res.post_proba = std::vector<double>(num_samples);
-    for (auto i = 0; i < num_samples; i++)
-        res.post_proba[i] = predserr[1][0][i];
-    const std::string &predict_filename = outfile + ".predictions";
-
     std::ostringstream os;
     if (num_samples > 1)
         os << fmt::format("{:>14}", "Target n°");
     for (auto i = 0; i < K; i++)
     {
-        os << fmt::format("{:>14}", fmt::format("votes model{0}", i + 1));
+        os << fmt::format("{:>14}", fmt::format("model{0}", i + 1));
     }
     os << fmt::format(" selected model");
     os << fmt::format("  post proba\n");
@@ -258,6 +332,15 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
         }
         os << fmt::format("{:>15}", res.predicted_model[j] + 1);
         os << fmt::format("{:12.3f}\n", res.post_proba[j]);
+        if (postproba_all) {
+            // os << fmt::format("{:>14}","  post proba all:");
+            for (auto i = 0; i < K; i++)
+            {
+                os << fmt::format("{:14.3f}", res.post_proba_all[j][i]);
+            }
+            os << fmt::format("{:>15}", res.predicted_model[j] + 1);
+            os << fmt::format("{:12.3f}\n", 1/norm[j]);
+        }
     }
     if (!quiet)
         std::cout << os.str();

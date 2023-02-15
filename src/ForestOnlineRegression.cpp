@@ -53,7 +53,7 @@ void ForestOnlineRegression::growInternal()
   samples_oob_count.resize(num_samples, 0);
 }
 
-thread_local std::vector<size_t> samples_terminalnodes;
+
 
 void ForestOnlineRegression::allocatePredictMemory()
 {

@@ -19,15 +19,41 @@ using namespace ranger;
 using namespace Eigen;
 using namespace ranges;
 
+std::vector<double> get_post_proba(std::vector<double> &model_error,
+                                   std::vector<double> &model_norms,
+                                   std::vector<size_t> &index_revsorted)
+{
+    auto index_sorted = views::iota((size_t)0, model_error.size()) | to_vector;
+    index_sorted = actions::sort(index_sorted,[&](size_t i, size_t j) {  return index_revsorted[i] < index_revsorted[j]; });
+    std::vector<double> post_proba(model_error.size());
+    double post_current = 1.0;
+    auto K = index_sorted.size();
+    for (size_t k = 0; k < index_sorted.size(); ++k)
+    {
+        auto sum_inter = 0.0;
+        auto norm = 0.0;
+        for(auto j = k; j < K; ++j) {
+            sum_inter += model_error[index_sorted[j]];
+            norm += model_norms[index_sorted[j]];
+        }
+        post_proba[k] = (1.0 - sum_inter) * post_current;
+        post_current = sum_inter * post_current;
+    }
+    std::vector<double> post_proba_sorted(model_error.size());
+    for (size_t i = 0; i < index_sorted.size(); ++i)
+        post_proba_sorted[i] = post_proba[index_sorted[i]];
+    return post_proba_sorted;
+}
+
 template <class MatrixType>
 ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
                                    MatrixXd statobs,
                                    const cxxopts::ParseResult opts,
                                    bool quiet)
 {
-    size_t ntree, nthreads, noisecols, seed, minnodesize;
+    size_t ntree, nthreads, noisecols, seed, minnodesize, ntest;
     std::string outfile;
-    bool lda, seeded, postproba_all;
+    bool lda, seeded, postproba_all,forest_save;
 
     ntree = opts["t"].as<size_t>();
     nthreads = opts["j"].as<size_t>();
@@ -37,6 +63,8 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
         seed = opts["s"].as<size_t>();
     minnodesize = opts["m"].as<size_t>();
     lda = opts.count("nolinear") == 0;
+    forest_save = opts.count("save") != 0;
+
     postproba_all = opts.count("allpost") != 0;
 
     outfile = (opts.count("output") == 0) ? "modelchoice_out" : opts["o"].as<std::string>();
@@ -129,8 +157,10 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
                      DEFAULT_PREDICTIONTYPE,    // prediction type
                      DEFAULT_NUM_RANDOM_SPLITS, // num_random_splits
                      false,                     //order_snps
-                     DEFAULT_MAXDEPTH);         // max_depth
-
+                     DEFAULT_MAXDEPTH,         // max_depth
+                     0,
+                     forest_save
+                    );
     ModelChoiceResults res;
     if (!quiet)
     {
@@ -157,14 +187,69 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
         forestclass.writeOOBErrorFile();
 
     size_t nobs = statobs.rows();
-    res.votes = std::vector<std::vector<size_t>>(num_samples, std::vector<size_t>(K));
+    auto votes = forestclass.getOOBVotes();
     res.predicted_model = std::vector<size_t>(num_samples);
+
+    res.votes = std::vector<std::vector<size_t>>(num_samples, std::vector<size_t>(K));
     for (auto i = 0; i < num_samples; i++)
     {
         for (auto &tree_pred : preds[1][i])
             res.votes[i][static_cast<size_t>(tree_pred - 1)]++;
         res.predicted_model[i] = std::distance(res.votes[i].begin(), std::max_element(res.votes[i].begin(), res.votes[i].end()));
     }
+
+    auto sorted_models_rt = 
+        std::vector<std::vector<size_t>>(n, std::vector<size_t>(K));
+
+    for(auto i = 0; i < n; i++) {
+        sorted_models_rt[i] = actions::sort(views::iota((size_t)0, K) | to_vector,[&votes, i](auto a, auto b) { return votes[i][a+1] > votes[i][b+1]; });
+    }
+    // std::vector<std::vector<std::vector<size_t>>> sorted_models_tree = 
+    //     std::vector<std::vector<std::vector<size_t>>>(num_samples, std::vector<std::vector<size_t>>(ntree, std::vector<size_t>(K)));
+
+    // auto votes_samples = 
+    //     std::vector<std::vector<std::vector<size_t>>>(num_samples, std::vector<vector<size_t>>(K, std::vector<size_t>(K)));
+    // std::vector<std::vector<size_t>> predicted_model = 
+    //     std::vector<std::vector<size_t>>(num_samples, std::vector<size_t>(K));
+    // for (auto i = 0; i < num_samples; i++) {
+    //     for (auto j = 0; j < ntree; j++)
+    //     {
+    //         sorted_models_tree[i][j] = sorted_models_rt[static_cast<size_t>(myread.scenarios[preds[3][i][j]] - 1)];
+    //         for (auto k = 0; k < K; k++) {
+    //             votes_samples[i][k][sorted_models_tree[i][j][k]]++;
+    //         }
+    //     }
+    //     for(auto k = 0; k < K; k++) {
+    //         predicted_model[i][k] = std::distance(votes_samples[i][k].begin(), std::max_element(votes_samples[i][k].begin(), votes_samples[i][k].end()));
+    //     }
+    //     res.predicted_model[i] = predicted_model[i][0];
+    // }
+    
+    res.model_errors3 = std::vector<std::vector<double>>(num_samples, std::vector<double>(K,0.0));
+    for (auto i = 0; i < num_samples; i++) {
+        auto sum = 0.0;
+        for(auto j = 0; j < n; j++)
+            sum += preds[4][i][j];
+        for(auto j = 0; j < n; j++)
+            preds[4][i][j] /= sum;
+
+        // for(auto j = 0; j < n; j++)
+        //     if (preds[0][0][j] != myread.scenarios[j])
+        //         res.model_errors3[i][static_cast<size_t>(myread.scenarios[j]) - 1] += preds[4][i][j];
+        for(auto k = 0; k < K; k++)
+            for(auto j = 0; j < n; j++)
+                if (sorted_models_rt[j][k] != (static_cast<size_t>(myread.scenarios[j]) - 1))
+                    res.model_errors3[i][k] += preds[4][i][j];
+    }
+
+    res.post_proba_all3 = std::vector<std::vector<double>>(num_samples, std::vector<double>(K));
+    auto index_sorted = std::vector<std::vector<size_t>>(num_samples,std::vector<size_t>(K));
+    for(auto i = 0; i < num_samples; i++) {
+        auto sorted_total = actions::sort(views::iota((size_t)0,K) | to_vector, [&res,i](auto a, auto b) { return res.votes[i][a] > res.votes[i][b]; });
+        index_sorted[i] = actions::sort(views::iota((size_t)0, K) | to_vector,[&sorted_total](size_t a, size_t b) {  return sorted_total[a] < sorted_total[b]; });
+        for(auto k = 0; k < K; k++) 
+            res.post_proba_all3[i][k] = 1.0 - res.model_errors3[i][index_sorted[i][k]];
+    }    
 
     size_t ycol = data_extended.cols() - 1;
 
@@ -189,6 +274,7 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
     //     | to<std::vector>();
     // datareleased.filterRows(defined_preds);
 
+
     auto statobsreleased = forestclass.releasePred();
     ForestOnlineRegression forestreg;
 
@@ -209,7 +295,7 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
                    std::vector<string>(0),     // unordered variables names
                    false,                      // memory_saving_splitting
                    DEFAULT_SPLITRULE,          // gini for classif variance for  regression
-                   false,                      // predict_all
+                   true,                      // predict_all
                    samplefract,                // sample_fraction 1 if replace else 0.632
                    DEFAULT_ALPHA,              // alpha
                    DEFAULT_MINPROP,            // miniprop
@@ -231,28 +317,48 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
     forestreg.run(!quiet, true);
 
     auto predserr = forestreg.getPredictions();
+    auto value_weights = forestreg.getWeights();
+    // auto dataptr2 = forestreg.releaseData();
+    // auto& datareleased2 = static_cast<DataDense&>(*dataptr2.get());
+    // datareleased2.data.conservativeResize(NoChange,nstat);
+    // myread.stats = std::move(datareleased2.data);
     res.post_proba = std::vector<double>(num_samples);
     for (auto i = 0; i < num_samples; i++)
         res.post_proba[i] = 1.0 - predserr[1][0][i];
     const std::string &predict_filename = outfile + ".predictions";
 
-    auto norm = std::vector<double>(num_samples, 0.0);
+    res.post_proba_all = std::vector<std::vector<double>>(num_samples, std::vector<double>(K));
+    res.model_errors = std::vector<std::vector<double>>(num_samples, std::vector<double>(K,0.0));
+    res.model_norms = std::vector<std::vector<double>>(num_samples, std::vector<double>(K,0.0));
+    auto total_postproba = std::vector<double>(num_samples, 0.0);
+    for(auto i = 0; i < num_samples; i++) {
+        auto norm = 0.0;
+        for(auto j = 0; j < n; j++){
+            size_t real_model = (size_t)myread.scenarios[j] - 1;
+            if ((!std::isnan(predserr[0][0][j])) 
+                && (!std::isinf(predserr[0][0][j]))
+                && (!std::isnan(predserr[4][i][j])) 
+                && (!std::isinf(predserr[4][i][j]))) {
+                    res.model_errors[i][real_model] += predserr[4][i][j] * predserr[0][0][j];
+                    norm += predserr[4][i][j];
+                    res.model_norms[i][real_model] += predserr[4][i][j];
+                    total_postproba[i] += predserr[4][i][j] * predserr[0][0][j];
+                }
+        }
+
+        auto sorted_total = actions::sort(views::iota((size_t)0,K) | to_vector, [&res,i](auto a, auto b) { return res.votes[i][a] > res.votes[i][b]; });
+        res.post_proba_all[i] = get_post_proba(res.model_errors[i],res.model_norms[i],sorted_total);
+    }
+
+
     if (postproba_all) {
-        res.post_proba_all = std::vector<std::vector<double>>(num_samples, std::vector<double>(K));
+        res.model_errors2 = std::vector<std::vector<double>>(num_samples, std::vector<double>(K));
 
 
         auto forestregK = std::vector<ForestOnlineRegression>(K);
         for (auto c = 1; c < K + 1; c++) {
-            auto nsampled = 0;
-            auto sum = 0.0;
-            for (size_t i = 0; i < preds[0][0].size(); i++)
-                if (!std::isnan(preds[0][0][i])) {
-                    nsampled++;
-                    auto indic = (preds[0][0][i] == c) == (myread.scenarios[i] == c) ? 0.0 : 1.0;
-                    data_extended(i, ycol) = indic;
-                    sum += (preds[0][0][i] == c) ? 0.0 : 1.0;
-                    // data_extended(i, ycol) += (myread.scenarios[i] != c) && (preds[0][0][i] != myread.scenarios[i]) ? 1.0/(double)(K-1) : 0.0;
-                }
+            for (size_t i = 0; i < n; i++)
+                data_extended(i, ycol) = (sorted_models_rt[i][c-1] != (static_cast<size_t>(myread.scenarios[i]) - 1)) ? 1.0 : 0.0;
 
             
             if (c == 1) {
@@ -293,24 +399,17 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
 
             auto predserr = forestregK[c-1].getPredictions();
             for (auto i = 0; i < num_samples; i++) {
-                auto frac = sum / (double)nsampled;
-                res.post_proba_all[i][c - 1] = (res.predicted_model[i] == (c-1)) ?  1.0 - predserr[1][0][i] : predserr[1][0][i];
-                norm[i] += res.post_proba_all[i][c - 1];
-            }
-
-
-        }
-        for (auto c = 1; c < K + 1; c++) {
-            for (auto i = 0; i < num_samples; i++) {
-                res.post_proba_all[i][c - 1] /= norm[i];
+                res.model_errors2[i][c - 1] = predserr[1][0][i];
             }
         }
     }
+    res.post_proba_all2 = std::vector<std::vector<double>>(num_samples, std::vector<double>(K));
 
-    // auto dataptr2 = forestreg.releaseData();
-    // auto& datareleased2 = static_cast<DataDense&>(*dataptr2.get());
-    // datareleased2.data.conservativeResize(NoChange,nstat);
-    // myread.stats = std::move(datareleased2.data);
+    for(auto i = 0; i < num_samples; i++) {
+        for(auto k = 0; k < K; k++) 
+            res.post_proba_all2[i][k] = 1.0 - res.model_errors2[i][index_sorted[i][k]];
+    }    
+
     myread.stats_names.resize(nstat);
 
     std::ostringstream os;
@@ -327,19 +426,22 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
         if (num_samples > 1)
             os << fmt::format("{:>14}", j + 1);
         for (auto i = 0; i < K; i++)
-        {
             os << fmt::format(" {:>13}", res.votes[j][i]);
-        }
         os << fmt::format("{:>15}", res.predicted_model[j] + 1);
         os << fmt::format("{:12.3f}\n", res.post_proba[j]);
+        for (auto i = 0; i < K; i++)
+            os << fmt::format("{:14.3f}", res.post_proba_all3[j][i]);
+        os << std::endl;
+        for (auto i = 0; i < K; i++)
+            os << fmt::format("{:14.3f}", res.post_proba_all[j][i]);
+        os << fmt::format("{:>15}", res.predicted_model[j] + 1);
+        os << fmt::format("{:12.3f}\n", 1.0 - total_postproba[j]);
         if (postproba_all) {
             // os << fmt::format("{:>14}","  post proba all:");
             for (auto i = 0; i < K; i++)
-            {
-                os << fmt::format("{:14.3f}", res.post_proba_all[j][i]);
-            }
-            os << fmt::format("{:>15}", res.predicted_model[j] + 1);
-            os << fmt::format("{:12.3f}\n", 1/norm[j]);
+                os << fmt::format("{:14.3f}", res.post_proba_all2[j][i]);
+            os << std::endl;
+
         }
     }
     if (!quiet)
@@ -384,6 +486,8 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
     //     mer_file.flush();
     //     mer_file.close();
     // }
+
+
 
     return res;
 }

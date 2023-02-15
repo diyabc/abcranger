@@ -5,6 +5,8 @@
 #include <random>
 #include <ctime>
 #include <memory>
+#include <fstream>
+#include <map>
 #ifndef OLD_WIN_R_BUILD
 #include <thread>
 #include <chrono>
@@ -34,7 +36,7 @@ public:
       uint min_node_size, std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
       const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
       bool predict_all, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
-      PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth, size_t oob_weights = 0);
+      PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth, size_t oob_weights = 0, bool forest_save = false);
   virtual void initInternal(std::string status_variable_name) = 0;
 
   // Grow or predict
@@ -49,7 +51,7 @@ public:
   std::vector<std::pair<std::string,double>> getImportance();
 
   // Save ForestOnline to file
-  void saveToFile();
+  void saveToFileBegin();
   virtual void saveToFileInternal(std::ofstream& outfile) = 0;
 
   std::unique_ptr<Data> releaseData() {
@@ -122,6 +124,12 @@ public:
   // Verbose output stream, cout if verbose==true, logfile if not
   std::ostream* verbose_out;
 
+    // Get Oob map subset
+  std::map<size_t,size_t>& getOobMapSubset() {
+    return oob_subset;
+  }
+
+
 protected:
   void grow();
   virtual void growInternal() = 0;
@@ -152,6 +160,11 @@ protected:
   void setSplitWeightVector(std::vector<std::vector<double>>& split_select_weights);
   void setAlwaysSplitVariables(const std::vector<std::string>& always_split_variable_names);
 
+  std::vector<std::mutex> mutex_samples;
+
+  // OOb counts
+  std::vector<size_t> samples_oob_count;
+  std::vector<size_t> samples_terminalnodes;
   // Show progress every few seconds
 #ifdef OLD_WIN_R_BUILD
   void showProgress(std::string operation, clock_t start_time, clock_t& lap_time);
@@ -224,6 +237,13 @@ protected:
   // Computation progress (finished trees)
   size_t progress;
   tqdm bar;
+
+  // subset of oob for predictionsS
+  std::map<size_t,size_t> oob_subset;
+
+  // Forest saved to file
+  bool forest_save;
+  std::ofstream forestoutfile;
 #ifdef R_BUILD
   size_t aborted_threads;
   bool aborted;

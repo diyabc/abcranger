@@ -31,8 +31,10 @@ int main(int argc, char* argv[]) {
             ("plsmaxvar","Percentage of maximum explained Y-variance for retaining pls axis",cxxopts::value<double>()->default_value("0.9"))
             ("chosenscen","Chosen scenario (mandatory for parameter estimation)", cxxopts::value<size_t>())
             ("noob","number of oob testing samples (mandatory for parameter estimation)",cxxopts::value<size_t>())
+            ("allpost","calculate all posteriors per model not just the selected one")
             ("parameter","name of the parameter of interest (mandatory for parameter estimation)",cxxopts::value<std::string>())
             ("g,groups","Groups of models",cxxopts::value<std::string>())
+            ("save","save forest in ranger format")
             ("help", "Print help")
             ;
         auto opts = options.parse(argc,argv);

@@ -47,6 +47,7 @@ const cxxopts::ParseResult parseopt(std::string stropts) {
         ("allpost","calculate all posteriors per model not just the selected one")
         ("parameter","name of the parameter of interest (mandatory for parameter estimation)",cxxopts::value<std::string>())
         ("g,groups","Groups of models",cxxopts::value<std::string>())
+        ("save","save forest in ranger format")
         ("help", "Print help")
         ;
     int argc = (int)v.size()-1;
@@ -105,7 +106,13 @@ PYBIND11_MODULE(pyabcranger, m) {
         .def_readwrite("predicted_model",&ModelChoiceResults::predicted_model)
         .def_readwrite("votes",&ModelChoiceResults::votes)
         .def_readwrite("post_proba",&ModelChoiceResults::post_proba)
-        .def_readwrite("post_proba_all",&ModelChoiceResults::post_proba_all);
+        .def_readwrite("model_norms",&ModelChoiceResults::model_norms)
+        .def_readwrite("post_proba_all",&ModelChoiceResults::post_proba_all)
+        .def_readwrite("post_proba_all2",&ModelChoiceResults::post_proba_all2)
+        .def_readwrite("post_proba_all3",&ModelChoiceResults::post_proba_all3)
+        .def_readwrite("model_errors",&ModelChoiceResults::model_errors)
+        .def_readwrite("model_errors2",&ModelChoiceResults::model_errors2)
+        .def_readwrite("model_errors3",&ModelChoiceResults::model_errors3);
     py::class_<EstimParamResults>(m,"estimparam_results")
         .def_readwrite("plsvar",&EstimParamResults::plsvar)
         .def_readwrite("plsweights",&EstimParamResults::plsweights)

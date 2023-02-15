@@ -33,7 +33,7 @@ ForestOnline::ForestOnline() :
         true), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), predict_all(false), keep_inbag(false), sample_fraction(
         { 1 }), holdout(false), prediction_type(DEFAULT_PREDICTIONTYPE), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), max_depth(
         DEFAULT_MAXDEPTH), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_threads(DEFAULT_NUM_THREADS), data { }, overall_prediction_error(
-    NAN), importance_mode(DEFAULT_IMPORTANCE_MODE), progress(0) {
+    NAN), importance_mode(DEFAULT_IMPORTANCE_MODE), progress(0), forest_save(false) {
 }
 
 
@@ -42,7 +42,7 @@ void ForestOnline::init(std::string dependent_variable_name, MemoryMode memory_m
     uint min_node_size, std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
     const std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
     bool predict_all, std::vector<double>& sample_fraction, double alpha, double minprop, bool holdout,
-    PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth, size_t oob_samples_num) {
+    PredictionType prediction_type, uint num_random_splits, bool order_snps, uint max_depth, size_t oob_samples_num, bool forest_save) {
 
   // Initialize data with memmode
   this->data = std::move(input_data);
@@ -137,11 +137,11 @@ void ForestOnline::init(std::string dependent_variable_name, MemoryMode memory_m
   }
 
   tree_order = std::vector<size_t>(num_trees);
-
+  this->forest_save = forest_save;
 }
 
 void ForestOnline::run(bool verbose, bool compute_oob_error) {
-  
+  if (forest_save) saveToFileBegin();
   if (prediction_mode) {
     if (verbose && verbose_out) {
       *verbose_out << "Predicting .." << std::endl;
@@ -260,36 +260,27 @@ void ForestOnline::writeImportanceFile() {
   //   *verbose_out << "Saved variable importance to file " << filename << "." << std::endl;
 }
 
-void ForestOnline::saveToFile() {
+void ForestOnline::saveToFileBegin() {
 
   // Open file for writing
   std::string filename = output_prefix + ".ForestOnline";
-  std::ofstream outfile;
-  outfile.open(filename, std::ios::binary);
-  if (!outfile.good()) {
+  forestoutfile.open(filename, std::ios::binary);
+  if (!forestoutfile.good()) {
     throw std::runtime_error("Could not write to output file: " + filename + ".");
   }
 
   // Write dependent_varID
-  outfile.write((char*) &dependent_varID, sizeof(dependent_varID));
+  forestoutfile.write((char*) &dependent_varID, sizeof(dependent_varID));
 
   // Write num_trees
-  outfile.write((char*) &num_trees, sizeof(num_trees));
+  forestoutfile.write((char*) &num_trees, sizeof(num_trees));
 
   // Write is_ordered_variable
-  saveVector1D(data->getIsOrderedVariable(), outfile);
+  saveVector1D(data->getIsOrderedVariable(), forestoutfile);
 
-  saveToFileInternal(outfile);
+  saveToFileInternal(forestoutfile);
 
-  // Write tree data for each tree
-  for (auto& tree : trees) {
-    tree->appendToFile(outfile);
-  }
 
-  // Close file
-  outfile.close();
-  if (verbose_out)
-    *verbose_out << "Saved ForestOnline to file " << filename << "." << std::endl;
 }
 // #nocov end
 
@@ -617,6 +608,9 @@ void ForestOnline::growTreesInThread(uint thread_idx, std::vector<double>* varia
             *verbose_out << "computed_" << !predict_all << " " << progress << "/" << num_trees << std::endl;
         #endif
       }
+      if (forest_save) {
+        trees[i]->appendToFile(forestoutfile);
+      }
       trees[i].reset(nullptr);
       mutex.unlock();
       // condition_variable.notify_one();
@@ -728,6 +722,11 @@ void ForestOnline::loadFromFile(std::string filename) {
   equalSplit(thread_ranges, 0, num_trees - 1, num_threads);
 }
 // #nocov end
+
+
+
+thread_local std::vector<size_t> samples_terminalnodes;
+
 
 void ForestOnline::setSplitWeightVector(std::vector<std::vector<double>>& split_select_weights) {
 
@@ -906,5 +905,7 @@ void ForestOnline::showProgress(std::string operation, size_t max_progress) {
 }
  
 #endif
+
+
 
 } // namespace ranger

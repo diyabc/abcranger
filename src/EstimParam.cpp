@@ -46,7 +46,7 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
     size_t nref, ntree, nthreads, noisecols, seed, minnodesize, ntest;
     std::string outfile, parameter_of_interest;
     double chosenscen, plsmaxvar;
-    bool plsok, seeded;
+    bool plsok, seeded, forest_save;
 
     ntree = opts["t"].as<size_t>();
     nthreads = opts["j"].as<size_t>();
@@ -60,7 +60,8 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
     chosenscen = static_cast<double>(opts["chosenscen"].as<size_t>());
     parameter_of_interest = opts["parameter"].as<std::string>();
     plsok = opts.count("nolinear") == 0;
-
+    forest_save = opts.count("save") != 0;
+    
     outfile = (opts.count("output") == 0) ? "estimparam_out" : opts["o"].as<std::string>();
 
     double p_threshold_PLS = 0.99;
@@ -236,8 +237,9 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
                    DEFAULT_NUM_RANDOM_SPLITS,                                                           // num_random_splits
                    false,                                                                               //order_snps
                    DEFAULT_MAXDEPTH,
-                   ntest); // max_depth
-    if (!quiet)
+                   ntest,
+                   forest_save); 
+
         forestreg.verbose_out = &std::cout;
     forestreg.run(!quiet, true);
     auto preds = forestreg.getPredictions();
@@ -274,7 +276,7 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
 
     if (weights)
         res.oob_weights = MatrixXd(ntest, nref);
-    res.oob_map = forestreg.oob_subset;
+    res.oob_map = forestreg.getOobMapSubset();
 
     std::vector<double> expectation(num_samples, 0.0);
     std::vector<double> variance(num_samples, 0.0);
@@ -358,7 +360,7 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
         // mutex_quant.unlock();
         if (i < ntest)
         {
-            auto p = *(std::next(forestreg.oob_subset.begin(), i));
+            auto p = *(std::next(res.oob_map.begin(), i));
             if (weights)
                 for (auto i = 0; i < nref; i++)
                     res.oob_weights(p.second, i) = preds[5][p.second][i];

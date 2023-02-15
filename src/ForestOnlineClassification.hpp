@@ -26,11 +26,18 @@ public:
     this->class_weights = class_weights;
   }
 
+  const std::vector<std::unordered_map<double,size_t>> &getOOBVotes() const
+  {
+    return oob_votes;
+  }
+
   // Manually set the outputstream for verbose out
   void setverboseOutput(std::ostream* verbose_output);
   void writeConfusionFile() override;
   std::vector<std::vector<size_t>> getConfusion();
   void writeOOBErrorFile();   
+  std::vector<std::pair<double,std::vector<double>>> getWeights();
+  void writeWeightsFile();
 
 protected:
   void initInternal(std::string status_variable_name) override;
@@ -60,8 +67,15 @@ protected:
   // Table with classifications and true classes
   std::map<std::pair<double, double>, size_t> classification_table;
 
+  // OOB votes
+  std::vector<std::unordered_map<double, size_t>> oob_votes;
+
+  // OOB weights
+  std::vector<std::vector<double>> oob_weights;
+
 private:
   double getTreePrediction(size_t tree_idx, size_t sample_idx) const;
   size_t getTreePredictionTerminalNodeID(size_t tree_idx, size_t sample_idx) const;
+  const std::vector<size_t>& getInbagCounts(size_t tree_idx);
 };
 } // namespace ranger

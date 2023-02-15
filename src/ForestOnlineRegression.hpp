@@ -18,12 +18,11 @@ public:
 
   virtual ~ForestOnlineRegression() override = default;
 
-  void writeOOBErrorFile();   
-  void writeWeightsFile();
   void writeConfusionFile() override;
+  void writeOOBErrorFile();   
   std::vector<std::pair<double,std::vector<double>>> getWeights();
-  // subset of oob for predictionsS
-  std::map<size_t,size_t> oob_subset;
+  void writeWeightsFile();
+
 
 private:
   void initInternal(std::string status_variable_name) override;
@@ -37,13 +36,10 @@ private:
   void saveToFileInternal(std::ofstream& outfile) override;
   void loadFromFileInternal(std::ifstream& infile) override;
 
-  // OOb counts for regression
-  std::vector<size_t> samples_oob_count;
 //  std::vector<size_t> samples_terminalnodes;
   // Storing prediction sum by tree
   std::vector<double> prediction_sum;
   std::mutex mutex_pred_0, mutex_pred_1, mutex_pred_4, mutex_pred_5;
-  std::vector<std::mutex> mutex_samples;
 
 private:
   double getTreePrediction(size_t tree_idx, size_t sample_idx) const;

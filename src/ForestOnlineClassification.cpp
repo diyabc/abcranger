@@ -5,18 +5,21 @@
 #include <stdexcept>
 #include <cmath>
 #include <string>
+#include <range/v3/all.hpp>
 
 #include "utility.h"
 #include "ForestOnlineClassification.hpp"
 #include "TreeClassification.h"
 #include "Data.h"
 
+using namespace ranges;
 namespace ranger
 {
 
   void ForestOnlineClassification::initInternal(std::string status_variable_name)
   {
 
+    keep_inbag = false;
     // If mtry not set, use floored square root of number of independent variables.
     if (mtry == 0)
     {
@@ -95,21 +98,29 @@ namespace ranger
   {
     size_t num_prediction_samples = predict_data->getNumRows();
     class_count = std::vector<std::unordered_map<double, size_t>>(num_prediction_samples);
-    predictions = std::vector<std::vector<std::vector<double>>>(3);
+    predictions = std::vector<std::vector<std::vector<double>>>(7);
+    // OOB Votes
+    oob_votes = std::vector<std::unordered_map<double, size_t>>(num_samples); 
     // Predictions on the OOB set
     predictions[0] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
     // OOB Error classifications on n-trees (non-cumulative)
     predictions[2] = std::vector<std::vector<double>>(1, std::vector<double>(num_trees, 0.0));
     // predictions[2] = std::vector<std::vector<double>>(1, std::vector<double>(num_samples));
-    if (predict_all || prediction_type == TERMINALNODES)
-    {
+
+    mutex_samples = std::vector<std::mutex>(num_samples);
+    if (predict_all) {
       // Predictions on the provided samples by each tree
-      predictions[1] = std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees));
+        predictions[1] = std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees));
+        predictions[4] = std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_samples,0.0));
     }
     else
     {
       // Predictions on the provided samples
       predictions[1] = std::vector<std::vector<double>>(1, std::vector<double>(num_prediction_samples));
+    }
+    if (prediction_type == TERMINALNODES)
+    {
+      predictions[3] = std::vector<std::vector<double>>(num_prediction_samples, std::vector<double>(num_trees));
     }
   }
 
@@ -140,6 +151,7 @@ namespace ranger
     //   }
     //   predictions[0][0][sample_idx] = mostFrequentValue(class_count, random_number_generator);
     // }
+
     for (size_t sample_idx = 0; sample_idx < predict_data->getNumRows(); ++sample_idx)
     {
       if (predict_all || prediction_type == TERMINALNODES)
@@ -167,14 +179,21 @@ namespace ranger
     // For each tree loop over OOB samples and count classes
     double to_add = 0.0;
     auto numOOB = trees[tree_idx]->getNumSamplesOob();
-    for (size_t sample_idx = 0; sample_idx < numOOB; ++sample_idx)
+    if (samples_terminalnodes.empty()) samples_terminalnodes.resize(num_samples);
+
+    for (size_t sample_oob_idx = 0; sample_oob_idx < numOOB; ++sample_oob_idx)
     {
-      size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_idx];
-      auto res = static_cast<size_t>(getTreePrediction(tree_idx, sample_idx));
+      size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_oob_idx];
+      auto sample_node_oob = static_cast<size_t>(getTreePredictionTerminalNodeID(tree_idx, sample_oob_idx));
+      auto res = static_cast<size_t>(getTreePrediction(tree_idx, sample_oob_idx));
       mutex_post.lock();
       ++class_counts[sampleID][res];
       if (!class_counts[sampleID].empty())
         to_add += (mostFrequentValue(class_counts[sampleID], random_number_generator) == data->get(sampleID, dependent_varID)) ? 0.0 : 1.0;
+      for (size_t sample_idx = 0; sample_idx < predict_data->getNumRows(); ++sample_idx) {
+        auto sample_node = static_cast<size_t>(getTreePredictionTerminalNodeID(tree_idx, sample_idx));        
+        if (sample_node == sample_node_oob) predictions[4][sample_idx][sampleID]++;
+      }
       mutex_post.unlock();
     }
     predictions[2][0][tree_idx] += to_add / static_cast<double>(numOOB);
@@ -207,6 +226,7 @@ namespace ranger
     {
       if (!class_counts[i].empty())
       {
+        oob_votes[i] = class_counts[i];
         predictions[0][0][i] = mostFrequentValue(class_counts[i], random_number_generator);
       }
       else
@@ -240,6 +260,7 @@ namespace ranger
       {
         predictions[1][0][sample_idx] = mostFrequentValue(class_count[sample_idx], random_number_generator);
       }
+  
     std::vector<double> sort_oob_trees(num_trees);
     for (auto i = 0; i < num_trees; i++)
       sort_oob_trees[i] = predictions[2][0][tree_order[i]];
@@ -272,6 +293,34 @@ namespace ranger
       outfile << predictions[2][0][tree_idx] << std::endl;
     }
   }
+
+std::vector<std::pair<double,std::vector<double>>> ForestOnlineClassification::getWeights() {
+  std::vector<std::pair<double,std::vector<double>>> res;
+  auto num_targets = predict_data->getNumRows();
+  for (auto sample_idx = 0; sample_idx < num_samples; sample_idx++) {
+    std::vector<double> vec_targets(num_targets);
+    for(auto i = 0; i < num_targets; i++) vec_targets[i] = predictions[4][i][sample_idx];
+    res.push_back(std::make_pair(data->get(sample_idx,dependent_varID),vec_targets));
+  }
+  return res;
+}
+
+void ForestOnlineClassification::writeWeightsFile() {
+  // Open confusion file for writing
+  std::string filename = output_prefix + ".predweights";
+  std::ofstream outfile;
+  outfile.open(filename, std::ios::out);
+  if (!outfile.good())
+  {
+    throw std::runtime_error("Could not write to predweights file: " + filename + ".");
+  }
+  outfile << "value,weight" << std::endl;
+  for(auto& kv: getWeights()) {
+    outfile << kv.first; 
+    for(auto& p : kv.second) outfile << "," << p;
+    outfile << std::endl;
+  }
+}
 
   std::vector<std::vector<size_t>> ForestOnlineClassification::getConfusion()
   {
@@ -482,6 +531,11 @@ namespace ranger
     this->verbose_out = verbose_output;
   }
 
+  const std::vector<size_t>& ForestOnlineClassification::getInbagCounts(size_t tree_idx)
+  {
+    const auto &tree = dynamic_cast<const TreeClassification &>(*trees[tree_idx]);
+    return tree.getInbagCounts();
+  }
   // #nocov end
 
 } // namespace ranger

@@ -724,10 +724,6 @@ void ForestOnline::loadFromFile(std::string filename) {
 // #nocov end
 
 
-
-thread_local std::vector<size_t> samples_terminalnodes;
-
-
 void ForestOnline::setSplitWeightVector(std::vector<std::vector<double>>& split_select_weights) {
 
 // Size should be 1 x num_independent_variables or num_trees x num_independent_variables

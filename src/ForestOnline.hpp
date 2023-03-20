@@ -164,7 +164,7 @@ protected:
 
   // OOb counts
   std::vector<size_t> samples_oob_count;
-  std::vector<size_t> samples_terminalnodes;
+  
   // Show progress every few seconds
 #ifdef OLD_WIN_R_BUILD
   void showProgress(std::string operation, clock_t start_time, clock_t& lap_time);

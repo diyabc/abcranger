@@ -124,51 +124,29 @@ namespace ranger
     }
   }
 
+  thread_local std::vector<size_t> classsamples_terminalnodes;
+
   void ForestOnlineClassification::predictInternal(size_t tree_idx)
   {
-    // if (predict_all || prediction_type == TERMINALNODES)
-    // {
-    //   // Get all tree predictions
-    //   for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx)
-    //   {
-    //     if (prediction_type == TERMINALNODES)
-    //     {
-    //       predictions[0][sample_idx][tree_idx] = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
-    //     }
-    //     else
-    //     {
-    //       predictions[0][sample_idx][tree_idx] = getTreePrediction(tree_idx, sample_idx);
-    //     }
-    //   }
-    // }
-    // else
-    // {
-    //   // Count classes over trees and save class with maximum count
-    //   std::unordered_map<double, size_t> class_count;
-    //   for (size_t tree_idx = 0; tree_idx < num_trees; ++tree_idx)
-    //   {
-    //     ++class_count[getTreePrediction(tree_idx, sample_idx)];
-    //   }
-    //   predictions[0][0][sample_idx] = mostFrequentValue(class_count, random_number_generator);
-    // }
-
     for (size_t sample_idx = 0; sample_idx < predict_data->getNumRows(); ++sample_idx)
     {
-      if (predict_all || prediction_type == TERMINALNODES)
-      {
-        if (prediction_type == TERMINALNODES)
-        {
-          predictions[1][sample_idx][tree_idx] = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
+      auto sample_node = getTreePredictionTerminalNodeID(tree_idx, sample_idx);
+      auto sample_pred = getTreePrediction(tree_idx, sample_idx);
+      for(auto i = 0; i < num_samples; i++)
+        if (sample_node == classsamples_terminalnodes[i]) {
+          mutex_samples[i].lock();
+          predictions[4][sample_idx][i]++;
+          mutex_samples[i].unlock();
         }
-        else
-        {
-          predictions[1][sample_idx][tree_idx] = getTreePrediction(tree_idx, sample_idx);
-        }
+      if (predict_all || prediction_type == TERMINALNODES) {
+          predictions[1][sample_idx][tree_idx] = sample_pred;
+          if (prediction_type == TERMINALNODES)
+            predictions[3][sample_idx][tree_idx] = sample_node;
       }
       else
       {
         mutex_post.lock();
-        ++class_count[sample_idx][getTreePrediction(tree_idx, sample_idx)];
+        ++class_count[sample_idx][sample_pred];
         mutex_post.unlock();
       }
     }
@@ -178,35 +156,27 @@ namespace ranger
   {
     // For each tree loop over OOB samples and count classes
     double to_add = 0.0;
-    auto numOOB = trees[tree_idx]->getNumSamplesOob();
-    if (samples_terminalnodes.empty()) samples_terminalnodes.resize(num_samples);
 
+    if (classsamples_terminalnodes.empty()) classsamples_terminalnodes.reserve(num_samples);
+    for (size_t i = 0; i < num_samples; ++i) classsamples_terminalnodes[i] = 0;
+    auto numOOB = trees[tree_idx]->getNumSamplesOob();
+    auto mapOOB = trees[tree_idx]->getOobSampleIDs();
     for (size_t sample_oob_idx = 0; sample_oob_idx < numOOB; ++sample_oob_idx)
     {
-      size_t sampleID = trees[tree_idx]->getOobSampleIDs()[sample_oob_idx];
-      auto sample_node_oob = static_cast<size_t>(getTreePredictionTerminalNodeID(tree_idx, sample_oob_idx));
-      auto res = static_cast<size_t>(getTreePrediction(tree_idx, sample_oob_idx));
+      auto sampleID = mapOOB[sample_oob_idx];
+      auto sample_node = getTreePredictionTerminalNodeID(tree_idx, sample_oob_idx);
+      classsamples_terminalnodes[sampleID] = sample_node;
+      // classsamples_terminalnodes[sampleID+1] = getTreePredictionTerminalNodeID(tree_idx, sample_oob_idx);
+      auto res = getTreePrediction(tree_idx, sample_oob_idx);
       mutex_post.lock();
       ++class_counts[sampleID][res];
       if (!class_counts[sampleID].empty())
         to_add += (mostFrequentValue(class_counts[sampleID], random_number_generator) == data->get(sampleID, dependent_varID)) ? 0.0 : 1.0;
-      for (size_t sample_idx = 0; sample_idx < predict_data->getNumRows(); ++sample_idx) {
-        auto sample_node = static_cast<size_t>(getTreePredictionTerminalNodeID(tree_idx, sample_idx));        
-        if (sample_node == sample_node_oob) predictions[4][sample_idx][sampleID]++;
-      }
+
       mutex_post.unlock();
     }
     predictions[2][0][tree_idx] += to_add / static_cast<double>(numOOB);
-    // for (size_t sample_idx = 0; sample_idx < num_samples; sample_idx++) {
-    //   if (!class_counts[sample_idx].empty())
-    //     predictions[2][0][tree_idx] += (mostFrequentValue(class_counts[sample_idx], random_number_generator) == data->get(sample_idx,dependent_varID)) ? 0.0 : 1.0;
-    // }
 
-    // else
-    //   for (size_t sample_idx = 0; sample_idx < num_samples; ++sample_idx)
-    //   {
-    //     ++class_counts_internal[sample_idx][getTreePrediction(tree_idx,sample_idx)];
-    //   };
   }
 
   void ForestOnlineClassification::computePredictionErrorInternal()

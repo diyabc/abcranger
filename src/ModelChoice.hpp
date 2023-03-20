@@ -12,8 +12,11 @@ struct ModelChoiceResults
     std::vector<double> ntree_oob_error;
     std::vector<size_t> predicted_model;
     std::vector<std::vector<size_t>> votes;
+    std::vector<std::vector<size_t>> oob_votes;
     std::vector<double> post_proba;
-    std::vector<std::vector<double>> model_norms;
+    std::vector<std::vector<double>> pudlo_weights;
+    std::vector<std::vector<std::vector<double>>> pudlo_weights_all;
+    std::vector<std::vector<double>> luhardin_weights;
     std::vector<std::vector<double>> post_proba_all;
     std::vector<std::vector<double>> post_proba_all2;
     std::vector<std::vector<double>> post_proba_all3;

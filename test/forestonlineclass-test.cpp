@@ -70,7 +70,7 @@ TEST_CASE("Online Ranger classifier")
                      std::vector<string>(0),        // unordered variables names
                      false,                     // memory_saving_splitting
                      DEFAULT_SPLITRULE,         // gini for classif variance for  regression
-                     false,                     // predict_all
+                     true,                     // predict_all
                      DEFAULT_SAMPLE_FRACTION,   // sample_fraction 1 if replace else 0.632
                      DEFAULT_ALPHA,             // alpha
                      DEFAULT_MINPROP,           // miniprop

@@ -20,6 +20,7 @@ void ForestOnlineRegression::initInternal(std::string status_variable_name)
 {
 
   keep_inbag = true;
+
   // If mtry not set, use floored square root of number of independent variables
   if (mtry == 0)
   {
@@ -53,7 +54,7 @@ void ForestOnlineRegression::growInternal()
   samples_oob_count.resize(num_samples, 0);
 }
 
-
+thread_local std::vector<size_t> samples_terminalnodes;
 
 void ForestOnlineRegression::allocatePredictMemory()
 {

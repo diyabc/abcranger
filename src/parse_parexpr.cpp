@@ -38,6 +38,8 @@ void parse_paramexpression(const std::vector<std::string>& params_str,
                     op = op_type::multiply;
                 else if(base_match[4].str()[0] == '/')
                     op = op_type::divide;
+                else if(base_match[4].str()[0] == '+')
+                    op = op_type::add;
                 else {
                     std::cout << "Wrong parameter composition : " << base_match[4].str() << std::endl;
                     exit(1);

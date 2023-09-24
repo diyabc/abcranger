@@ -94,6 +94,9 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
     case op_type::multiply:
         y = myread.params(all, p1) * myread.params(all, p2);
         break;
+    case op_type::add:
+        y = myread.params(all, p1) + myread.params(all, p2);
+        break;
     }
 
     // myread.params = std::move(myread.params(indexesModel,param_num)).eval();

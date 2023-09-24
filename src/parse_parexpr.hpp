@@ -8,7 +8,8 @@ enum op_type
 {
     none,
     divide,
-    multiply
+    multiply,
+    add
 };
 
 void parse_paramexpression(const std::vector<std::string>& params_str,

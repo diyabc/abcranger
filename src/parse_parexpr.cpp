@@ -29,7 +29,7 @@ void parse_paramexpression(const std::vector<std::string>& params_str,
     size_t& p2)
 {
     op = op_type::none;
-    const regex param_re(R"#(([^\/\*]+)|((\w+)([\/\*])(\w+)))#");
+    const regex param_re(R"#(([^\/\*\+]+)|((\w+)([\/\*\+])(\w+)))#");
     smatch base_match;
     if (regex_match(to_parse,base_match,param_re)) {
         if (base_match.size() == 6) {

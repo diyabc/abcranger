@@ -166,7 +166,7 @@ if pls enabled :
 
 # Various
 
-## Partial Least Squares algorithm
+## Partial Least Squares algorithm (univariate)
 
 1.  $X_{0}=X ; y_{0}=y$
 2.  For $k=1,2,...,s$ :

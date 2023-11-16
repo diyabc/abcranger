@@ -165,7 +165,7 @@ if pls enabled :
 
 # Various
 
-## Partial Least Squares algorithm {#sec-plsalgo}
+## Partial Least Squares algorithm (univariate) {#sec-plsalgo}
 
 #. $X_{0}=X ; y_{0}=y$
 #. For $k=1,2,...,s$ :

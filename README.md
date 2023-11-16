@@ -181,7 +181,7 @@ if pls enabled :
 
 **Comment** When there isn’t any missing data, stages $2.1$ and $2.2$ could be replaced by $w_{k}=\frac{X_{k-1}^{T} y_{k-1}}{\left\|X_{k-1}^{T} y_{k-1}\right\|}$ and $2.3$ by $t_{k}=X_{k-1}w_{k}$
 
-To get $W$ so that $T=XW$ we compute : $$\mathbf{W}=\mathbf{W}^{*}\left(\widetilde{\mathbf{P}} \mathbf{W}^{*}\right)^{-1}$$
+To get $W$ so that $T=XW$ we compute : $$\mathbf{W}=\mathbf{W}^{*}\left(\widetilde{\mathbf{P}} \mathbf{W}^{\*}\right)^{-1}$$
 
 where $\widetilde{\mathbf{P}}_{K \times p}=\mathbf{t}\left[p_{1}, \ldots, p_{K}\right]$ and $\mathbf{W}^{*}_{p \times K} = [w_1, \ldots, w_K]$
 

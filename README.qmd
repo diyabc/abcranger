@@ -5,10 +5,8 @@ bibliography: [ref.bib]
 toc: true
 toc-depth: 1
 format: 
-  gfm:
-    html-math-method: 
-       method: webtex
-       url: https://latex.codecogs.com/png.image?%5Cbg_black&space;
+  gfm: 
+    wrap: none
 ---
 
 <!-- pandoc -f markdown README-ORIG.md -t gfm -o README.md --citeproc -s --toc --toc-depth=1 --webtex -->
@@ -229,3 +227,5 @@ where $\widetilde{\mathbf{P}}_{K \times p}=\mathbf{t}\left[p_{1}, \ldots, p_{K}\
 
 This have been the subject of a proceedings in [JOBIM 2020](https://jobim2020.sciencesconf.org/), [PDF](https://hal.archives-ouvertes.fr/hal-02910067v2) and [video](https://relaiswebcasting.mediasite.com/mediasite/Play/8ddb4e40fc88422481f1494cf6af2bb71d?catalog=e534823f0c954836bf85bfa80af2290921) (in french), [@collin:hal-02910067].
 
+::: {.references}
+:::

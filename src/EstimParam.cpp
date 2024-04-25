@@ -46,7 +46,7 @@ EstimParamResults EstimParam_fun(Reftable<MatrixType> &myread,
     size_t nref, ntree, nthreads, noisecols, seed, minnodesize, ntest;
     std::string outfile, parameter_of_interest;
     double chosenscen, plsmaxvar;
-    bool plsok, seeded, forest_save, weights_keep;
+    bool plsok, seeded, forest_save;
 
     ntree = opts["t"].as<size_t>();
     nthreads = opts["j"].as<size_t>();

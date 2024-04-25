@@ -1,0 +1,10 @@
+name: abcranger
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy
+  - pandas
+  - h5py
+  - tqdm

@@ -4,7 +4,7 @@
 #include "EstimParam.hpp"
 #include "ModelChoice.hpp"
 
-int main(int argc, char* argv[]) {
+int main(const int argc, const char* argv[]) {
     size_t nref, chosenscen;
     std::string headerfile,reftablefile,statobsfile;
  
@@ -43,7 +43,6 @@ int main(int argc, char* argv[]) {
           std::cout << options.help({"", "Group"}) << std::endl;
             exit(0);
         }
-
 
         headerfile = opts["h"].as<std::string>();
         reftablefile = opts["r"].as<std::string>();

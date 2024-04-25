@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15...3.19)
+cmake_minimum_required(VERSION 3.26)
 cmake_policy(SET CMP0074 NEW)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -76,18 +76,19 @@ if(TEST)
 endif()
 
 if(PYABCRANGER)
-  find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
-  set(PYBIND11PKG pybind11-nodep)
+  find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+  set(PYBIND11PKG pybind11)
 endif()
 
 pmm(
     VCPKG
         # https://github.com/microsoft/vcpkg/pull/19665
         # REVISION a69b65229b3956b7f45abd81671b7330114bcaad
-        REVISION 6f7ffeb18f99796233b958aaaf14ec7bd4fb64b2
+        # REVISION 6f7ffeb18f99796233b958aaaf14ec7bd4fb64b2
+        REVISION 9d47b24eacbd1cd94f139457ef6cd35e5d92cc84
         TRIPLET ${VCPKG_TARGET_TRIPLET}
         REQUIRES range-v3 catch2 cxxopts fmt  eigen3 ${PYBIND11PKG} ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
-        PORTS "${PROJECT_SOURCE_DIR}/pybind11-nodep"
+        # PORTS "${PROJECT_SOURCE_DIR}/pybind11-nodep"
 )
 
 if(MAKE_STATIC_EXE)
@@ -126,6 +127,7 @@ add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
                 -D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING 
                 -D_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING
                 -D_CRT_SECURE_NO_WARNINGS
+                -DTBB_ENABLE_IPO=OFF
                 -DNOMINMAX)
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 

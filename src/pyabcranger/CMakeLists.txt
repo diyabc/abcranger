@@ -3,11 +3,13 @@ project(pyabcranger)
 ## Pybind11
 find_package(pybind11 CONFIG REQUIRED)
 
-pybind11_add_module(pyabcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp pyabcranger.cpp ${PROJECT_abcranger_SRCS})
 
+pybind11_add_module(pyabcranger ${ABCRANGER_SOURCE_DIR}/ModelChoice.cpp ${ABCRANGER_SOURCE_DIR}/EstimParam.cpp pyabcranger.cpp ${PROJECT_abcranger_SRCS})
+remove_definitions(-DPy_DEBUG)
 target_link_libraries(pyabcranger PRIVATE ${TBBLIB} fmt::fmt cxxopts::cxxopts)
 set_property(TARGET pyabcranger PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 target_compile_definitions(pyabcranger PRIVATE PYTHON_OUTPUT=1)
+target_compile_options(pyabcranger PRIVATE -UPy_DEBUG)
 # if (USES_LIBCXX)
 #     target_link_options(pyabcranger PRIVATE -nodefaultlibs)
 #     target_link_libraries(pyabcranger PRIVATE libc++.a libc++abi.a libgcc_eh.a libgcc.a)

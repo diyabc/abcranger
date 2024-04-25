@@ -17,3 +17,9 @@ before-build = "rm -f {project}/build/CMakeCache.txt"
 
 [tool.cibuildwheel.windows]
 before-build = "pip install cmake & IF EXIST {project}\\build\\CMakeCache.txt DEL /F {project}\\build\\CMakeCache.txt"
+
+[tool.poetry]
+name = "pyabcranger"
+version = "0.70"
+description = "Python bindings for the ABC-Ranger library"
+authors = ["François-David Collin <Francois-David.Collin@umontpellier.fr>"] 

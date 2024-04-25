@@ -54,7 +54,7 @@ jobs:
             shortos: linux
             mkl-version: intel-oneapi-mkl-devel-2022.2.1
             cmakeargs: "-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=TRUE -DMAKE_STATIC_EXE:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/oneapi/mkl/latest/lib '-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_tbb_thread.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' '-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_tbb_thread.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja"
-          - os: macos-11
+          - os: macos-latest
             shortos: macos
             cmakeargs: -DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja
     steps:
@@ -77,7 +77,7 @@ jobs:
         with:
           path: /Users/runner/.local/share/pmm
           key: macos-vcpkg5-${{ env.PMM_VERSION }}-${{ env.VCPKG_REVISION }}
-        if: matrix.os == 'macos-11'
+        if: matrix.os == 'macos-latest'
       - name: restore/cache vcpkg/windows
         uses: actions/cache@v2
         with:
@@ -107,7 +107,7 @@ jobs:
           echo "CC=gcc-11" >> $GITHUB_ENV
           echo "CXX=g++-11" >> $GITHUB_ENV
           echo "CXXFLAGS=-static-libstdc++ -static-libgcc" >> $GITHUB_ENV
-        if: matrix.os == 'macos-11'
+        if: matrix.os == 'macos-latest'
       - name: Configure MSVC console (Windows)
         if: matrix.os == 'windows-latest'
         uses: ilammy/msvc-dev-cmd@v1.10.0

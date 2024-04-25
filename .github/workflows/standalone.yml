@@ -10,7 +10,7 @@ env:
 
 jobs:
   create_release:
-    if: "! contains(toJSON(github.event.commits.*.message), '[skip-ci]')"
+    if: ! contains(toJSON(github.event.commits.*.message), '[skip-ci]')
     runs-on: ubuntu-22.04
     outputs:
         upload_url: ${{ steps.new_release.outputs.upload_url }}
@@ -214,7 +214,7 @@ jobs:
           path: dist/*.tar.gz
   upload_pypi:
     needs: [job, build_sdist]
-    if: "contains(toJSON(github.event.commits.*.message), '[pypi]')"
+    if: contains(toJSON(github.event.commits.*.message), '[pypi]')
     runs-on: ubuntu-22.04
     # upload to PyPI on every tag starting with 'v'
     # if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')

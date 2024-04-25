@@ -424,12 +424,67 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
 
     myread.stats_names.resize(nstat);
 
+    // std::ostringstream os;
+    // if (num_samples > 1)
+    //     os << fmt::format("{:>14}", "Target n°");
+    // for (auto i = 0; i < K; i++)
+    // {
+    //     os << fmt::format("{:>14}", fmt::format("model{0}", i + 1));
+    // }
+    // os << fmt::format(" selected model");
+    // os << fmt::format("  post proba\n");
+    // for (auto j = 0; j < num_samples; j++)
+    // {
+    //     if (num_samples > 1)
+    //         os << fmt::format("{:>14}", j + 1);
+    //     for (auto i = 0; i < K; i++)
+    //         // os << fmt::format(" {:>13}", res.votes[j][i]);
+    //         os << fmt::format("{:14.3f}", static_cast<double>(res.votes[j][i])/ntree);
+    //     os << fmt::format("{:>15}", res.predicted_model[j] + 1);
+    //     os << fmt::format("{:12.3f}\n", res.post_proba[j]);
+    //     for (auto i = 0; i < K; i++)
+    //         os << fmt::format("{:14.3f}", res.post_proba_all3[j][i]);
+    //     os << fmt::format("{:>15}", res.predicted_model[j] + 1);
+    //     os << fmt::format("{:12.3f}\n", total_postproba3[j]);
+    //     for (auto i = 0; i < K; i++)
+    //         os << fmt::format("{:14.3f}", res.post_proba_all[j][i]);
+    //     os << fmt::format("{:>15}", res.predicted_model[j] + 1);
+    //     os << fmt::format("{:12.3f}\n", total_postproba[j]);
+    //     if (postproba_all) {
+    //         // os << fmt::format("{:>14}","  post proba all:");
+    //         for (auto i = 0; i < K; i++)
+    //             os << fmt::format("{:14.3f}", res.post_proba_all2[j][i]);
+    //         os << std::endl;
+
+    //     }
+    // }
+    // if (!quiet)
+    //     std::cout << os.str();
+    // std::cout.flush();
+
+    // std::ofstream predict_file;
+    // if (!quiet)
+    // {
+    //     predict_file.open(predict_filename, std::ios::out);
+    //     if (!predict_file.good())
+    //     {
+    //         throw std::runtime_error("Could not write to prediction file: " + predict_filename + ".");
+    //     }
+    //     predict_file << os.str();
+    //     predict_file.flush();
+    //     predict_file.close();
+    // }
+
+    res.post_proba = std::vector<double>(num_samples);
+    for (auto i = 0; i < num_samples; i++)
+        res.post_proba[i] = predserr[1][0][i];
+
     std::ostringstream os;
     if (num_samples > 1)
         os << fmt::format("{:>14}", "Target n°");
     for (auto i = 0; i < K; i++)
     {
-        os << fmt::format("{:>14}", fmt::format("model{0}", i + 1));
+        os << fmt::format("{:>14}", fmt::format("votes model{0}", i + 1));
     }
     os << fmt::format(" selected model");
     os << fmt::format("  post proba\n");
@@ -438,25 +493,11 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
         if (num_samples > 1)
             os << fmt::format("{:>14}", j + 1);
         for (auto i = 0; i < K; i++)
-            // os << fmt::format(" {:>13}", res.votes[j][i]);
-            os << fmt::format("{:14.3f}", static_cast<double>(res.votes[j][i])/ntree);
-        os << fmt::format("{:>15}", res.predicted_model[j] + 1);
-        os << fmt::format("{:12.3f}\n", res.post_proba[j]);
-        for (auto i = 0; i < K; i++)
-            os << fmt::format("{:14.3f}", res.post_proba_all3[j][i]);
-        os << fmt::format("{:>15}", res.predicted_model[j] + 1);
-        os << fmt::format("{:12.3f}\n", total_postproba3[j]);
-        for (auto i = 0; i < K; i++)
-            os << fmt::format("{:14.3f}", res.post_proba_all[j][i]);
-        os << fmt::format("{:>15}", res.predicted_model[j] + 1);
-        os << fmt::format("{:12.3f}\n", total_postproba[j]);
-        if (postproba_all) {
-            // os << fmt::format("{:>14}","  post proba all:");
-            for (auto i = 0; i < K; i++)
-                os << fmt::format("{:14.3f}", res.post_proba_all2[j][i]);
-            os << std::endl;
-
+        {
+            os << fmt::format(" {:>13}", res.votes[j][i]);
         }
+        os << fmt::format("{:>15}", res.predicted_model[j] + 1);
+        os << fmt::format("{:12.3f}\n", 1 - res.post_proba[j]);
     }
     if (!quiet)
         std::cout << os.str();
@@ -474,7 +515,6 @@ ModelChoiceResults ModelChoice_fun(Reftable<MatrixType> &myread,
         predict_file.flush();
         predict_file.close();
     }
-
     // Pour Arnaud
     // Global_error_rate    Local_error rate*    Vote_S1   Vote_S2    Vote_S2    Vote_S3    Vote_S5    Vote_S6   Posterior_probability_S3(best)
     // std::ofstream mer_file;

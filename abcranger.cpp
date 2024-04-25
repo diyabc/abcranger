@@ -7,7 +7,7 @@
 int main(const int argc, const char* argv[]) {
     size_t nref, chosenscen;
     std::string headerfile,reftablefile,statobsfile;
- 
+
     try {
         size_t nref;
         cxxopts::Options options(argv[0], " - ABC Random Forest - Model choice or parameter estimation command line options");
@@ -92,9 +92,9 @@ int main(const int argc, const char* argv[]) {
 
 
 
-    } catch (const cxxopts::OptionException& e)
+    } catch (const cxxopts::exceptions::exception& e)
       {
         std::cout << "error parsing options: " << e.what() << std::endl;
         exit(1);
-    } 
+    }
 }

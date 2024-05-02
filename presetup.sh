@@ -10,7 +10,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 EOF
 if [ -x "$(command -v yum-config-manager)" ]; then
     mv /tmp/oneAPI.repo /etc/yum.repos.d
-    yum install -y intel-oneapi-mkl-devel-2022.2.1 zip
+    yum install -y intel-oneapi-mkl-devel-2024.1 zip
 fi
 # cd /tmp
 # apt-get update

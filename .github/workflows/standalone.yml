@@ -203,7 +203,7 @@ jobs:
 
       - name: Build sdist
         run: |
-          pip install cmake ninja cmaketools wheel
+          pip install setuptools cmake ninja cmaketools wheel
           python setup.py sdist
       - uses: actions/upload-artifact@v2
         if: failure()

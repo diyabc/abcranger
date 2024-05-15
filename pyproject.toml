@@ -20,6 +20,6 @@ before-build = "pip install cmake & IF EXIST {project}\\build\\CMakeCache.txt DE
 
 [tool.poetry]
 name = "pyabcranger"
-version = "0.71"
+version = "0.72"
 description = "Python bindings for the ABC-Ranger library"
 authors = ["François-David Collin <Francois-David.Collin@umontpellier.fr>"] 

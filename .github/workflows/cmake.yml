@@ -91,7 +91,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /opt/intel
-          key: ${{ env.mkl-version }}
+          key: ${{ env.MKL_VERSION }}
         if: matrix.os == 'ubuntu-latest'
       - name: setup x64-linux
         run: |
@@ -99,7 +99,7 @@ jobs:
             wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
             echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
             sudo apt-get update
-            sudo apt-get install -y ${{ env.mkl-version }}
+            sudo apt-get install -y ${{ env.MKL_VERSION }}
           fi
           echo "CC=gcc-13" >> $GITHUB_ENV
           echo "CXX=g++-13" >> $GITHUB_ENV
@@ -107,8 +107,8 @@ jobs:
       - name: setup MacOS
         run: |
           brew install ninja
-          echo "CC=gcc-13" >> $GITHUB_ENV
-          echo "CXX=g++-13" >> $GITHUB_ENV
+          echo "CC=gcc-12" >> $GITHUB_ENV
+          echo "CXX=g++-12" >> $GITHUB_ENV
           echo "CXXFLAGS=-static-libstdc++ -static-libgcc" >> $GITHUB_ENV
         if: matrix.os == 'macos-latest'
       - name: Configure MSVC console (Windows)

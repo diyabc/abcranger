@@ -106,10 +106,12 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
       - name: setup MacOS
         run: |
-          brew install ninja gcc@14
-          echo "CC=gcc-14" >> $GITHUB_ENV
-          echo "CXX=g++-14" >> $GITHUB_ENV
-          echo "CXXFLAGS=-static-libstdc++ -static-libgcc" >> $GITHUB_ENV
+          brew install ninja
+          echo "CC=$(brew --prefix llvm@15)/bin/clang" >> $GITHUB_ENV
+          echo "CXX=$(brew --prefix llvm@15)/bin/clang++" >> $GITHUB_ENV
+          # echo "CC=gcc-14" >> $GITHUB_ENV
+          # echo "CXX=g++-14" >> $GITHUB_ENV
+          # echo "CXXFLAGS=-static-libstdc++ -static-libgcc" >> $GITHUB_ENV
         if: matrix.os == 'macos-latest'
       - name: Configure MSVC console (Windows)
         if: matrix.os == 'windows-latest'

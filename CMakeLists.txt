@@ -76,7 +76,7 @@ if(TEST)
 endif()
 
 if(PYABCRANGER)
-  find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+  # find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
   set(PYBIND11PKG pybind11)
 endif()
 
@@ -85,10 +85,6 @@ set(VCPKG_REVISION $ENV{VCPKG_REVISION})
 
 pmm(
     VCPKG
-        # https://github.com/microsoft/vcpkg/pull/19665
-        # REVISION a69b65229b3956b7f45abd81671b7330114bcaad
-        # REVISION 6f7ffeb18f99796233b958aaaf14ec7bd4fb64b2
-        # REVISION 9d47b24eacbd1cd94f139457ef6cd35e5d92cc84
         REVISION ${VCPKG_REVISION}
         TRIPLET ${VCPKG_TARGET_TRIPLET}
         REQUIRES range-v3 catch2 cxxopts fmt  eigen3 ${PYBIND11PKG} ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}

@@ -16,7 +16,7 @@ elif sys.platform == "linux":
 elif sys.platform == "darwin":
     configure_opts = ["-DPython_EXECUTABLE="+sys.executable,"-DPYABCRANGER=TRUE","-DUSE_MKL:BOOL=FALSE","-DCMAKE_BUILD_TYPE:STRING=Release"]
 elif sys.platform == "win32":
-    configure_opts = ["-DPython_FIND_REGISTRY=NEVER","-DPYABCRANGER=TRUE","-DUSE_MKL:BOOL=FALSE","-DMAKE_STATIC_EXE:BOOL=TRUE","-DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static"]
+    configure_opts = ["-DPython_FIND_REGISTRY=NEVER","-DPYABCRANGER=TRUE","-DCMAKE_OSX_ARCHITECTURES:STRING=arm64","-DUSE_MKL:BOOL=FALSE","-DMAKE_STATIC_EXE:BOOL=TRUE","-DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static"]
 else:
     exit(1)
 

@@ -101,14 +101,14 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y ${{ env.MKL_VERSION }}
           fi
-          echo "CC=gcc-13" >> $GITHUB_ENV
-          echo "CXX=g++-13" >> $GITHUB_ENV
+          echo "CC=gcc-12" >> $GITHUB_ENV
+          echo "CXX=g++-12" >> $GITHUB_ENV
         if: matrix.os == 'ubuntu-latest'
       - name: setup MacOS
         run: |
-          brew install ninja
-          echo "CC=gcc-12" >> $GITHUB_ENV
-          echo "CXX=g++-12" >> $GITHUB_ENV
+          brew install ninja gcc-14
+          echo "CC=gcc-14" >> $GITHUB_ENV
+          echo "CXX=g++-14" >> $GITHUB_ENV
           echo "CXXFLAGS=-static-libstdc++ -static-libgcc" >> $GITHUB_ENV
         if: matrix.os == 'macos-latest'
       - name: Configure MSVC console (Windows)
@@ -120,9 +120,9 @@ jobs:
           echo "CXX=cl.exe" | Out-File -Append -FilePath $env:GITHUB_ENV -Encoding utf8
           echo "CC=cl.exe" | Out-File -Append -FilePath $env:GITHUB_ENV -Encoding utf8
         if: matrix.os == 'windows-latest'
-      - uses: actions/setup-python@v5
-        name: Install Python
-        if: matrix.os != 'ubuntu-latest'
+      # - uses: actions/setup-python@v5
+      #   name: Install Python
+      #   if: matrix.os != 'ubuntu-latest'
       - name: Run CMake+Ninja
         uses: lukka/run-cmake@v3
         id: runcmake_cmd

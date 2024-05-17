@@ -106,7 +106,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
       - name: setup MacOS
         run: |
-          brew install ninja gcc-14
+          brew install ninja gcc@14
           echo "CC=gcc-14" >> $GITHUB_ENV
           echo "CXX=g++-14" >> $GITHUB_ENV
           echo "CXXFLAGS=-static-libstdc++ -static-libgcc" >> $GITHUB_ENV

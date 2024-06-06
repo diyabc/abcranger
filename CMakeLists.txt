@@ -60,6 +60,11 @@ if(MSVC AND MAKE_STATIC_EXE)
   set(VCPKG_TARGET_TRIPLET "x64-windows-static")
 endif()
 
+if(APPLE)
+  set(VCPKG_TARGET_TRIPLET "arm64-osx")
+  set(VCPKG_OSX_ARCHITECTURES "arm64")
+endif()
+
 if(USE_MKL)
   set(TBBPKG tbb)
 endif()
@@ -76,7 +81,7 @@ if(TEST)
 endif()
 
 if(PYABCRANGER)
-  find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+  find_package(Python3 COMPONENTS Interpreter Development.Module REQUIRED)
   set(PYBIND11PKG pybind11)
 endif()
 
@@ -136,6 +141,7 @@ link_libraries(Threads::Threads)
 
 ### Eigen
 find_package(Eigen3 CONFIG REQUIRED)
+message("Eigen3 found: ${Eigen3_DIR}")
 link_libraries(Eigen3::Eigen)
 if(USE_MKL)
   add_compile_definitions(PRIVATE EIGEN_USE_MKL_ALL)
@@ -153,7 +159,7 @@ find_package(fmt CONFIG REQUIRED)
 ## CXXOPTS
 find_package(cxxopts CONFIG REQUIRED)
 
-## TBBLI8
+## TBBLIB
 if(MAKE_STATIC_EXE AND USE_MKL)
   find_package(TBB CONFIG REQUIRED)
   set(TBBLIB TBB::tbb TBB::tbbmalloc)

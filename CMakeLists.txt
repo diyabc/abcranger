@@ -76,7 +76,7 @@ if(TEST)
 endif()
 
 if(PYABCRANGER)
-  # find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+  find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
   set(PYBIND11PKG pybind11)
 endif()
 

@@ -6,10 +6,12 @@ manylinux-x86_64-image = "manylinux2014"
 skip = "cp27-* cp35-* cp36-* cp37-* pp*  *-musllinux* *-manylinux_i686 *-win32"
 test-command = "pytest {project}/test/test-pyabcranger.py -v"
 test-requires = ["pytest", "h5py"]
+test-skip = "cp38-macosx_*:arm64"
 build-verbosity = 3
 
 [tool.cibuildwheel.linux]
 before-all = "bash presetup.sh"
+environment-pass = [ "VCPKG_REVISION" ]
 before-build = "rm -f {project}/build/CMakeCache.txt"
 
 [tool.cibuildwheel.macos]

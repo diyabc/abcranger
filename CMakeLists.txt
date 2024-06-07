@@ -85,12 +85,9 @@ if(PYABCRANGER)
   set(PYBIND11PKG pybind11)
 endif()
 
-# Get VCPKG revision from env
-set(VCPKG_REVISION $ENV{VCPKG_REVISION})
-
 pmm(
     VCPKG
-        REVISION ${VCPKG_REVISION}
+        REVISION 2024.04.26
         TRIPLET ${VCPKG_TARGET_TRIPLET}
         REQUIRES range-v3 catch2 cxxopts fmt  eigen3 ${PYBIND11PKG} ${TBBPKG} ${BOOSTREPKG} ${TESTDEPS}
 )

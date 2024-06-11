@@ -46,7 +46,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-large-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-13, macos-latest, windows-latest]
         arch: [x64]
         include:
           - os: windows-latest
@@ -55,7 +55,7 @@ jobs:
           - os: ubuntu-latest
             shortos: linux
             cmakeargs: "-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=TRUE -DMAKE_STATIC_EXE:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/oneapi/mkl/latest/lib '-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_tbb_thread.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' '-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_tbb_thread.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja"
-          - os: macos-large-latest
+          - os: macos-13
             shortos: macos-x64
             cmakeargs: -DTEST:BOOL=FALSE -DCMAKE_OSX_ARCHITECTURES:STRING=x86_64 -DVCPKG_TARGET_TRIPLET:STRING=x64-osx -DUSE_MKL:BOOL=FALSE -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja
           - os: macos-latest
@@ -84,7 +84,7 @@ jobs:
         with:
           path: /Users/runner/.local/share/pmm
           key: macos-vcpkg5-${{ matrix.shortos }}-${{ env.PMM_VERSION }}-${{ env.VCPKG_REVISION }}
-        if: matrix.os == 'macos-latest' || matrix.os == 'macos-large-latest'
+        if: matrix.os == 'macos-latest' || matrix.os == 'macos-13'
       - name: restore/cache vcpkg/windows
         uses: actions/cache@v2
         with:
@@ -121,7 +121,7 @@ jobs:
           # echo "CC=gcc-14" >> $GITHUB_ENV
           # echo "CXX=g++-14" >> $GITHUB_ENV
           # echo "CXXFLAGS=-static-libstdc++ -static-libgcc" >> $GITHUB_ENV
-        if: matrix.os == 'macos-latest' || matrix.os == 'macos-large-latest'
+        if: matrix.os == 'macos-latest' || matrix.os == 'macos-13'
       - name: Configure MSVC console (Windows)
         if: matrix.os == 'windows-latest'
         uses: ilammy/msvc-dev-cmd@v1

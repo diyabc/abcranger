@@ -60,11 +60,6 @@ if(MSVC AND MAKE_STATIC_EXE)
   set(VCPKG_TARGET_TRIPLET "x64-windows-static")
 endif()
 
-if(APPLE)
-  set(VCPKG_TARGET_TRIPLET "arm64-osx")
-  set(VCPKG_OSX_ARCHITECTURES "arm64")
-endif()
-
 if(USE_MKL)
   set(TBBPKG tbb)
 endif()

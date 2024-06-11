@@ -11,7 +11,7 @@ build-verbosity = 3
 
 [tool.cibuildwheel.linux]
 before-all = "bash presetup.sh"
-environment-pass = [ "VCPKG_REVISION" ]
+environment-pass = ["VCPKG_REVISION"]
 before-build = "rm -f {project}/build/CMakeCache.txt"
 
 [tool.cibuildwheel.macos]

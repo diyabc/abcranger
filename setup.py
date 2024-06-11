@@ -16,9 +16,9 @@ elif sys.platform == "linux":
     configure_opts = ["-DPython_EXECUTABLE="+sys.executable,"-DPYABCRANGER=TRUE","-DUSE_MKL:BOOL=TRUE","-DMAKE_STATIC_EXE:BOOL=TRUE","-DLAPACK_ROOT:STRING=/opt/intel/oneapi/mkl/latest/lib","-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_tbb_thread.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl","-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_tbb_thread.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl"]
 elif sys.platform == "darwin":
     if getenv("OSARCH") == "arm":
-        configure_opts = ["-DPython_EXECUTABLE="+sys.executable,"-DVCPKG_TRIPLET:STRING=arm64-osx","-DCMAKE_OSX_ARCHITECTURES:STRING=arm64","-DPYABCRANGER=TRUE","-DUSE_MKL:BOOL=FALSE","-DCMAKE_BUILD_TYPE:STRING=Release"]
+        configure_opts = ["-DPython_EXECUTABLE="+sys.executable,"-DVCPKG_TARGET_TRIPLET:STRING=arm64-osx","-DCMAKE_OSX_ARCHITECTURES:STRING=arm64","-DPYABCRANGER=TRUE","-DUSE_MKL:BOOL=FALSE","-DCMAKE_BUILD_TYPE:STRING=Release"]
     else:
-        configure_opts = ["-DPython_EXECUTABLE="+sys.executable,"-DVCPKG_TRIPLET:STRING=x64-osx","-DCMAKE_OSX_ARCHITECTURES:STRING=x64","-DPYABCRANGER=TRUE","-DUSE_MKL:BOOL=FALSE","-DCMAKE_BUILD_TYPE:STRING=Release"]
+        configure_opts = ["-DPython_EXECUTABLE="+sys.executable,"-DVCPKG_TARGET_TRIPLET:STRING=x64-osx","-DCMAKE_OSX_ARCHITECTURES:STRING=x86_64","-DPYABCRANGER=TRUE","-DUSE_MKL:BOOL=FALSE","-DCMAKE_BUILD_TYPE:STRING=Release"]
 elif sys.platform == "win32":
     configure_opts = ["-DPython_FIND_REGISTRY=NEVER","-DPYABCRANGER=TRUE","-DUSE_MKL:BOOL=FALSE","-DMAKE_STATIC_EXE:BOOL=TRUE","-DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static"]
 else:

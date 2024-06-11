@@ -46,19 +46,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        shortos: [windows, macos-x64, macos-arm64, linux]
         include:
-          - os: windows-latest
-            shortos: windows
+          - shortos: windows
+            os: windows-latest
             cmakeargs: -DTEST:BOOL=FALSE -DUSE_MKL:BOOL=FALSE -DMAKE_STATIC_EXE:BOOL=TRUE -DVCPKG_TARGET_TRIPLET:STRING=x64-windows-static -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja
-          - os: ubuntu-latest
-            shortos: linux
+          - shortos: linux
+            os: ubuntu-latest
             cmakeargs: "-DTEST:BOOL=FALSE -DUSE_MKL:BOOL=TRUE -DMAKE_STATIC_EXE:BOOL=TRUE -DLAPACK_ROOT:STRING=/opt/intel/oneapi/mkl/latest/lib '-DLAPACK_LIBRARIES:STRING=-Wl,--start-group /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_tbb_thread.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' '-DBLAS_LIBRARIES:STRING=-Wl,--start-group /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_intel_lp64.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_tbb_thread.a /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_core.a -Wl,--end-group;pthread;m;dl' -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja"
-          - os: macos-latest
-            shortos: macos-x64
+          - shortos: macos-x64
+            os: macos-latest
             cmakeargs: -DTEST:BOOL=FALSE -DCMAKE_OSX_ARCHITECTURES:STRING=x86_64 -DVCPKG_TARGET_TRIPLET:STRING=x64-osx -DUSE_MKL:BOOL=FALSE -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja
-          - os: macos-latest
-            shortos: macos-arm64
+          - shortos: macos-arm64
+            os: macos-latest
             cmakeargs: -DTEST:BOOL=FALSE -DCMAKE_OSX_ARCHITECTURES:STRING=arm64 -DVCPKG_TARGET_TRIPLET:STRING=arm64-osx -DUSE_MKL:BOOL=FALSE -DCMAKE_BUILD_TYPE:STRING=Release -G Ninja
     steps:
       - uses: actions/checkout@v4
@@ -112,9 +112,17 @@ jobs:
           brew install ninja
           echo "CC=$(brew --prefix llvm@15)/bin/clang" >> $GITHUB_ENV
           echo "CXX=$(brew --prefix llvm@15)/bin/clang++" >> $GITHUB_ENV
+          if [ "${{ matrix.shortos }}" == "macos-arm64" ]; then
+            echo "OSARCH=arm" >> $GITHUB_ENV
+          else
+            echo "OSARCH=x86" >> $GITHUB_ENV
+          fi
           # echo "CC=gcc-14" >> $GITHUB_ENV
           # echo "CXX=g++-14" >> $GITHUB_ENV
           # echo "CXXFLAGS=-static-libstdc++ -static-libgcc" >> $GITHUB_ENV
+        if: matrix.os == 'macos-latest'
+      - name: setup MacOS arch
+        run: |
         if: matrix.os == 'macos-latest'
       - name: Configure MSVC console (Windows)
         if: matrix.os == 'windows-latest'

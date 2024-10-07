@@ -134,3 +134,9 @@ TEST_CASE("Read statobs from txt") {
     const auto expected = Catch::Matchers::Approx(readstatobs).epsilon(0.001);
     CHECK_THAT( statobs, expected );
 }
+
+TEST_CASE("Read statobs from txt new format") {
+    const auto readstatobs = readStatObs("newformat/statobsRF.txt");
+    const auto expected = Catch::Matchers::Approx(readstatobs).epsilon(0.001);
+    CHECK_THAT( statobs2, expected );
+}

@@ -197,7 +197,7 @@ jobs:
         if: matrix.os == 'windows-latest'
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.19.0
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           path: ./wheelhouse/*.whl
   build_sdist:
@@ -219,11 +219,11 @@ jobs:
         run: |
           pip install setuptools cmake ninja cmaketools wheel
           python setup.py sdist
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           path: dist/*.tar.gz
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           path: dist/*.tar.gz
   upload_pypi:
@@ -235,7 +235,7 @@ jobs:
     # alternatively, to publish when a GitHub Release is created, use the following rule:
     # if: github.event_name == 'release' && github.event.action == 'published'
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: artifact
           path: dist
